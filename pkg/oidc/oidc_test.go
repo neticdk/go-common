@@ -31,10 +31,10 @@ func TestKeySet(t *testing.T) {
 		if r.URL.Path == "/.well-known/openid-configuration" {
 			w.WriteHeader(http.StatusOK)
 			cfg := fmt.Sprintf(`{"jwks_uri":"http://%s/keyset"}`, r.Host)
-			w.Write([]byte(cfg))
+			_, _ = w.Write([]byte(cfg))
 		} else if r.URL.Path == "/keyset" {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(keys)
+			_ = json.NewEncoder(w).Encode(keys)
 		}
 	}))
 	defer srv.Close()
