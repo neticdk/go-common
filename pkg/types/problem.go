@@ -8,8 +8,6 @@ import (
 // Problem is simple implementation of [RFC9457]
 //
 // [RFC9457]: https://datatracker.ietf.org/doc/html/rfc9457
-//
-//openapi:component schema Problem
 type Problem struct {
 	// Type identify problem type RFC-9457#3.1.1
 	//schema:format uri
