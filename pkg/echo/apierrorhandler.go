@@ -53,6 +53,7 @@ func APIErrorHandler(err error, c echo.Context) {
 	if p.Status != nil {
 		status = *p.Status
 	}
+	c.Response().Header().Set(echo.HeaderContentType, "application/problem+json")
 	err = c.JSON(status, p)
 	if err != nil {
 		log.FromContext(c.Request().Context()).WarnContext(c.Request().Context(), "unable to send error response to client", log.Error(err))
