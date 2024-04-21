@@ -226,6 +226,13 @@ func AllRegions() Regions {
 	return allRegions
 }
 
+func AllRegionsString() (regions []string) {
+	for _, r := range allRegions {
+		regions = append(regions, r.String())
+	}
+	return
+}
+
 func PartitionRegions(p Partition) Regions {
 	switch p {
 	case NeticPartition:
