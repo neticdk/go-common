@@ -19,6 +19,13 @@ func AllPartitions() Partitions {
 	return Partitions{NeticPartition, AzurePartition, AWSPartition}
 }
 
+func AllPartitionsString() (partitions []string) {
+	for _, p := range AllPartitions() {
+		partitions = append(partitions, p.String())
+	}
+	return
+}
+
 func ParsePartition(name string) (Partition, bool) {
 	switch name {
 	case "netic":
