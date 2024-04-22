@@ -102,8 +102,24 @@ func UserFromJWTToken(token *jwt.Token, clientID string) (User, error) {
 		}
 	}
 
+	adminClients := []string{"inventory", "inventory-cli"}
+outer:
+	for _, c := range adminClients {
+		if clientResources, ok := resourceAccess[c].(map[string]interface{}); ok {
+			if roles, ok := clientResources["roles"].([]interface{}); ok {
+				for _, role := range roles {
+					if roleStr, ok := role.(string); ok {
+						if roleStr == "admin" {
+							user.IsAdmin = true
+							break outer
+						}
+					}
+				}
+			}
+		}
+	}
+
 	user.Scopes = strings.Split(stringClaim(claims, "scope"), " ")
-	user.IsAdmin = user.HasRole("admin")
 
 	return user, nil
 }
