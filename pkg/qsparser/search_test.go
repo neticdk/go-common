@@ -74,22 +74,22 @@ func Test_ParseSearchQuery_Params(t *testing.T) {
 				expErr: true,
 			},
 			"perPage must accept a MinInt value": {
-				in:     fmt.Sprintf("perPage=%d", math.MinInt),
+				in:     fmt.Sprintf("per_page=%d", math.MinInt),
 				out:    &SearchParams{PerPage: ptr(math.MinInt)},
 				expErr: false,
 			},
 			"perPage must accept a value of 1": {
-				in:     "perPage=1",
+				in:     "per_page=1",
 				out:    &SearchParams{PerPage: ptr(1)},
 				expErr: false,
 			},
 			"perPage must accept a MaxInt value": {
-				in:     fmt.Sprintf("perPage=%d", math.MaxInt),
+				in:     fmt.Sprintf("per_page=%d", math.MaxInt),
 				out:    &SearchParams{PerPage: ptr(math.MaxInt)},
 				expErr: false,
 			},
 			"perPage must not accept a letter": {
-				in:     "perPage=a",
+				in:     "per_page=a",
 				out:    &SearchParams{},
 				expErr: true,
 			},
@@ -214,7 +214,7 @@ func Test_ParseSearchQuery_Params(t *testing.T) {
 				expErr: false,
 			},
 			"a full query string with all options must return a full struct with all options": {
-				in: "draw=1&page=1&perPage=10&search=a%20search&ord[fields]=name,age&ord[dir]=desc,asc&f[name][visible]=true&f[name][search][value]=peter&f[name][search][op]=ilike&f[age][visible]=false&f[age][search][value]=42&f[age][search][op]=ge",
+				in: "draw=1&page=1&per_page=10&search=a%20search&ord[fields]=name,age&ord[dir]=desc,asc&f[name][visible]=true&f[name][search][value]=peter&f[name][search][op]=ilike&f[age][visible]=false&f[age][search][value]=42&f[age][search][op]=ge",
 				out: &SearchParams{
 					Draw:            ptr(1),
 					Page:            ptr(1),

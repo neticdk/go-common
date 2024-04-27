@@ -58,7 +58,7 @@ type SearchParams struct {
 //
 // * draw - an optional integer value that can be used to ensure the order of quests and responses of asynchronous requests
 // * page - an optional integer value that can be used as the requested page in pagination
-// * perPage - an optional integer value that can be used as the requested number of rows returned in pagination
+// * per_page - an optional integer value that can be used as the requested number of rows returned in pagination
 // * search - an optional string value that can be used as a global search value
 // * ord - a complex value (see below) that specifies the order of the requested fields for field search
 // * f - a complex value (see below) that specifies the field names, search values and search operator of the requested fields for field search
@@ -154,7 +154,7 @@ func ParseSearchQuery(r *http.Request) (sp *SearchParams, err error) {
 		case "page":
 			sp.Page, e = parseStrIntPtr(val0)
 			err = errors.Join(err, e)
-		case "perPage":
+		case "per_page":
 			sp.PerPage, e = parseStrIntPtr(val0)
 			err = errors.Join(err, e)
 		case "search":
