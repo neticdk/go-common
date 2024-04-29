@@ -51,6 +51,41 @@ type SearchParams struct {
 	Fields map[string]*SearchField
 }
 
+func (sp *SearchParams) SetRawQuery(req *http.Request) {
+	q := req.URL.Query()
+	if sp.Draw != nil {
+		q.Add("draw", fmt.Sprintf("%d", *sp.Draw))
+	}
+	if sp.PerPage != nil {
+		q.Add("per_page", fmt.Sprintf("%d", *sp.PerPage))
+	}
+	if sp.Page != nil {
+		q.Add("page", fmt.Sprintf("%d", *sp.Page))
+	}
+	if sp.GlobalSearchVal != nil {
+		q.Add("search", *sp.GlobalSearchVal)
+	}
+	if sp.Order != nil {
+		q.Add("ord[fields]", strings.Join(sp.Order.Fields, ","))
+		q.Add("ord[dir]", strings.Join(sp.Order.Directions, ","))
+	}
+	for k, v := range sp.Fields {
+		if v == nil {
+			continue
+		}
+		if v.Visible != nil {
+			q.Add(fmt.Sprintf("f[%s][visible]", k), strconv.FormatBool(*v.Visible))
+		}
+		if v.SearchOp != nil {
+			q.Add(fmt.Sprintf("f[%s][search][op]", k), *v.SearchOp)
+		}
+		if v.SearchVal != nil {
+			q.Add(fmt.Sprintf("f[%s][search][value]", k), *v.SearchVal)
+		}
+	}
+	req.URL.RawQuery = q.Encode()
+}
+
 // ParseSearchQuery parses a HTTP request's query string into a SeachParams
 // It supports global search, field search and pagination.
 //
