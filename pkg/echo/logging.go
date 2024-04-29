@@ -14,7 +14,7 @@ func SlogContext(logger *slog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ctx := log.WithLogger(c.Request().Context(), logger)
-			req := c.Request().Clone(ctx)
+			req := c.Request().WithContext(ctx)
 			c.SetRequest(req)
 			return next(c)
 		}
