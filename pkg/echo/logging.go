@@ -31,6 +31,8 @@ func RequestLogger() echo.MiddlewareFunc {
 		LogHost:      true,
 		LogUserAgent: true,
 		LogError:     true,
+		LogLatency:   true,
+		LogRemoteIP:  true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			attrs := []any{}
 			attrs = append(attrs, slog.String("URI", v.URI))
@@ -38,6 +40,9 @@ func RequestLogger() echo.MiddlewareFunc {
 			attrs = append(attrs, slog.String("method", v.Method))
 			attrs = append(attrs, slog.String("host", v.Host))
 			attrs = append(attrs, slog.String("user_agent", v.UserAgent))
+			attrs = append(attrs, slog.Duration("latency", v.Latency))
+			attrs = append(attrs, slog.String("remote_ip", v.RemoteIP))
+
 			if v.Error != nil {
 				attrs = append(attrs, log.Error(v.Error))
 			}
