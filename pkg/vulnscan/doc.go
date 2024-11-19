@@ -13,7 +13,7 @@ Basic usage:
 	    })
 
 		// Scan a project
-		results, err := scanner.Scan()
+		results, err := scanner.Scan(context.Background())
 		if err != nil {
 		    // Handle error
 		}

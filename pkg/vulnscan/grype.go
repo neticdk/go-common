@@ -20,6 +20,8 @@ import (
 	"github.com/neticdk/go-common/pkg/types"
 )
 
+var grypeDBRootDir = "/tmp/grype-db"
+
 // GrypeScanner is a scanner that uses Grype to find vulnerabilities in a
 // project
 type GrypeScanner struct {
@@ -57,7 +59,7 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 	}
 
 	for _, s := range sboms {
-		vulns, err := GrypeScanSBOM(*s)
+		vulns, err := GrypeScanSBOM(ctx, *s)
 		if err != nil {
 			logger.WarnContext(ctx, "failed to get vulnerabilities from SBOM", slog.Any("error", err))
 			continue
@@ -70,12 +72,11 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 // GrypeScanSBOM extracts vulnerabilities from the given SBOM.
 // It loads the Grype vulnerability database, matches the packages in the SBOM
 // against known vulnerabilities, and returns a list of vulnerabilities.
-func GrypeScanSBOM(s syftSbom.SBOM) ([]types.Vulnerability, error) {
+func GrypeScanSBOM(ctx context.Context, s syftSbom.SBOM) ([]types.Vulnerability, error) {
 	vulns := []types.Vulnerability{}
 
 	dbConfig := grypedb.Config{
-		// TODO: use a temporary directory
-		DBRootDir:  "/tmp/grype-db",
+		DBRootDir:  grypeDBRootDir,
 		ListingURL: "https://toolbox-data.anchore.io/grype/databases/listing.json",
 	}
 	datastore, _, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
@@ -111,7 +112,7 @@ func GrypeScanSBOM(s syftSbom.SBOM) ([]types.Vulnerability, error) {
 		go func() {
 			defer wg.Done()
 			for match := range workChan {
-				grypeProcessMatch(match, datastore, resultChan)
+				grypeProcessMatch(ctx, match, datastore, resultChan)
 			}
 		}()
 	}
@@ -134,11 +135,11 @@ func GrypeScanSBOM(s syftSbom.SBOM) ([]types.Vulnerability, error) {
 	return vulns, nil
 }
 
-func grypeProcessMatch(match grypeMatch.Match, datastore *grypeStore.Store, resultChan chan<- types.Vulnerability) {
+func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *grypeStore.Store, resultChan chan<- types.Vulnerability) {
 	logger := slog.Default()
 	metadata, err := datastore.GetMetadata(match.Vulnerability.ID, match.Vulnerability.Namespace)
 	if err != nil {
-		logger.WarnContext(context.TODO(), "getting metadata for vulnerability", slog.String("ID", match.Vulnerability.ID), slog.Any("error", err))
+		logger.WarnContext(ctx, "getting metadata for vulnerability", slog.String("ID", match.Vulnerability.ID), slog.Any("error", err))
 		return
 	}
 
@@ -160,6 +161,10 @@ func grypeProcessMatch(match grypeMatch.Match, datastore *grypeStore.Store, resu
 		FixState:    string(match.Vulnerability.Fix.State),
 		CVSS:        cvss,
 	}
+}
+
+func GrypeSetDBRootDir(dir string) {
+	grypeDBRootDir = dir
 }
 
 type grypeByCVSSVersion []grypeVulnerability.Cvss

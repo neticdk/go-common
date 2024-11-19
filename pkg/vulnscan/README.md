@@ -1,7 +1,7 @@
 # Vulnerability Scanning Package
 
 This package provides comprehensive vulnerability scanning capabilities for Go
-applications, supporting multiple scanning backends and vulnerability databases.
+applications. It supports many scanning backends and vulnerability databases.
 
 ## Usage
 
@@ -14,7 +14,7 @@ scanner := vulnscan.NewScanner(vulnscan.Options{
 })
 
 // Perform a scan
-results, err := scanner.Scan()
+results, err := scanner.Scan(context.Background())
 if err != nil {
     // Handle error
 }
@@ -27,7 +27,7 @@ for _, vuln := range results.Vulnerabilities {
 
 ## Configuration
 
-The scanner must implement the `Scanner` interface, which includes a `Scan`
-method that returns a list of vulnerabilities and an error.
+A scanner implements the `Scanner` interface. Specifically, the `Scan` method
+which returns a list of vulnerabilities and an error.
 
-For now the only implementation is the GrypeScanner, which uses the Grype.
+For now GrypeScanner is the only implementation.
