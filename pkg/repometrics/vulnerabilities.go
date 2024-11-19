@@ -6,10 +6,13 @@ import (
 	"github.com/neticdk/go-common/pkg/types"
 )
 
+// Scanner is the interface for vulnerability scanners
 type Scanner interface {
+	// Scan scans for vulnerabilities
 	Scan() ([]types.Vulnerability, error)
 }
 
+// ScanVulnerabilities scans for vulnerabilities and updates the metrics
 func (m *Metrics) ScanVulnerabilities(s Scanner) error {
 	var err error
 

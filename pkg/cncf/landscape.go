@@ -63,6 +63,7 @@ func (c *DefaultHTTPClient) Get(rawURL string) (*http.Response, error) {
 	return http.Get(parsedURL.String())
 }
 
+// GetLandscape fetches the CNCF landscape from the official repository
 func GetLandscape(client HTTPClient) (*Landscape, error) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
