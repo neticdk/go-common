@@ -48,7 +48,7 @@ func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, erro
 	logger := slog.Default()
 	manifests, err := filepath.Glob(filepath.Join(path, "*.yaml"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read manifests: %w", err)
+		return nil, fmt.Errorf("reading manifests: %w", err)
 	}
 	var sboms []*sbom.SBOM
 	for _, manifest := range manifests {
@@ -56,15 +56,15 @@ func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, erro
 		defer func() {
 			err := f.Close()
 			if err != nil {
-				logger.ErrorContext(ctx, "failed to close manifest file", slog.String("file", manifest), slog.Any("error", err))
+				logger.ErrorContext(ctx, "closing manifest file", slog.String("file", manifest), slog.Any("error", err))
 			}
 		}()
 		if err != nil {
-			return nil, fmt.Errorf("failed to open manifest file %s: %w", manifest, err)
+			return nil, fmt.Errorf("opening manifest file %s: %v", manifest, err)
 		}
 		sbom, err := GenerateSBOMsFromManifest(ctx, f)
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate SBOM from manifest file %s: %w", manifest, err)
+			return nil, fmt.Errorf("generating SBOM from manifest file %s: %v", manifest, err)
 		}
 		sboms = append(sboms, sbom...)
 	}
@@ -74,8 +74,7 @@ func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, erro
 func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]string, error) {
 	logger := slog.Default()
 	imageNames := []string{}
-	var m []byte
-	_, err := manifest.Read(m)
+	m, err := io.ReadAll(manifest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read manifest: %w", err)
 	}
