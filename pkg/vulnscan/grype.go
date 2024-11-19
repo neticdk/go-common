@@ -135,9 +135,10 @@ func GrypeScanSBOM(s syftSbom.SBOM) ([]types.Vulnerability, error) {
 }
 
 func grypeProcessMatch(match grypeMatch.Match, datastore *grypeStore.Store, resultChan chan<- types.Vulnerability) {
+	logger := slog.Default()
 	metadata, err := datastore.GetMetadata(match.Vulnerability.ID, match.Vulnerability.Namespace)
 	if err != nil {
-		fmt.Printf("failed to get metadata for vulnerability %s: %v\n", match.Vulnerability.ID, err)
+		logger.WarnContext(context.TODO(), "getting metadata for vulnerability", slog.String("ID", match.Vulnerability.ID), slog.Any("error", err))
 		return
 	}
 
@@ -172,12 +173,13 @@ func (s grypeByCVSSVersion) Swap(i, j int) {
 }
 
 func (s grypeByCVSSVersion) Less(i, j int) bool {
+	logger := slog.Default()
 	v1, err1 := version.NewVersion(s[i].Version)
 	v2, err2 := version.NewVersion(s[j].Version)
 
 	if err1 != nil || err2 != nil {
 		// Treat versions as equal if parsing fails
-		fmt.Printf("failed to parse version: %v, %v\n", err1, err2)
+		logger.DebugContext(context.TODO(), "parsing version", slog.Any("error1", err1), slog.Any("error2", err2))
 		return false
 	}
 
