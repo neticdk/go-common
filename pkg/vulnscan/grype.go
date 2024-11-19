@@ -1,6 +1,7 @@
 package vulnscan
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -35,7 +36,8 @@ func NewGrypeScanner(path string) *GrypeScanner {
 }
 
 // Scan scans the project in the given path and returns a list of vulnerabilities
-func (s *GrypeScanner) Scan() ([]types.Vulnerability, error) {
+func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) {
+	logger := slog.Default()
 	var err error
 	if s.path == "" {
 		s.path, err = os.Getwd()
@@ -44,7 +46,7 @@ func (s *GrypeScanner) Scan() ([]types.Vulnerability, error) {
 		}
 	}
 
-	sboms, err := sbom.GenerateSBOMFromPath(s.path)
+	sboms, err := sbom.GenerateSBOMsFromPath(ctx, s.path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
 	}
@@ -57,7 +59,7 @@ func (s *GrypeScanner) Scan() ([]types.Vulnerability, error) {
 	for _, s := range sboms {
 		vulns, err := GrypeScanSBOM(*s)
 		if err != nil {
-			slog.Warn("failed to get vulnerabilities from SBOM", "error", err)
+			logger.WarnContext(ctx, "failed to get vulnerabilities from SBOM", slog.Any("error", err))
 			continue
 		}
 		vulnerabilities = append(vulnerabilities, vulns...)

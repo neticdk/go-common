@@ -3,6 +3,8 @@ package sbom
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -13,11 +15,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 )
 
-// GenerateSBOMFromManifests generates SBOMs from the given manifest files
-func GenerateSBOMFromManifests(manifestFiles []string) ([]*sbom.SBOM, error) {
-	ctx := context.Background()
-	imageNames := extractImageNamesFromManifests(manifestFiles)
-	fmt.Printf("Extracted image names: %v\n", imageNames)
+// GenerateSBOMsFromManifest generates SBOMs from the given manifest
+func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom.SBOM, error) {
+	imageNames, err := extractImageNamesFromManifest(ctx, manifest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract image names from manifest: %w", err)
+	}
 
 	var sboms []*sbom.SBOM
 	for _, imageName := range imageNames {
@@ -40,59 +43,72 @@ func GenerateSBOMFromManifests(manifestFiles []string) ([]*sbom.SBOM, error) {
 	return sboms, nil
 }
 
-// GenerateSBOMFromPath generates SBOMs from all manifests in the given path
-func GenerateSBOMFromPath(path string) ([]*sbom.SBOM, error) {
+// GenerateSBOMsFromPath generates SBOMs from all manifests in the given path
+func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, error) {
+	logger := slog.Default()
 	manifests, err := filepath.Glob(filepath.Join(path, "*.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read manifests: %w", err)
 	}
-	return GenerateSBOMFromManifests(manifests)
+	var sboms []*sbom.SBOM
+	for _, manifest := range manifests {
+		f, err := os.Open(manifest)
+		defer func() {
+			err := f.Close()
+			if err != nil {
+				logger.ErrorContext(ctx, "failed to close manifest file", slog.String("file", manifest), slog.Any("error", err))
+			}
+		}()
+		if err != nil {
+			return nil, fmt.Errorf("failed to open manifest file %s: %w", manifest, err)
+		}
+		sbom, err := GenerateSBOMsFromManifest(ctx, f)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate SBOM from manifest file %s: %w", manifest, err)
+		}
+		sboms = append(sboms, sbom...)
+	}
+	return sboms, nil
 }
 
-func extractImageNamesFromManifests(manifestFiles []string) []string {
+func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]string, error) {
+	logger := slog.Default()
 	imageNames := []string{}
-	for _, manifestFile := range manifestFiles {
-		file, err := os.ReadFile(manifestFile)
+	var m []byte
+	_, err := manifest.Read(m)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read manifest: %w", err)
+	}
+
+	var obj unstructured.Unstructured
+	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+	_, _, err = dec.Decode(m, nil, &obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode manifest: %v\n", err)
+	}
+
+	containers, err := getContainers(&obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract containers: %v\n", err)
+	}
+
+	for _, container := range containers {
+		containerMap, ok := container.(map[string]interface{})
+		if !ok {
+			logger.DebugContext(ctx, "failed to convert container to map[string]interface{}")
+			continue
+		}
+		imageName, found, err := unstructured.NestedString(containerMap, "image")
 		if err != nil {
-			fmt.Printf("failed to read manifest file %s: %v\n", manifestFile, err)
+			logger.DebugContext(ctx, "failed to extract image name from container", slog.Any("error", err))
 			continue
 		}
-
-		var obj unstructured.Unstructured
-		dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-		_, _, err = dec.Decode(file, nil, &obj)
-		if err != nil {
-			fmt.Printf("failed to decode manifest file %s: %v\n", manifestFile, err)
-			continue
-		}
-
-		containers, err := getContainers(&obj)
-		if err != nil {
-			fmt.Printf("failed to extract containers from manifest file %s: %v\n", manifestFile, err)
-			continue
-		}
-
-		if len(containers) == 0 {
-			continue
-		}
-
-		for _, container := range containers {
-			containerMap, ok := container.(map[string]interface{})
-			if !ok {
-				fmt.Printf("failed to convert container to map[string]interface{}\n")
-				continue
-			}
-			imageName, found, err := unstructured.NestedString(containerMap, "image")
-			if err != nil {
-				fmt.Printf("failed to extract image name from container: %v\n", err)
-				continue
-			}
-			if found {
-				imageNames = append(imageNames, imageName)
-			}
+		if found {
+			imageNames = append(imageNames, imageName)
 		}
 	}
-	return imageNames
+
+	return imageNames, nil
 }
 
 func getContainers(obj *unstructured.Unstructured) ([]interface{}, error) {
