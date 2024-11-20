@@ -3,9 +3,11 @@ package vulnscan
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/anchore/go-version"
@@ -33,9 +35,10 @@ type GrypeScanner struct {
 
 // GrypeScannerOptions specifies the options for the GrypeScanner
 type GrypeScannerOptions struct {
-	ManifestPath       string // ManifestPath specifies the path to the project manifest
-	DBRootDir          string // DBRootDir specifies the root directory of the Grype database
-	CleanupDBAfterScan bool   // CleanupDBAfterScan specifies whether to clean up the Grype database after the scan
+	ManifestPath       string    // ManifestPath specifies the path to the project manifest
+	Manifest           io.Reader // Manifest is a readable representation of a manifest file
+	DBRootDir          string    // DBRootDir specifies the root directory of the Grype database
+	CleanupDBAfterScan bool      // CleanupDBAfterScan specifies whether to clean up the Grype database after the scan
 }
 
 // DefaultGrypeScannerOptions returns the default GrypeScannerOptions
@@ -48,6 +51,7 @@ func DefaultGrypeScannerOptions() *GrypeScannerOptions {
 	wd, _ = os.Getwd()
 	return &GrypeScannerOptions{
 		ManifestPath:       wd,
+		Manifest:           strings.NewReader(""),
 		DBRootDir:          DefaultDBRootDir,
 		CleanupDBAfterScan: false,
 	}
@@ -61,6 +65,7 @@ func NewGrypeScanner(opts *GrypeScannerOptions) *GrypeScanner {
 	s := &GrypeScanner{
 		manifestScanner{
 			manifestPath: opts.ManifestPath,
+			manifest:     opts.Manifest,
 		},
 		opts.DBRootDir,
 		opts.CleanupDBAfterScan,
@@ -86,6 +91,11 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
 	}
+	sboms2, err := sbom.GenerateSBOMsFromManifest(ctx, s.manifest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
+	}
+	sboms = append(sboms, sboms2...)
 
 	vulnerabilities := []types.Vulnerability{}
 	if len(sboms) == 0 {

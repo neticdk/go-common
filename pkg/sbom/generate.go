@@ -46,6 +46,11 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom
 // GenerateSBOMsFromPath generates SBOMs from all manifests in the given path
 func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, error) {
 	logger := slog.Default()
+
+	if path == "" {
+		return make([]*sbom.SBOM, 0), nil
+	}
+
 	manifests, err := filepath.Glob(filepath.Join(path, "*.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("reading manifests: %w", err)
@@ -77,6 +82,9 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 	m, err := io.ReadAll(manifest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read manifest: %w", err)
+	}
+	if len(m) == 0 {
+		return imageNames, nil
 	}
 
 	var obj unstructured.Unstructured
