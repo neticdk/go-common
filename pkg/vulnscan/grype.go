@@ -10,6 +10,7 @@ import (
 
 	"github.com/anchore/go-version"
 	"github.com/anchore/grype/grype"
+	"github.com/anchore/grype/grype/db/legacy/distribution"
 	grypedb "github.com/anchore/grype/grype/db/legacy/distribution"
 	grypeMatch "github.com/anchore/grype/grype/match"
 	grypePkg "github.com/anchore/grype/grype/pkg"
@@ -20,35 +21,68 @@ import (
 	"github.com/neticdk/go-common/pkg/types"
 )
 
-var grypeDBRootDir = "/tmp/grype-db"
+const DefaultDBRootDir = "/tmp/grypedb"
 
 // GrypeScanner is a scanner that uses Grype to find vulnerabilities in a
 // project
 type GrypeScanner struct {
 	manifestScanner
+	dbRootDir          string
+	cleanupDBAfterScan bool
+}
+
+// GrypeScannerOptions specifies the options for the GrypeScanner
+type GrypeScannerOptions struct {
+	ManifestPath       string // ManifestPath specifies the path to the project manifest
+	DBRootDir          string // DBRootDir specifies the root directory of the Grype database
+	CleanupDBAfterScan bool   // CleanupDBAfterScan specifies whether to clean up the Grype database after the scan
+}
+
+// DefaultGrypeScannerOptions returns the default GrypeScannerOptions
+// It sets:
+// - ManifestPath to the current working directory
+// - DBRootDir to the default Grype database root directory
+// - CleanupDBAfterScan to false
+func DefaultGrypeScannerOptions() *GrypeScannerOptions {
+	var wd string
+	wd, _ = os.Getwd()
+	return &GrypeScannerOptions{
+		ManifestPath:       wd,
+		DBRootDir:          DefaultDBRootDir,
+		CleanupDBAfterScan: false,
+	}
 }
 
 // NewGrypeScanner creates a new GrypeScanner
-func NewGrypeScanner(path string) *GrypeScanner {
-	return &GrypeScanner{
-		manifestScanner{
-			path: path,
-		},
+func NewGrypeScanner(opts *GrypeScannerOptions) *GrypeScanner {
+	if opts == nil {
+		opts = DefaultGrypeScannerOptions()
 	}
+	s := &GrypeScanner{
+		manifestScanner{
+			manifestPath: opts.ManifestPath,
+		},
+		opts.DBRootDir,
+		opts.CleanupDBAfterScan,
+	}
+	if s.dbRootDir == "" {
+		s.dbRootDir = DefaultDBRootDir
+	}
+	return s
 }
 
 // Scan scans the project in the given path and returns a list of vulnerabilities
 func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) {
 	logger := slog.Default()
 	var err error
-	if s.path == "" {
-		s.path, err = os.Getwd()
+	if s.manifestPath == "" {
+		s.manifestPath, err = os.Getwd()
 		if err != nil {
 			return nil, fmt.Errorf("failed to get current working directory: %w", err)
 		}
 	}
 
-	sboms, err := sbom.GenerateSBOMsFromPath(ctx, s.path)
+	sboms, err := sbom.GenerateSBOMsFromPath(ctx, s.manifestPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
 	}
@@ -58,8 +92,8 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 		return vulnerabilities, nil
 	}
 
-	for _, s := range sboms {
-		vulns, err := GrypeScanSBOM(ctx, *s)
+	for _, sbm := range sboms {
+		vulns, err := s.GrypeScanSBOM(ctx, *sbm)
 		if err != nil {
 			logger.WarnContext(ctx, "failed to get vulnerabilities from SBOM", slog.Any("error", err))
 			continue
@@ -72,13 +106,26 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 // GrypeScanSBOM extracts vulnerabilities from the given SBOM.
 // It loads the Grype vulnerability database, matches the packages in the SBOM
 // against known vulnerabilities, and returns a list of vulnerabilities.
-func GrypeScanSBOM(ctx context.Context, s syftSbom.SBOM) ([]types.Vulnerability, error) {
+func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]types.Vulnerability, error) {
+	logger := slog.Default()
 	vulns := []types.Vulnerability{}
 
 	dbConfig := grypedb.Config{
-		DBRootDir:  grypeDBRootDir,
+		DBRootDir:  s.dbRootDir,
 		ListingURL: "https://toolbox-data.anchore.io/grype/databases/listing.json",
 	}
+	if s.cleanupDBAfterScan {
+		dbCurator, err := distribution.NewCurator(dbConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create database curator: %w", err)
+		}
+		defer func() {
+			if err := dbCurator.Delete(); err != nil {
+				logger.ErrorContext(ctx, "cleaning up database", slog.Any("error", err))
+			}
+		}()
+	}
+
 	datastore, _, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load vulnerability database: %w", err)
@@ -86,19 +133,20 @@ func GrypeScanSBOM(ctx context.Context, s syftSbom.SBOM) ([]types.Vulnerability,
 
 	matcher := grype.DefaultVulnerabilityMatcher(*datastore)
 
-	syftPkgs := s.Artifacts.Packages.Sorted()
+	syftPkgs := sbm.Artifacts.Packages.Sorted()
 	grypePkgs := grypePkg.FromPackages(syftPkgs, grypePkg.SynthesisConfig{GenerateMissingCPEs: false})
 
-	col, _, err := matcher.FindMatches(grypePkgs, grypePkg.Context{
-		Source: &s.Source,
+	matches, _, err := matcher.FindMatches(grypePkgs, grypePkg.Context{
+		Source: &sbm.Source,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to find matches: %w", err)
 	}
 
+	matchCount := len(matches.Sorted())
 	// Create channels for work distribution and result collection
-	workChan := make(chan grypeMatch.Match, len(col.Sorted()))
-	resultChan := make(chan types.Vulnerability, len(col.Sorted()))
+	workChan := make(chan grypeMatch.Match, matchCount)
+	resultChan := make(chan types.Vulnerability, matchCount)
 
 	// Use a WaitGroup to wait for all workers to finish
 	var wg sync.WaitGroup
@@ -118,7 +166,7 @@ func GrypeScanSBOM(ctx context.Context, s syftSbom.SBOM) ([]types.Vulnerability,
 	}
 
 	// Send work to the work channel
-	for _, match := range col.Sorted() {
+	for _, match := range matches.Sorted() {
 		workChan <- match
 	}
 	close(workChan)
@@ -161,10 +209,6 @@ func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *g
 		FixState:    string(match.Vulnerability.Fix.State),
 		CVSS:        cvss,
 	}
-}
-
-func GrypeSetDBRootDir(dir string) {
-	grypeDBRootDir = dir
 }
 
 type grypeByCVSSVersion []grypeVulnerability.Cvss

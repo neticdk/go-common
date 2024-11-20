@@ -7,28 +7,30 @@ import (
 	"time"
 )
 
+// Stats represents the metrics of a repository
 type Stats struct {
-	LastCommit        *time.Time    `json:"last_commit"`
-	CommitsPerMonth6M int           `json:"commits_per_month_6m"`
-	Contributors1Y    int           `json:"contributors_1y"`
-	FirstRelease      *time.Time    `json:"first_release"`
-	LastRelease       *time.Time    `json:"last_release"`
-	Releases          int           `json:"releases"`
-	ReleasesPerDay    float64       `json:"releases_per_day"`
-	ReleasesPerWeek   float64       `json:"releases_per_week"`
-	ReleasesPerMonth  float64       `json:"releases_per_month"`
-	ReleasesPerYear   float64       `json:"releases_per_year"`
-	OpenIssuesNow     int           `json:"open_issues_now"`
-	OpenedIssues6M    int           `json:"opened_issues_6m"`
-	ClosedIssues6M    int           `json:"closed_issues_6m"`
-	OpenedPRs6M       int           `json:"opened_prs_6m"`
-	ClosedPRs6M       int           `json:"closed_prs_6m"`
-	Likes             int           `json:"likes"`
-	Forks             int           `json:"forks"`
-	TopCommitters     []Contributor `json:"top_committers"`
-	TopCommitters1Y   []Contributor `json:"top_committers_1y"`
+	LastCommit        *time.Time    `json:"last_commit"`          // Date of the last commit.
+	CommitsPerMonth6M int           `json:"commits_per_month_6m"` // Number of commits in the last 6 months.
+	Contributors1Y    int           `json:"contributors_1y"`      // Number of contributors in the last year.
+	FirstRelease      *time.Time    `json:"first_release"`        // Date of the first release.
+	LastRelease       *time.Time    `json:"last_release"`         // Date of the last release.
+	Releases          int           `json:"releases"`             // Total number of releases.
+	ReleasesPerDay    float64       `json:"releases_per_day"`     // Number of releases per day.
+	ReleasesPerWeek   float64       `json:"releases_per_week"`    // Number of releases per week.
+	ReleasesPerMonth  float64       `json:"releases_per_month"`   // Number of releases per month.
+	ReleasesPerYear   float64       `json:"releases_per_year"`    // Number of releases per year.
+	OpenIssuesNow     int           `json:"open_issues_now"`      // Number of currently open issues.
+	OpenedIssues6M    int           `json:"opened_issues_6m"`     // Number of issues opened in the last 6 months.
+	ClosedIssues6M    int           `json:"closed_issues_6m"`     // Number of issues closed in the last 6 months.
+	OpenedPRs6M       int           `json:"opened_prs_6m"`        // Number of pull requests opened in the last 6 months.
+	ClosedPRs6M       int           `json:"closed_prs_6m"`        // Number of pull requests closed in the last 6 months.
+	Likes             int           `json:"likes"`                // Number of likes/hearts/stars.
+	Forks             int           `json:"forks"`                // Number of forks.
+	TopCommitters     []Contributor `json:"top_committers"`       // Top committers overall.
+	TopCommitters1Y   []Contributor `json:"top_committers_1y"`    // Top committers in the last year.
 }
 
+// Contributor represents a contributor to a repository
 type Contributor struct {
 	Name    string `json:"name"`
 	Commits int    `json:"commits"`

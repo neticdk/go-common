@@ -30,4 +30,4 @@ for _, vuln := range results.Vulnerabilities {
 A scanner implements the `Scanner` interface. Specifically, the `Scan` method
 which returns a list of vulnerabilities and an error.
 
-For now GrypeScanner is the only implementation.
+For now, GrypeScanner is the only implementation.
