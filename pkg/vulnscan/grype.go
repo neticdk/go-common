@@ -105,6 +105,19 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 		}
 		vulnerabilities = append(vulnerabilities, vulns...)
 	}
+
+	sort.SliceStable(vulnerabilities, func(i, j int) bool {
+		baseScoreI := 0.0
+		baseScoreJ := 0.0
+		if vulnerabilities[i].CVSS != nil {
+			baseScoreI = vulnerabilities[i].CVSS.BaseScore
+		}
+		if vulnerabilities[j].CVSS != nil {
+			baseScoreJ = vulnerabilities[j].CVSS.BaseScore
+		}
+		return baseScoreI > baseScoreJ
+	})
+
 	return vulnerabilities, nil
 }
 
