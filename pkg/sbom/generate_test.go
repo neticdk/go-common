@@ -31,6 +31,33 @@ spec:
 			want: []string{"nginx:1.14.2", "sidecar:latest"},
 		},
 		{
+			name: "multiple pod manifests",
+			manifest: `---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+  - name: sidecar
+    image: sidecar:latest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx2
+spec:
+  containers:
+  - name: nginx2
+    image: nginx:1.14.3
+  - name: sidecar
+    image: sidecar:latest
+`,
+			want: []string{"nginx:1.14.2", "sidecar:latest", "nginx:1.14.3", "sidecar:latest"},
+		},
+		{
 			name: "deployment manifest",
 			manifest: `---
 apiVersion: apps/v1

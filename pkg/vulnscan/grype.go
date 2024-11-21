@@ -43,7 +43,6 @@ type GrypeScannerOptions struct {
 
 // DefaultGrypeScannerOptions returns the default GrypeScannerOptions
 // It sets:
-// - ManifestPath to the current working directory
 // - DBRootDir to the default Grype database root directory
 // - CleanupDBAfterScan to false
 func DefaultGrypeScannerOptions() *GrypeScannerOptions {
@@ -73,19 +72,15 @@ func NewGrypeScanner(opts *GrypeScannerOptions) *GrypeScanner {
 	if s.dbRootDir == "" {
 		s.dbRootDir = DefaultDBRootDir
 	}
+	if s.manifest == nil {
+		s.manifest = strings.NewReader("")
+	}
 	return s
 }
 
 // Scan scans the project in the given path and returns a list of vulnerabilities
 func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) {
 	logger := slog.Default()
-	var err error
-	if s.manifestPath == "" {
-		s.manifestPath, err = os.Getwd()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get current working directory: %w", err)
-		}
-	}
 
 	sboms, err := sbom.GenerateSBOMsFromPath(ctx, s.manifestPath)
 	if err != nil {

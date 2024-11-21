@@ -1,6 +1,7 @@
 package sbom
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 // GenerateSBOMsFromManifest generates SBOMs from the given manifest
@@ -79,24 +81,35 @@ func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, erro
 func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]string, error) {
 	logger := slog.Default()
 	imageNames := []string{}
-	m, err := io.ReadAll(manifest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read manifest: %w", err)
-	}
-	if len(m) == 0 {
-		return imageNames, nil
-	}
 
-	var obj unstructured.Unstructured
+	multidocReader := utilyaml.NewYAMLReader(bufio.NewReader(manifest))
 	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-	_, _, err = dec.Decode(m, nil, &obj)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode manifest: %v\n", err)
-	}
+	var containers []interface{}
+	for {
+		buf, err := multidocReader.Read()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, fmt.Errorf("failed to read manifest: %v\n", err)
+		}
 
-	containers, err := getContainers(&obj)
-	if err != nil {
-		return nil, fmt.Errorf("failed to extract containers: %v\n", err)
+		var obj unstructured.Unstructured
+		rto, _, err := dec.Decode(buf, nil, &obj)
+		// happens with empty YAML documents
+		if rto == nil {
+			logger.DebugContext(ctx, "failed to decode manifest")
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode manifest: %v\n", err)
+		}
+
+		objContainers, err := getContainers(&obj)
+		if err != nil {
+			return nil, fmt.Errorf("failed to extract containers: %v\n", err)
+		}
+		containers = append(containers, objContainers...)
 	}
 
 	for _, container := range containers {
