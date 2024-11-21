@@ -158,21 +158,27 @@ func (gr *ghRepo) fetchContributors(m *Metrics) error {
 			continue
 		}
 
-		contributer := Contributor{
+		contributor := Contributor{
 			Name:    stat.GetAuthor().GetLogin(),
 			Commits: stat.GetTotal(),
 		}
-		topCommitters = append(topCommitters, contributer)
+		if m.Type == "github" {
+			contributor.URL = fmt.Sprintf("https://github.com/%s", stat.GetAuthor().GetLogin())
+		}
+		topCommitters = append(topCommitters, contributor)
 
-		contributer1Y := Contributor{
+		contributor1Y := Contributor{
 			Name: stat.GetAuthor().GetLogin(),
+		}
+		if m.Type == "github" {
+			contributor1Y.URL = fmt.Sprintf("https://github.com/%s", stat.GetAuthor().GetLogin())
 		}
 		for _, week := range stat.Weeks {
 			if week.Week.Unix() > oneYearAgo.Unix() {
-				contributer1Y.Commits += week.GetCommits()
+				contributor1Y.Commits += week.GetCommits()
 			}
 		}
-		topCommitters1Y = append(topCommitters1Y, contributer1Y)
+		topCommitters1Y = append(topCommitters1Y, contributor1Y)
 	}
 
 	sortContributors(topCommitters)

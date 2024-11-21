@@ -33,6 +33,7 @@ type Stats struct {
 // Contributor represents a contributor to a repository
 type Contributor struct {
 	Name    string `json:"name"`
+	URL     string `json:"url"`
 	Commits int    `json:"commits"`
 }
 
