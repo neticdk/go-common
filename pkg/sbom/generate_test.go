@@ -103,6 +103,18 @@ spec:
 			want: []string{},
 		},
 		{
+			name:     "empty manifest",
+			manifest: ``,
+			wantErr:  false,
+			want:     []string{},
+		},
+		{
+			name:     "empty manifest with comments",
+			manifest: `#  this is a comment`,
+			wantErr:  false,
+			want:     []string{},
+		},
+		{
 			name: "invalid manifest",
 			manifest: `
 invalid:

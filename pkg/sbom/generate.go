@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/sbom"
@@ -93,14 +94,25 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 			}
 			return nil, fmt.Errorf("failed to read manifest: %v\n", err)
 		}
-
-		var obj unstructured.Unstructured
-		rto, _, err := dec.Decode(buf, nil, &obj)
-		// happens with empty YAML documents
-		if rto == nil {
-			logger.DebugContext(ctx, "failed to decode manifest")
+		// handle empty YAML documents
+		if len(buf) == 0 {
 			continue
 		}
+		bufStr := string(buf)
+		lines := strings.Split(bufStr, "\n")
+		isEmpty := true
+		for _, line := range lines {
+			trimmedLine := strings.TrimSpace(line)
+			if trimmedLine != "" && !strings.HasPrefix(trimmedLine, "#") {
+				isEmpty = false
+				break
+			}
+		}
+		if isEmpty {
+			continue
+		}
+		var obj unstructured.Unstructured
+		_, _, err = dec.Decode(buf, nil, &obj)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode manifest: %v\n", err)
 		}
