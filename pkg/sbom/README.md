@@ -2,8 +2,8 @@
 
 The `sbom` package provides utilities for generating and encoding Software Bill
 of Materials (SBOM) from Kubernetes manifests. It leverages the Syft library to
-create SBOMs in various formats such as SPDX JSON, SPDX Tag-Value, CycloneDX
-JSON, and CycloneDX XML.
+create SBOMs in formats such as SPDX JSON, SPDX Tag-Value, CycloneDX JSON, and
+CycloneDX XML.
 
 ## Installation
 
@@ -143,10 +143,10 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 
 ## License
 
-This project is licensed under the MIT License.
+We have licensed this project under the MIT License.
 
 ## Acknowledgements
 
 This package uses the [Syft](https://github.com/anchore/syft) library for SBOM
-generation and encoding. Special thanks to the Syft team for their excellent
+generation and encoding. Special thanks to the Syft team for their competent
 work.
