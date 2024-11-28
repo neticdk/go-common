@@ -27,18 +27,22 @@ type PullResult struct {
 	Version string
 }
 
+// WithRegistryClient sets the registry client to use
 func WithRegistryClient(client *registry.Client) PullOption {
 	return func(o *pullOption) {
 		o.RegistryClient = client
 	}
 }
 
+// WithVersion sets the version of the chart to pull
 func WithVersion(version string) PullOption {
 	return func(o *pullOption) {
 		o.Version = version
 	}
 }
 
+// PullChart pulls a helm chart to the destination directory
+// Version defaults to "latest"
 func PullChart(ctx context.Context, repository, chartName, dstDir string, opts ...PullOption) (*PullResult, error) {
 	if repository == "" {
 		return nil, fmt.Errorf("repository is required")
@@ -73,11 +77,13 @@ func PullChart(ctx context.Context, repository, chartName, dstDir string, opts .
 	chartRef := chartName
 	if registry.IsOCI(repository) {
 		chartRef = repository
-		registryClient, err := registry.NewClient()
-		if err != nil {
-			return nil, err
+		if opt.RegistryClient == nil {
+			registryClient, err := registry.NewClient()
+			if err != nil {
+				return nil, err
+			}
+			actionConfig.RegistryClient = registryClient
 		}
-		actionConfig.RegistryClient = registryClient
 	} else {
 		client.RepoURL = repository
 	}
