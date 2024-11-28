@@ -11,9 +11,8 @@ trim_trailing_whitespace = true
 
 [*.md]
 trim_trailing_whitespace = false
-;indent_size = 2
 
-[*.{htm,html,js,ts,tsx,css,sass,scss,less,svg,vue,json,yml.yaml}]
+[*.{htm,html,js,ts,tsx,css,sass,scss,less,svg,vue,json,yml,yaml}]
 indent_size = 2
 
 
