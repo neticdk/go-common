@@ -1,0 +1,110 @@
+package helm
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	// "github.com/neticdk/solas/pkg/artifact"
+	"github.com/neticdk/go-common/pkg/version"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/registry"
+)
+
+type pullOption struct {
+	RegistryClient *registry.Client
+	Version        string
+}
+
+type PullOption func(*pullOption)
+
+type PullResult struct {
+	Chart   *chart.Chart
+	Version string
+}
+
+func WithRegistryClient(client *registry.Client) PullOption {
+	return func(o *pullOption) {
+		o.RegistryClient = client
+	}
+}
+
+func WithVersion(version string) PullOption {
+	return func(o *pullOption) {
+		o.Version = version
+	}
+}
+
+func PullChart(ctx context.Context, repository, chartName, dstDir string, opts ...PullOption) (*PullResult, error) {
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if chartName == "" {
+		return nil, fmt.Errorf("chart reference is required")
+	}
+
+	opt := &pullOption{}
+	for _, o := range opts {
+		o(opt)
+	}
+	registry.NewClient()
+
+	tmpDir, err := os.MkdirTemp("", "go-common-helm-")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	settings := cli.New()
+	actionConfig := &action.Configuration{}
+	if opt.RegistryClient != nil {
+		actionConfig.RegistryClient = opt.RegistryClient
+	}
+	client := action.NewPullWithOpts(action.WithConfig(actionConfig))
+	client.Settings = settings
+
+	client.Untar = true
+	client.UntarDir = tmpDir
+
+	chartRef := chartName
+	if registry.IsOCI(repository) {
+		chartRef = repository
+		registryClient, err := registry.NewClient()
+		if err != nil {
+			return nil, err
+		}
+		actionConfig.RegistryClient = registryClient
+	} else {
+		client.RepoURL = repository
+	}
+	client.Version = opt.Version
+
+	if _, err := client.Run(chartRef); err != nil {
+		return nil, fmt.Errorf("failed to pull helm chart: %w", err)
+	}
+
+	tmpDstDir := filepath.Join(tmpDir, chartName)
+	// Load and inspect the chart:
+	chart, err := loader.Load(tmpDstDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load chart: %w", err)
+	}
+
+	// Move the directory to the final destination
+	if err := os.Rename(
+		tmpDstDir,
+		dstDir); err != nil {
+		return nil, fmt.Errorf("failed to rename directory: %w", err)
+	}
+
+	artifactVersion := version.First(chart.Metadata.Version, opt.Version, "latest")
+
+	return &PullResult{
+		Chart:   chart,
+		Version: artifactVersion,
+	}, nil
+}
