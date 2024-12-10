@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	// "github.com/neticdk/solas/pkg/artifact"
 	"github.com/neticdk/go-common/pkg/version"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
