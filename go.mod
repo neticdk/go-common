@@ -12,6 +12,7 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/chelnak/ysmrr v0.5.0
 	github.com/glebarez/sqlite v1.11.0
+	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-jose/go-jose/v3 v3.0.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v66 v66.0.0
@@ -131,7 +132,6 @@ require (
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.0 // indirect
-	github.com/go-git/go-git/v5 v5.12.0 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
@@ -278,6 +278,7 @@ require (
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/sylabs/sif/v2 v2.19.2 // indirect
 	github.com/sylabs/squashfs v1.0.0 // indirect
