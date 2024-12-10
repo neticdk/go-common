@@ -47,7 +47,7 @@ func PullRepository(ctx context.Context, a *artifact.Artifact, opts *RepositoryO
 		cloneOptions.Auth = opts.Auth
 	}
 
-	tmpDir, err := os.MkdirTemp("", "solas")
+	tmpDir, err := os.MkdirTemp("", "go-common-")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
 	}

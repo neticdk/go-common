@@ -19,7 +19,7 @@ import (
 
 func TestPullRepository(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -57,7 +57,7 @@ func TestPullRepository(t *testing.T) {
 	})
 
 	t.Run("error_clone", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -79,7 +79,7 @@ func TestPullRepository(t *testing.T) {
 	})
 
 	t.Run("error_checkout_commit", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 

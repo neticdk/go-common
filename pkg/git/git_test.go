@@ -10,7 +10,7 @@ import (
 )
 
 func TestGitRepository_Init(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "solas-test-")
+	tmpDir, err := os.MkdirTemp("", "go-common-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestGitRepository_Init(t *testing.T) {
 }
 
 func TestGitRepository_InitAndCommit(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "solas-test-")
+	tmpDir, err := os.MkdirTemp("", "go-common-test-")
 	if err != nil {
 		t.Fatal(err)
 	}

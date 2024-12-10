@@ -36,7 +36,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestCopyDirectory(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "solas-test-")
+	tmpDir, err := os.MkdirTemp("", "go-common-test-")
 	assert.NoError(t, err)
 	srcDir := filepath.Join(tmpDir, "src")
 	dstDir := filepath.Join(tmpDir, "dst")

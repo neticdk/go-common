@@ -27,7 +27,7 @@ func (m *MockDownloader) Download(url, path string) (int64, error) {
 
 func TestPullRelease(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		// defer os.RemoveAll(tmpDir)
 
@@ -91,7 +91,7 @@ func TestPullRelease(t *testing.T) {
 	})
 
 	t.Run("error_get_release", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -119,7 +119,7 @@ func TestPullRelease(t *testing.T) {
 	})
 
 	t.Run("error_download_asset", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -147,7 +147,7 @@ func TestPullRelease(t *testing.T) {
 	})
 
 	t.Run("error_uncompress_asset", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 

@@ -34,7 +34,7 @@ func PullHTTP(ctx context.Context, a *artifact.Artifact, opts *HTTPOptions) (*ar
 		return nil, fmt.Errorf("not a compressed file: %s", assetName)
 	}
 
-	tmpDir, err := os.MkdirTemp("", "solas-")
+	tmpDir, err := os.MkdirTemp("", "go-common-")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
 	}

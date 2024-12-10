@@ -35,7 +35,7 @@ func (m *mockDownloader) Download(url, path string) (int64, error) {
 
 func TestPullHTTP(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -67,7 +67,7 @@ func TestPullHTTP(t *testing.T) {
 	})
 
 	t.Run("error_downloader", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common--")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -86,7 +86,7 @@ func TestPullHTTP(t *testing.T) {
 	})
 
 	t.Run("error_uncompress", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 
@@ -114,7 +114,7 @@ func TestPullHTTP(t *testing.T) {
 }
 
 func Test_PullHTTP_NotCompressed(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "solas-test-")
+	tmpDir, err := os.MkdirTemp("", "go-common-test-")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
@@ -136,7 +136,7 @@ func Test_PullHTTP_NotCompressed(t *testing.T) {
 
 func TestPullHTTP_ExtractToExistingDir(t *testing.T) {
 	t.Run("error_with_existing_file", func(t *testing.T) {
-		tmpDir, err := os.MkdirTemp("", "solas-test-")
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
 		require.NoError(t, err)
 		defer os.RemoveAll(tmpDir)
 

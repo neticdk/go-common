@@ -7,7 +7,7 @@ import (
 )
 
 func TestSafePath(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "solas-test-")
+	tmpDir, err := os.MkdirTemp("", "go-common-test-")
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,7 +88,7 @@ func TestSafePath(t *testing.T) {
 			root: tmpDir,
 			path: "symlink",
 			setup: func() error {
-				err := os.WriteFile(filepath.Join(tmpDir, "example.txt"), []byte("example"), 0640)
+				err := os.WriteFile(filepath.Join(tmpDir, "example.txt"), []byte("example"), 0o640)
 				if err != nil {
 					t.Fatalf("failed to create example.txt: %v", err)
 				}
@@ -120,13 +120,13 @@ func TestSafePath(t *testing.T) {
 			root: tmpDir,
 			path: "dir1/symlink/file.txt",
 			setup: func() error {
-				if err := os.Mkdir(filepath.Join(tmpDir, "dir1"), 0755); err != nil {
+				if err := os.Mkdir(filepath.Join(tmpDir, "dir1"), 0o755); err != nil {
 					return err
 				}
-				if err := os.Mkdir(filepath.Join(tmpDir, "dir2"), 0755); err != nil {
+				if err := os.Mkdir(filepath.Join(tmpDir, "dir2"), 0o755); err != nil {
 					return err
 				}
-				if err := os.WriteFile(filepath.Join(tmpDir, "dir2", "file.txt"), []byte("test"), 0640); err != nil {
+				if err := os.WriteFile(filepath.Join(tmpDir, "dir2", "file.txt"), []byte("test"), 0o640); err != nil {
 					return err
 				}
 				return os.Symlink("../dir2", filepath.Join(tmpDir, "dir1", "symlink"))
@@ -139,7 +139,7 @@ func TestSafePath(t *testing.T) {
 			root: tmpDir,
 			path: "dir1/dir2/../../../../etc/passwd",
 			setup: func() error {
-				if err := os.MkdirAll(filepath.Join(tmpDir, "dir1", "dir2"), 0755); err != nil {
+				if err := os.MkdirAll(filepath.Join(tmpDir, "dir1", "dir2"), 0o755); err != nil {
 					return err
 				}
 				return nil
@@ -152,7 +152,7 @@ func TestSafePath(t *testing.T) {
 			root: tmpDir,
 			path: "dir/symlink/file.txt",
 			setup: func() error {
-				if err := os.Mkdir(filepath.Join(tmpDir, "dir"), 0755); err != nil {
+				if err := os.Mkdir(filepath.Join(tmpDir, "dir"), 0o755); err != nil {
 					return err
 				}
 				return os.Symlink("../..", filepath.Join(tmpDir, "dir", "symlink"))
