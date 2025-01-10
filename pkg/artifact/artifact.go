@@ -35,12 +35,12 @@ type Artifact struct {
 	// typically used for archives
 	AssetName string
 
-	// SubDir is a subdirectory relative to the souce root directory that is
+	// RelativePath is a subdirectory relative to the souce root directory that is
 	// used for the basis in the component. Leading slashes are removed.
 	// e.g. 'my/path' in the checkout of git URL
 	// 'https://github.com/my/repo.git' would use 'my/path' as the directory
 	// where the source is found
-	SubDir string
+	RelativePath string
 
 	// BaseDir is the directory where the artifact is stored
 	// It does not include the directory for the artifact itself

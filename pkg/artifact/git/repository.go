@@ -79,11 +79,11 @@ func PullRepository(ctx context.Context, a *artifact.Artifact, opts *RepositoryO
 		return nil, fmt.Errorf("failed to remove .git directory: %w", err)
 	}
 
-	if a.SubDir != "" {
-		if !filepath.IsLocal(a.SubDir) {
+	if a.RelativePath != "" {
+		if !filepath.IsLocal(a.RelativePath) {
 			return nil, fmt.Errorf("subdir must be a local path")
 		}
-		tmpDstDir = filepath.Join(tmpDstDir, a.SubDir)
+		tmpDstDir = filepath.Join(tmpDstDir, a.RelativePath)
 	}
 
 	// Move the directory to the final destination
