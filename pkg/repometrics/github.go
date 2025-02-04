@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v66/github"
+	"github.com/google/go-github/v68/github"
 	"golang.org/x/mod/semver"
 	"golang.org/x/oauth2"
 )
@@ -108,9 +108,7 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 			gr.updateIssuePRCounts(issue, counts)
 		}
 		return resp.NextPage, nil
-
 	})
-
 	if err != nil {
 		return err
 	}
@@ -208,7 +206,6 @@ func (gr *ghRepo) fetchCommits(m *Metrics) error {
 		commits = append(commits, pageCommits...)
 		return resp.NextPage, nil
 	})
-
 	if err != nil {
 		return err
 	}
@@ -253,7 +250,6 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 		releases = append(releases, pageReleases...)
 		return resp.NextPage, nil
 	})
-
 	if err != nil {
 		return err
 	}
