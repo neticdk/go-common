@@ -19,6 +19,7 @@ type Repository interface {
 	Commit(message string) (plumbing.Hash, error)
 	Push(o *git.PushOptions) error
 	InitAndCommit(dir string, url string, cfg *config.Config) error
+	Config() (*config.Config, error)
 }
 
 type gitRepository struct {
@@ -153,4 +154,16 @@ func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Confi
 		return err
 	}
 	return nil
+}
+
+// Config returns the repository configuration
+func (g *gitRepository) Config() (*config.Config, error) {
+	if g.repo == nil {
+		return nil, fmt.Errorf("repository is not yet initialized")
+	}
+	cfg, err := g.repo.Config()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get git config: %w", err)
+	}
+	return cfg, nil
 }
