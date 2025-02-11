@@ -13,10 +13,9 @@ import (
 	"github.com/anchore/go-version"
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db/legacy/distribution"
-	grypedb "github.com/anchore/grype/grype/db/legacy/distribution"
+	v5 "github.com/anchore/grype/grype/db/v5"
 	grypeMatch "github.com/anchore/grype/grype/match"
 	grypePkg "github.com/anchore/grype/grype/pkg"
-	grypeStore "github.com/anchore/grype/grype/store"
 	grypeVulnerability "github.com/anchore/grype/grype/vulnerability"
 	syftSbom "github.com/anchore/syft/syft/sbom"
 	"github.com/neticdk/go-common/pkg/sbom"
@@ -128,7 +127,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	logger := slog.Default()
 	vulns := []types.Vulnerability{}
 
-	dbConfig := grypedb.Config{
+	dbConfig := distribution.Config{
 		DBRootDir:  s.dbRootDir,
 		ListingURL: "https://toolbox-data.anchore.io/grype/databases/listing.json",
 	}
@@ -144,7 +143,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 		}()
 	}
 
-	datastore, _, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
+	datastore, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
 	if err != nil {
 		return nil, fmt.Errorf("loading vulnerability database: %w", err)
 	}
@@ -201,7 +200,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	return vulns, nil
 }
 
-func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *grypeStore.Store, resultChan chan<- types.Vulnerability) {
+func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *v5.ProviderStore, resultChan chan<- types.Vulnerability) {
 	logger := slog.Default()
 	metadata, err := datastore.GetMetadata(match.Vulnerability.ID, match.Vulnerability.Namespace)
 	if err != nil {
