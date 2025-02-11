@@ -84,11 +84,11 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 
 	sboms, err := sbom.GenerateSBOMsFromPath(ctx, s.manifestPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
+		return nil, fmt.Errorf("generating SBOM: %w", err)
 	}
 	sboms2, err := sbom.GenerateSBOMsFromManifest(ctx, s.manifest)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate SBOM: %w", err)
+		return nil, fmt.Errorf("generating SBOM: %w", err)
 	}
 	sboms = append(sboms, sboms2...)
 
@@ -100,7 +100,7 @@ func (s *GrypeScanner) Scan(ctx context.Context) ([]types.Vulnerability, error) 
 	for _, sbm := range sboms {
 		vulns, err := s.GrypeScanSBOM(ctx, *sbm)
 		if err != nil {
-			logger.WarnContext(ctx, "failed to get vulnerabilities from SBOM", slog.Any("error", err))
+			logger.WarnContext(ctx, "getting vulnerabilities from SBOM", slog.Any("error", err))
 			continue
 		}
 		vulnerabilities = append(vulnerabilities, vulns...)
@@ -135,7 +135,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	if s.cleanupDBAfterScan {
 		dbCurator, err := distribution.NewCurator(dbConfig)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create database curator: %w", err)
+			return nil, fmt.Errorf("creating database curator: %w", err)
 		}
 		defer func() {
 			if err := dbCurator.Delete(); err != nil {
@@ -146,7 +146,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 
 	datastore, _, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load vulnerability database: %w", err)
+		return nil, fmt.Errorf("loading vulnerability database: %w", err)
 	}
 
 	matcher := grype.DefaultVulnerabilityMatcher(*datastore)
@@ -158,7 +158,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 		Source: &sbm.Source,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to find matches: %w", err)
+		return nil, fmt.Errorf("finding matches: %w", err)
 	}
 
 	matchCount := len(matches.Sorted())

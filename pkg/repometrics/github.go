@@ -29,28 +29,28 @@ func (m *Metrics) UpdateGitHub(ctx context.Context, client *github.Client, owner
 
 	repo, err := gh.fetchRepoInfo(m)
 	if err != nil {
-		return fmt.Errorf("failed to fetch repository info: %w", err)
+		return fmt.Errorf("fetching repository info: %w", err)
 	}
 	gh.repo = repo
 
 	err = gh.fetchIssuesAndPRs(m)
 	if err != nil {
-		return fmt.Errorf("failed to fetch issues and PRs: %w", err)
+		return fmt.Errorf("fetching issues and PRs: %w", err)
 	}
 
 	err = gh.fetchContributors(m)
 	if err != nil {
-		return fmt.Errorf("failed to fetch contributors: %w", err)
+		return fmt.Errorf("fetching contributors: %w", err)
 	}
 
 	err = gh.fetchCommits(m)
 	if err != nil {
-		return fmt.Errorf("failed to fetch commits: %w", err)
+		return fmt.Errorf("fetching commits: %w", err)
 	}
 
 	err = gh.fetchReleases(m)
 	if err != nil {
-		return fmt.Errorf("failed to fetch releases: %w", err)
+		return fmt.Errorf("fetching releases: %w", err)
 	}
 
 	m.CurrentVersion = gh.guessVersion()
@@ -69,7 +69,7 @@ type ghRepo struct {
 func (gr *ghRepo) fetchRepoInfo(m *Metrics) (*github.Repository, error) {
 	r, _, err := gr.client.Repositories.Get(gr.ctx, gr.owner, gr.name)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get repository info: %w", err)
+		return nil, fmt.Errorf("getting repository info: %w", err)
 	}
 	gr.repo = r
 
@@ -102,7 +102,7 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 		issuesOpts.Page = page
 		pageIssues, resp, err := gr.client.Issues.ListByRepo(gr.ctx, gr.owner, gr.name, issuesOpts)
 		if err != nil {
-			return 0, fmt.Errorf("failed to list issues: %w", err)
+			return 0, fmt.Errorf("listing issues: %w", err)
 		}
 		for _, issue := range pageIssues {
 			gr.updateIssuePRCounts(issue, counts)
@@ -144,7 +144,7 @@ func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issuePRCounts
 func (gr *ghRepo) fetchContributors(m *Metrics) error {
 	contributorStats, _, err := gr.client.Repositories.ListContributorsStats(gr.ctx, gr.owner, gr.name)
 	if err != nil {
-		return fmt.Errorf("failed to list contributor stats: %w", err)
+		return fmt.Errorf("listing contributor stats: %w", err)
 	}
 
 	oneYearAgo := time.Now().AddDate(-1, 0, 0)
@@ -201,7 +201,7 @@ func (gr *ghRepo) fetchCommits(m *Metrics) error {
 		commitsOpts.Page = page
 		pageCommits, resp, err := gr.client.Repositories.ListCommits(gr.ctx, gr.owner, gr.name, commitsOpts)
 		if err != nil {
-			return 0, fmt.Errorf("failed to list commits: %w", err)
+			return 0, fmt.Errorf("listing commits: %w", err)
 		}
 		commits = append(commits, pageCommits...)
 		return resp.NextPage, nil
@@ -245,7 +245,7 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 		releasesOpts.Page = page
 		pageReleases, resp, err := gr.client.Repositories.ListReleases(gr.ctx, gr.owner, gr.name, releasesOpts)
 		if err != nil {
-			return 0, fmt.Errorf("failed to list releases: %w", err)
+			return 0, fmt.Errorf("listing releases: %w", err)
 		}
 		releases = append(releases, pageReleases...)
 		return resp.NextPage, nil

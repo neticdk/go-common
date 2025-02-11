@@ -29,7 +29,7 @@ func (m *Metrics) UpdateCNCFStatus(opts UpdateCNCFOptions) error {
 	}
 	l, err := cncf.GetLandscape(opts.Client)
 	if err != nil {
-		return fmt.Errorf("failed to get landscape: %w", err)
+		return fmt.Errorf("getting landscape: %w", err)
 	}
 
 	findOpts := cncf.FindProjectOptions{

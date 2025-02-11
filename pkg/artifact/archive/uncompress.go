@@ -22,7 +22,7 @@ const (
 func Uncompress(filePath, dir string) error {
 	f, err := file.SafeOpen(filepath.Dir(filePath), filePath)
 	if err != nil {
-		return fmt.Errorf("failed to open file: %w", err)
+		return fmt.Errorf("opening file: %w", err)
 	}
 	defer f.Close()
 
@@ -30,7 +30,7 @@ func Uncompress(filePath, dir string) error {
 	case strings.HasSuffix(filePath, ".zip"):
 		s, err := f.Stat()
 		if err != nil {
-			return fmt.Errorf("failed to get file info: %w", err)
+			return fmt.Errorf("getting file info: %w", err)
 		}
 		return unzip(f, s.Size(), dir)
 	case strings.HasSuffix(filePath, ".tgz"), strings.HasSuffix(filePath, ".tar.gz"):
@@ -44,7 +44,7 @@ func unzip(f *os.File, size int64, dir string) error {
 	// Create a new zip reader
 	zr, err := zip.NewReader(f, size)
 	if err != nil {
-		return fmt.Errorf("failed to create zip reader: %w", err)
+		return fmt.Errorf("creating zip reader: %w", err)
 	}
 
 	// Closure to address file descriptors issue with all the deferred .Close()
@@ -52,7 +52,7 @@ func unzip(f *os.File, size int64, dir string) error {
 	extractAndWriteFile := func(f *zip.File) error {
 		rc, err := f.Open()
 		if err != nil {
-			return fmt.Errorf("failed to open file in zip: %w", err)
+			return fmt.Errorf("opening file in zip: %w", err)
 		}
 		defer rc.Close()
 
@@ -60,15 +60,15 @@ func unzip(f *os.File, size int64, dir string) error {
 		path := filepath.Join(dir, baseFile)
 		if f.FileInfo().Mode().IsDir() {
 			if err := os.MkdirAll(path, f.Mode()); err != nil {
-				return fmt.Errorf("failed to create directory: %w", err)
+				return fmt.Errorf("creating directory: %w", err)
 			}
 		} else if f.FileInfo().Mode().IsRegular() {
 			if err := os.MkdirAll(filepath.Dir(path), f.Mode()); err != nil {
-				return fmt.Errorf("failed to create directory: %w", err)
+				return fmt.Errorf("creating directory: %w", err)
 			}
 			outFile, err := file.SafeOpenFile(dir, baseFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, int64(f.Mode()))
 			if err != nil {
-				return fmt.Errorf("failed to create output file: %w", err)
+				return fmt.Errorf("creating output file: %w", err)
 			}
 			defer func() {
 				if err := outFile.Close(); err != nil {
@@ -80,7 +80,7 @@ func unzip(f *os.File, size int64, dir string) error {
 
 			_, err = io.Copy(outFile, limitReader)
 			if err != nil {
-				return fmt.Errorf("failed to copy file contents: %w", err)
+				return fmt.Errorf("copying file contents: %w", err)
 			}
 
 			if stat, err := outFile.Stat(); err != nil {
@@ -105,7 +105,7 @@ func unzip(f *os.File, size int64, dir string) error {
 func untarGz(r io.Reader, dir string) error {
 	gr, err := gzip.NewReader(r)
 	if err != nil {
-		return fmt.Errorf("failed to create gzip reader: %w", err)
+		return fmt.Errorf("creating gzip reader: %w", err)
 	}
 	defer gr.Close()
 
@@ -120,21 +120,21 @@ func untarGz(r io.Reader, dir string) error {
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if err := os.MkdirAll(path, 0o750); err != nil {
-				return fmt.Errorf("failed to create directory: %w", err)
+				return fmt.Errorf("creating directory: %w", err)
 			}
 		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
-				return fmt.Errorf("failed to create directory: %w", err)
+				return fmt.Errorf("creating directory: %w", err)
 			}
 			outFile, err := file.SafeOpenFile(dir, baseFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, header.Mode)
 			if err != nil {
-				return fmt.Errorf("failed to create output file: %w", err)
+				return fmt.Errorf("creating output file: %w", err)
 			}
 			defer outFile.Close()
 
 			_, err = io.Copy(outFile, limitReader)
 			if err != nil {
-				return fmt.Errorf("failed to copy file contents: %w", err)
+				return fmt.Errorf("copying file contents: %w", err)
 			}
 
 			if stat, err := outFile.Stat(); err != nil {
@@ -153,7 +153,7 @@ func untarGz(r io.Reader, dir string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("failed to read tar header: %w", err)
+			return fmt.Errorf("reading tar header: %w", err)
 		}
 
 		if err := extractAndWriteFile(header); err != nil {

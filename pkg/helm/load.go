@@ -16,7 +16,7 @@ func LoadChartFromFS(filesystem fs.FS) (*chart.Chart, error) {
 	root := "."
 	err := fs.WalkDir(filesystem, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("failed to walk chart directory: %w", err)
+			return fmt.Errorf("walking chart directory: %w", err)
 		}
 		if d.IsDir() {
 			return nil
@@ -24,12 +24,12 @@ func LoadChartFromFS(filesystem fs.FS) (*chart.Chart, error) {
 
 		data, readErr := fs.ReadFile(filesystem, path)
 		if readErr != nil {
-			return fmt.Errorf("failed to read file %s: %w", path, readErr)
+			return fmt.Errorf("reading file %s: %w", path, readErr)
 		}
 
 		relativePath, relErr := filepath.Rel(root, path)
 		if relErr != nil {
-			return fmt.Errorf("failed to get relative path for %s: %w", path, relErr)
+			return fmt.Errorf("getting relative path for %s: %w", path, relErr)
 		}
 
 		bufferedFile := &loader.BufferedFile{
@@ -41,7 +41,7 @@ func LoadChartFromFS(filesystem fs.FS) (*chart.Chart, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to walk chart directory: %w", err)
+		return nil, fmt.Errorf("walking chart directory: %w", err)
 	}
 
 	return loader.LoadFiles(bufferedFiles)

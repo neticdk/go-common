@@ -54,11 +54,10 @@ func PullChart(ctx context.Context, repository, chartName, dstDir string, opts .
 	for _, o := range opts {
 		o(opt)
 	}
-	registry.NewClient()
 
 	tmpDir, err := os.MkdirTemp("", "go-common-helm-")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
+		return nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -89,21 +88,21 @@ func PullChart(ctx context.Context, repository, chartName, dstDir string, opts .
 	client.Version = opt.Version
 
 	if _, err := client.Run(chartRef); err != nil {
-		return nil, fmt.Errorf("failed to pull helm chart: %w", err)
+		return nil, fmt.Errorf("pulling helm chart: %w", err)
 	}
 
 	tmpDstDir := filepath.Join(tmpDir, chartName)
 	// Load and inspect the chart:
 	chart, err := loader.Load(tmpDstDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load chart: %w", err)
+		return nil, fmt.Errorf("loading chart: %w", err)
 	}
 
 	// Move the directory to the final destination
 	if err := os.Rename(
 		tmpDstDir,
 		dstDir); err != nil {
-		return nil, fmt.Errorf("failed to rename directory: %w", err)
+		return nil, fmt.Errorf("renaming directory: %w", err)
 	}
 
 	artifactVersion := version.First(chart.Metadata.Version, opt.Version, "latest")

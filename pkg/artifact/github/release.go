@@ -44,7 +44,7 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 
 	tmpDir, err := os.MkdirTemp("", "go-common-")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
+		return nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -78,21 +78,21 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 		}
 	}
 	if assetURL == "" {
-		return nil, fmt.Errorf("failed to find asset: %s", opts.AssetName)
+		return nil, fmt.Errorf("finding asset %q", opts.AssetName)
 	}
 
 	assetDestFile := filepath.Join(tmpDir, assetName)
 	if _, err = opts.Downloader.Download(assetURL, assetDestFile); err != nil {
-		return nil, fmt.Errorf(`failed to download asset '%s': %w`, assetURL, err)
+		return nil, fmt.Errorf(`downloading asset %q: %w`, assetURL, err)
 	}
 
 	tmpDstDir := filepath.Join(tmpDir, a.Name)
 	if err := os.MkdirAll(tmpDstDir, 0o750); err != nil {
-		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
+		return nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 
 	if err := opts.Uncompress(assetDestFile, tmpDstDir); err != nil {
-		return nil, fmt.Errorf(`failed to uncompress asset '%s': %w`, assetDestFile, err)
+		return nil, fmt.Errorf(`uncompressing asset %q: %w`, assetDestFile, err)
 	}
 
 	artifactDirName := opts.AssetName
@@ -111,7 +111,7 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 	if err := os.Rename(
 		tmpDstDir,
 		filepath.Join(a.BaseDir, artifactDirName)); err != nil {
-		return nil, fmt.Errorf("failed to rename directory: %w", err)
+		return nil, fmt.Errorf("renaming directory: %w", err)
 	}
 
 	artifactVersion := artifact.FirstVersionOrLatest(a.Version)

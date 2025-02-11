@@ -39,4 +39,3 @@
 //		}
 //	}
 package logger
-

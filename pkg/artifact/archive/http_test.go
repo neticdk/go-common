@@ -109,7 +109,7 @@ func TestPullHTTP(t *testing.T) {
 
 		_, err = PullHTTP(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to uncompress asset")
+		assert.Contains(t, err.Error(), "uncompressing asset")
 	})
 }
 
@@ -161,7 +161,7 @@ func TestPullHTTP_ExtractToExistingDir(t *testing.T) {
 
 		result, err := PullHTTP(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to rename directory")
+		assert.Contains(t, err.Error(), "renaming directory")
 		assert.Nil(t, result)
 
 		// Verify the existing file is still present

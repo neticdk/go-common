@@ -19,7 +19,7 @@ func (m *Metrics) ScanVulnerabilities(ctx context.Context, s Scanner) error {
 
 	vulns, err := s.Scan(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to scan vulnerabilities: %w", err)
+		return fmt.Errorf("scanning vulnerabilities: %w", err)
 	}
 	m.Vulnerabilities = vulns
 

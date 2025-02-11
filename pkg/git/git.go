@@ -54,7 +54,7 @@ func (g *gitRepository) Init(path string, branch string) (*git.Repository, error
 		Bare: false,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize git repository: %w", err)
+		return nil, fmt.Errorf("initializing git repository: %w", err)
 	}
 	g.repo = repo
 	return repo, nil
@@ -64,7 +64,7 @@ func (g *gitRepository) Init(path string, branch string) (*git.Repository, error
 func (g *gitRepository) PlainCloneContext(ctx context.Context, path string, o *git.CloneOptions) (*git.Repository, error) {
 	repo, err := git.PlainCloneContext(ctx, path, false, o)
 	if err != nil {
-		return nil, fmt.Errorf("failed to clone repository: %w", err)
+		return nil, fmt.Errorf("cloning repository: %w", err)
 	}
 	g.repo = repo
 	return repo, nil
@@ -80,7 +80,7 @@ func (g *gitRepository) CreateRemote(name string, url string) (*git.Remote, erro
 		URLs: []string{url},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create remote: %w", err)
+		return nil, fmt.Errorf("creating remote: %w", err)
 	}
 	return remote, nil
 }
@@ -92,12 +92,12 @@ func (g *gitRepository) Add(paths ...string) error {
 	}
 	worktree, err := g.repo.Worktree()
 	if err != nil {
-		return fmt.Errorf("failed to get worktree: %w", err)
+		return fmt.Errorf("getting worktree: %w", err)
 	}
 	for _, path := range paths {
 		_, err = worktree.Add(path)
 		if err != nil {
-			return fmt.Errorf("failed to add files: %w", err)
+			return fmt.Errorf("adding files: %w", err)
 		}
 	}
 	return nil
@@ -110,11 +110,11 @@ func (g *gitRepository) Commit(message string) (plumbing.Hash, error) {
 	}
 	worktree, err := g.repo.Worktree()
 	if err != nil {
-		return plumbing.ZeroHash, fmt.Errorf("failed to get worktree: %w", err)
+		return plumbing.ZeroHash, fmt.Errorf("getting worktree: %w", err)
 	}
 	hash, err := worktree.Commit(message, &git.CommitOptions{})
 	if err != nil {
-		return plumbing.ZeroHash, fmt.Errorf("failed to commit changes: %w", err)
+		return plumbing.ZeroHash, fmt.Errorf("committing changes: %w", err)
 	}
 	return hash, nil
 }
@@ -126,7 +126,7 @@ func (g *gitRepository) Push(o *git.PushOptions) error {
 	}
 	err := g.repo.Push(o)
 	if err != nil {
-		return fmt.Errorf("failed to push changes: %w", err)
+		return fmt.Errorf("pushing changes: %w", err)
 	}
 	return nil
 }
@@ -163,7 +163,7 @@ func (g *gitRepository) Config() (*config.Config, error) {
 	}
 	cfg, err := g.repo.Config()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get git config: %w", err)
+		return nil, fmt.Errorf("getting git config: %w", err)
 	}
 	return cfg, nil
 }

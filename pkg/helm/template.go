@@ -41,7 +41,7 @@ func TemplateChart(ctx context.Context, chart *chart.Chart, namespace string, va
 
 	release, err := install.RunWithContext(ctx, chart, vals)
 	if err != nil {
-		return "", fmt.Errorf("failed to install Helm chart: %w", err)
+		return "", fmt.Errorf("installing Helm chart: %w", err)
 	}
 
 	return release.Manifest, nil
