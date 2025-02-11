@@ -1,18 +1,19 @@
 package puller
 
 import (
+	"log/slog"
+
 	"github.com/neticdk/go-common/pkg/artifact/archive"
 	agit "github.com/neticdk/go-common/pkg/artifact/git"
 	"github.com/neticdk/go-common/pkg/artifact/github"
 	"github.com/neticdk/go-common/pkg/artifact/helm"
 	"github.com/neticdk/go-common/pkg/git"
-	logger "github.com/neticdk/go-common/pkg/tui/logger/charm"
 )
 
 type PullerOption func(*puller)
 
 // WithLogger sets the logger for the puller
-func WithLogger(l logger.Logger) PullerOption {
+func WithLogger(l *slog.Logger) PullerOption {
 	return func(p *puller) {
 		p.logger = l
 	}

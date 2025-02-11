@@ -3,6 +3,7 @@ package puller
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/neticdk/go-common/pkg/artifact"
@@ -10,7 +11,6 @@ import (
 	"github.com/neticdk/go-common/pkg/artifact/git"
 	"github.com/neticdk/go-common/pkg/artifact/github"
 	"github.com/neticdk/go-common/pkg/artifact/helm"
-	logger "github.com/neticdk/go-common/pkg/tui/logger/charm"
 )
 
 // PullMethod is the method used to pull an artifact
@@ -31,7 +31,7 @@ type Puller interface {
 }
 
 type puller struct {
-	logger               logger.Logger
+	logger               *slog.Logger
 	helmChartOptions     *helm.ChartOptions
 	githubReleaseOptions *github.ReleaseOptions
 	archiveHTTPOptions   *archive.HTTPOptions
@@ -45,7 +45,8 @@ func NewPuller(opts ...PullerOption) Puller {
 		opt(p)
 	}
 	if p.logger == nil {
-		p.logger = logger.New(os.Stderr, "info")
+		handler := slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})
+		p.logger = slog.New(handler)
 	}
 	return p
 }
