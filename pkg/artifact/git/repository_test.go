@@ -75,7 +75,7 @@ func TestPullRepository(t *testing.T) {
 
 		_, err = PullRepository(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to clone repository")
+		assert.Contains(t, err.Error(), "cloning repository")
 	})
 
 	t.Run("error_checkout_commit", func(t *testing.T) {
@@ -103,6 +103,6 @@ func TestPullRepository(t *testing.T) {
 
 		_, err = PullRepository(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to checkout commit")
+		assert.Contains(t, err.Error(), "checking out commit")
 	})
 }

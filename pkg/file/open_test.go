@@ -90,7 +90,7 @@ func TestSafePath(t *testing.T) {
 			setup: func() error {
 				err := os.WriteFile(filepath.Join(tmpDir, "example.txt"), []byte("example"), 0o640)
 				if err != nil {
-					t.Fatalf("failed to create example.txt: %v", err)
+					t.Fatalf("creating example.txt: %v", err)
 				}
 				return os.Symlink(filepath.Join(tmpDir, "example.txt"), filepath.Join(tmpDir, "symlink"))
 			},

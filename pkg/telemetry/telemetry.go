@@ -50,12 +50,12 @@ func ConfigureTelemetry(metricsPort int, serviceName string) (func(context.Conte
 		),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create resource: %w", err)
+		return nil, fmt.Errorf("creating resource: %w", err)
 	}
 
 	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
+		return nil, fmt.Errorf("creating trace exporter: %w", err)
 	}
 
 	bsp := trace.NewBatchSpanProcessor(traceExporter)

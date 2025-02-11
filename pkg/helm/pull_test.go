@@ -19,7 +19,7 @@ func TestPullChart(t *testing.T) {
 	// Create a temporary directory for test data
 	tmpDir, err := os.MkdirTemp("", "go-common-helm-test-")
 	if err != nil {
-		t.Fatalf("failed to create temporary directory: %v", err)
+		t.Fatalf("creating temporary directory: %v", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -32,13 +32,13 @@ func TestPullChart(t *testing.T) {
 		dstDir := filepath.Join(tmpDir, "http-chart")
 		result, err := PullChart(context.Background(), httpServer.URL, "test-chart", dstDir)
 		if err != nil {
-			t.Fatalf("failed to pull chart from HTTP server: %v", err)
+			t.Fatalf("pulling chart from HTTP server: %v", err)
 		}
 		if result.Chart.Metadata.Name != "test-chart" {
-			t.Errorf("expected chart name 'test-chart', got '%s'", result.Chart.Metadata.Name)
+			t.Errorf("expected chart name 'test-chart', got %q", result.Chart.Metadata.Name)
 		}
 		if result.Version != "0.1.0" {
-			t.Errorf("expected chart version '0.1.0', got '%s'", result.Version)
+			t.Errorf("expected chart version '0.1.0', got %q", result.Version)
 		}
 	})
 
@@ -74,19 +74,19 @@ func TestPullChart(t *testing.T) {
 		dstDir := filepath.Join(tmpDir, "oci-chart")
 		registryClient, err := registry.NewClient(registry.ClientOptPlainHTTP(), registry.ClientOptDebug(true))
 		if err != nil {
-			t.Fatalf("failed to create registry client: %v", err)
+			t.Fatalf("creating registry client: %v", err)
 		}
 		ociServer.URL = strings.Replace(ociServer.URL, "http://", "oci://", 1)
 		ociServer.URL = fmt.Sprintf("%s/library/test-chart", ociServer.URL)
 		result, err := PullChart(context.Background(), ociServer.URL, "test-chart", dstDir, WithRegistryClient(registryClient))
 		if err != nil {
-			t.Fatalf("failed to pull chart from OCI registry: %v", err)
+			t.Fatalf("pulling chart from OCI registry: %v", err)
 		}
 		if result.Chart.Metadata.Name != "test-chart" {
-			t.Errorf("expected chart name 'test-chart', got '%s'", result.Chart.Metadata.Name)
+			t.Errorf("expected chart name 'test-chart', got %q", result.Chart.Metadata.Name)
 		}
 		if result.Version != "0.1.0" {
-			t.Errorf("expected chart version '0.1.0', got '%s'", result.Version)
+			t.Errorf("expected chart version '0.1.0', got %q", result.Version)
 		}
 	})
 
@@ -95,13 +95,13 @@ func TestPullChart(t *testing.T) {
 		dstDir := filepath.Join(tmpDir, "version-chart")
 		result, err := PullChart(context.Background(), httpServer.URL, "test-chart", dstDir, WithVersion("0.1.0"))
 		if err != nil {
-			t.Fatalf("failed to pull chart with version: %v", err)
+			t.Fatalf("pulling chart with version: %v", err)
 		}
 		if result.Chart.Metadata.Name != "test-chart" {
-			t.Errorf("expected chart name 'test-chart', got '%s'", result.Chart.Metadata.Name)
+			t.Errorf("expected chart name 'test-chart', got %q", result.Chart.Metadata.Name)
 		}
 		if result.Version != "0.1.0" {
-			t.Errorf("expected chart version '0.1.0', got '%s'", result.Version)
+			t.Errorf("expected chart version '0.1.0', got %q", result.Version)
 		}
 	})
 }

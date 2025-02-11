@@ -75,7 +75,7 @@ func GetLandscape(client HTTPClient) (*Landscape, error) {
 
 	res, err := client.Get(LandscapeURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch landscape: %w", err)
+		return nil, fmt.Errorf("fetching landscape: %w", err)
 	}
 	defer res.Body.Close()
 
@@ -87,7 +87,7 @@ func GetLandscape(client HTTPClient) (*Landscape, error) {
 
 		l := &Landscape{}
 		if err := yaml.Unmarshal(b, l); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal landscape: %w", err)
+			return nil, fmt.Errorf("unmarshaling landscape: %w", err)
 		}
 
 		// Update the cache

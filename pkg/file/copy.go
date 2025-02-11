@@ -11,11 +11,11 @@ import (
 func CopyDirectory(srcDir, dest string) error {
 	entries, err := os.ReadDir(srcDir)
 	if err != nil {
-		return fmt.Errorf("failed to read directory: '%s', error: '%s'", srcDir, err.Error())
+		return fmt.Errorf("reading directory: %q, error: %q", srcDir, err.Error())
 	}
 	if !IsDir(dest) {
 		if err := os.MkdirAll(dest, 0o750); err != nil {
-			return fmt.Errorf("failed to create directory: '%s', error: '%s'", dest, err.Error())
+			return fmt.Errorf("creating directory: %q, error: %q", dest, err.Error())
 		}
 	}
 	for _, entry := range entries {
@@ -24,7 +24,7 @@ func CopyDirectory(srcDir, dest string) error {
 
 		fileInfo, err := entry.Info()
 		if err != nil {
-			return fmt.Errorf("failed to get file info for '%s'", sourcePath)
+			return fmt.Errorf("getting file info for %q", sourcePath)
 		}
 
 		if err := copyFileOrDir(sourcePath, destPath, fileInfo); err != nil {
@@ -38,11 +38,11 @@ func CopyDirectory(srcDir, dest string) error {
 func Copy(srcFile, dstFile string) error {
 	in, err := SafeOpen(filepath.Dir(srcFile), srcFile)
 	if err != nil {
-		return fmt.Errorf("failed to open file: '%s', error: '%s'", srcFile, err.Error())
+		return fmt.Errorf("opening file: %q, error: %q", srcFile, err.Error())
 	}
 	defer func() {
 		if cerr := in.Close(); cerr != nil {
-			fmt.Fprintf(os.Stderr, "failed to close file: '%s', error: '%s'\n", srcFile, cerr.Error())
+			fmt.Fprintf(os.Stderr, "closing file: %q, error: %q\n", srcFile, cerr.Error())
 		}
 	}()
 
@@ -53,16 +53,16 @@ func Copy(srcFile, dstFile string) error {
 	}
 	out, err := SafeCreate(filepath.Dir(dstFile), dstFile, mode)
 	if err != nil {
-		return fmt.Errorf("failed to create file: '%s', error: '%s'", dstFile, err.Error())
+		return fmt.Errorf("creating file: %q, error: %q", dstFile, err.Error())
 	}
 	defer func() {
 		if cerr := out.Close(); cerr != nil {
-			fmt.Fprintf(os.Stderr, "failed to close file: '%s', error: '%s'\n", dstFile, cerr.Error())
+			fmt.Fprintf(os.Stderr, "closing file: %q, error: %q\n", dstFile, cerr.Error())
 		}
 	}()
 
 	if _, err = io.Copy(out, in); err != nil {
-		return fmt.Errorf("failed to copy file: '%s', error: '%s'", srcFile, err.Error())
+		return fmt.Errorf("copying file: %q, error: %q", srcFile, err.Error())
 	}
 
 	return nil
@@ -71,7 +71,7 @@ func Copy(srcFile, dstFile string) error {
 func copySymLink(source, dest string) error {
 	link, err := os.Readlink(source)
 	if err != nil {
-		return fmt.Errorf("failed to read symlink: '%s', error: '%s'", source, err.Error())
+		return fmt.Errorf("reading symlink: %q, error: %q", source, err.Error())
 	}
 	return os.Symlink(link, dest)
 }

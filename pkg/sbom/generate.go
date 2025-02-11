@@ -22,7 +22,7 @@ import (
 func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom.SBOM, error) {
 	imageNames, err := extractImageNamesFromManifest(ctx, manifest)
 	if err != nil {
-		return nil, fmt.Errorf("failed to extract image names from manifest: %w", err)
+		return nil, fmt.Errorf("extracting image names from manifest: %w", err)
 	}
 
 	var sboms []*sbom.SBOM
@@ -34,11 +34,11 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom
 			syft.DefaultGetSourceConfig(),
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get source for image %s: %w", imageName, err)
+			return nil, fmt.Errorf("getting source for image %s: %w", imageName, err)
 		}
 		s, err := syft.CreateSBOM(ctx, src, cfg)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create SBOM for image %s: %w", imageName, err)
+			return nil, fmt.Errorf("creating SBOM for image %s: %w", imageName, err)
 		}
 		sboms = append(sboms, s)
 	}
@@ -92,7 +92,7 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 			if err == io.EOF {
 				break
 			}
-			return nil, fmt.Errorf("failed to read manifest: %v\n", err)
+			return nil, fmt.Errorf("reading manifest: %w", err)
 		}
 		// handle empty YAML documents
 		if len(buf) == 0 {
@@ -114,12 +114,12 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 		var obj unstructured.Unstructured
 		_, _, err = dec.Decode(buf, nil, &obj)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode manifest: %v\n", err)
+			return nil, fmt.Errorf("decoding manifest: %w", err)
 		}
 
 		objContainers, err := getContainers(&obj)
 		if err != nil {
-			return nil, fmt.Errorf("failed to extract containers: %v\n", err)
+			return nil, fmt.Errorf("extracting containers: %w", err)
 		}
 		containers = append(containers, objContainers...)
 	}
@@ -127,12 +127,12 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 	for _, container := range containers {
 		containerMap, ok := container.(map[string]interface{})
 		if !ok {
-			logger.DebugContext(ctx, "failed to convert container to map[string]interface{}")
+			logger.DebugContext(ctx, "converting container to map[string]interface{}")
 			continue
 		}
 		imageName, found, err := unstructured.NestedString(containerMap, "image")
 		if err != nil {
-			logger.DebugContext(ctx, "failed to extract image name from container", slog.Any("error", err))
+			logger.DebugContext(ctx, "extracting image name from container", slog.Any("error", err))
 			continue
 		}
 		if found {

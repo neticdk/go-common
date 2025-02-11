@@ -31,25 +31,25 @@ func Encode(w io.Writer, sbom sbom.SBOM, f Format) error {
 	case FormatSPDXJSON:
 		enc, err := spdxjson.NewFormatEncoderWithConfig(spdxjson.DefaultEncoderConfig())
 		if err != nil {
-			return fmt.Errorf("failed to create encoder: %w", err)
+			return fmt.Errorf("creating encoder: %w", err)
 		}
 		encoder = enc
 	case FormatSPDXTagValue:
 		enc, err := spdxtagvalue.NewFormatEncoderWithConfig(spdxtagvalue.DefaultEncoderConfig())
 		if err != nil {
-			return fmt.Errorf("failed to create encoder: %w", err)
+			return fmt.Errorf("creating encoder: %w", err)
 		}
 		encoder = enc
 	case FormatCycloneDXJSON:
 		enc, err := cyclonedxjson.NewFormatEncoderWithConfig(cyclonedxjson.DefaultEncoderConfig())
 		if err != nil {
-			return fmt.Errorf("failed to create encoder: %w", err)
+			return fmt.Errorf("creating encoder: %w", err)
 		}
 		encoder = enc
 	case FormatCycloneDXXML:
 		enc, err := cyclonedxxml.NewFormatEncoderWithConfig(cyclonedxxml.DefaultEncoderConfig())
 		if err != nil {
-			return fmt.Errorf("failed to create encoder: %w", err)
+			return fmt.Errorf("creating encoder: %w", err)
 		}
 		encoder = enc
 	default:
@@ -57,7 +57,7 @@ func Encode(w io.Writer, sbom sbom.SBOM, f Format) error {
 	}
 
 	if encoder == nil {
-		return fmt.Errorf("failed to get encoder for format: %v", f)
+		return fmt.Errorf("getting encoder for format: %v", f)
 	}
 
 	encoder.Encode(w, sbom)

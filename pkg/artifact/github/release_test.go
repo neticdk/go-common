@@ -115,7 +115,7 @@ func TestPullRelease(t *testing.T) {
 
 		_, err = PullRelease(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to get release tagged")
+		assert.Contains(t, err.Error(), "getting release tagged")
 	})
 
 	t.Run("error_download_asset", func(t *testing.T) {
@@ -143,7 +143,7 @@ func TestPullRelease(t *testing.T) {
 
 		_, err = PullRelease(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to download asset")
+		assert.Contains(t, err.Error(), "downloading asset")
 	})
 
 	t.Run("error_uncompress_asset", func(t *testing.T) {
@@ -176,7 +176,7 @@ func TestPullRelease(t *testing.T) {
 
 		_, err = PullRelease(context.Background(), art, opts)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to uncompress asset")
+		assert.Contains(t, err.Error(), "uncompressing asset")
 	})
 }
 
@@ -185,12 +185,12 @@ func newMockedHTTPClient() *http.Client {
 		ghmock.WithRequestMatch(
 			ghmock.GetReposReleasesTagsByOwnerByRepoByTag,
 			gh.RepositoryRelease{
-				Name: gh.String("foobar"),
+				Name: gh.Ptr("foobar"),
 				Assets: []*gh.ReleaseAsset{
 					{
-						ID:                 gh.Int64(0),
-						Name:               gh.String("my-asset.zip"),
-						BrowserDownloadURL: gh.String("https://example.com/my-asset"),
+						ID:                 gh.Ptr(int64(0)),
+						Name:               gh.Ptr("my-asset.zip"),
+						BrowserDownloadURL: gh.Ptr("https://example.com/my-asset"),
 					},
 				},
 			},
@@ -198,12 +198,12 @@ func newMockedHTTPClient() *http.Client {
 		ghmock.WithRequestMatch(
 			ghmock.GetReposReleasesLatestByOwnerByRepo,
 			gh.RepositoryRelease{
-				Name: gh.String("foobar"),
+				Name: gh.Ptr("foobar"),
 				Assets: []*gh.ReleaseAsset{
 					{
-						ID:                 gh.Int64(0),
-						Name:               gh.String("my-asset.zip"),
-						BrowserDownloadURL: gh.String("https://example.com/my-asset"),
+						ID:                 gh.Ptr(int64(0)),
+						Name:               gh.Ptr("my-asset.zip"),
+						BrowserDownloadURL: gh.Ptr("https://example.com/my-asset"),
 					},
 				},
 			},
