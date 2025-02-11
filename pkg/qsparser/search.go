@@ -264,7 +264,7 @@ func parseStrIntPtr(s string) (*int, error) {
 }
 
 func escape(s string) (e string) {
-	e = strings.Replace(s, "\\", "\\\\", -1)
-	e = strings.Replace(e, "'", "\\'", -1)
+	e = strings.ReplaceAll(s, "\\", "\\\\")
+	e = strings.ReplaceAll(e, "'", "\\'")
 	return
 }

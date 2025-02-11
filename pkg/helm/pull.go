@@ -54,7 +54,6 @@ func PullChart(ctx context.Context, repository, chartName, dstDir string, opts .
 	for _, o := range opts {
 		o(opt)
 	}
-	registry.NewClient()
 
 	tmpDir, err := os.MkdirTemp("", "go-common-helm-")
 	if err != nil {

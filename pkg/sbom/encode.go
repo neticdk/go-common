@@ -60,7 +60,5 @@ func Encode(w io.Writer, sbom sbom.SBOM, f Format) error {
 		return fmt.Errorf("getting encoder for format: %v", f)
 	}
 
-	encoder.Encode(w, sbom)
-
-	return nil
+	return encoder.Encode(w, sbom)
 }
