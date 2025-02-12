@@ -7,6 +7,9 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	ssh2 "golang.org/x/crypto/ssh"
 )
 
 // Repository is an interface for interacting with git repositories
@@ -166,4 +169,18 @@ func (g *gitRepository) Config() (*config.Config, error) {
 		return nil, fmt.Errorf("getting git config: %w", err)
 	}
 	return cfg, nil
+}
+
+func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.AuthMethod, error) {
+	if user == "" {
+		user = "git"
+	}
+	v, err := ssh.NewPublicKeys(user, privateKey, "")
+	if err != nil {
+		return nil, fmt.Errorf("creating SSH public keys from private key: %w", err)
+	}
+	if ignoreHostKeys {
+		v.HostKeyCallback = ssh2.InsecureIgnoreHostKey()
+	}
+	return v, nil
 }
