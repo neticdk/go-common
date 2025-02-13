@@ -21,6 +21,11 @@ const (
 
 type InitFunc = func(cmd *cobra.Command, args []string) error
 
+type RootCommandBuilder struct {
+	cmd *cobra.Command
+	ec  *context.ExecutionContext
+}
+
 // NewRootCommand creates a new root command
 // Use this function to create a new root command that is used to add subcommands
 //
@@ -36,7 +41,22 @@ type InitFunc = func(cmd *cobra.Command, args []string) error
 // It uses ec.AppName as the base name for the configuration file and environment variables
 // initFunc is a function that is called before the command is executed
 // It can be used to add more context or do other initializations
-func NewRootCommand(ec *context.ExecutionContext, initFunc InitFunc) *cobra.Command {
+func NewRootCommand(ec *context.ExecutionContext) *RootCommandBuilder {
+	if ec == nil {
+		panic("execution context is required")
+	}
+	if ec.AppName == "" {
+		panic("app name is required")
+	}
+	initFunc := func(cmd *cobra.Command, _ []string) error {
+		if err := initConfig(ec.AppName, cmd); err != nil {
+			return err
+		}
+		ec.Command = cmd
+		ec.SetLogLevel()
+		return nil
+	}
+
 	c := &cobra.Command{
 		Use:                   fmt.Sprintf("%s [command] [flags]", ec.AppName),
 		DisableFlagsInUseLine: true,
@@ -45,15 +65,7 @@ func NewRootCommand(ec *context.ExecutionContext, initFunc InitFunc) *cobra.Comm
 		SilenceUsage:          true,
 		SilenceErrors:         true,
 		Version:               ec.Version,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := initConfig(ec.AppName, cmd); err != nil {
-				return err
-			}
-			ec.Command = cmd
-			ec.SetLogLevel()
-
-			return initFunc(cmd, args)
-		},
+		PersistentPreRunE:     initFunc,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				_ = cmd.Help()
@@ -71,7 +83,10 @@ func NewRootCommand(ec *context.ExecutionContext, initFunc InitFunc) *cobra.Comm
 	}
 
 	flags.AddPersistentFlags(c, ec)
-	_ = viper.BindPFlags(c.PersistentFlags())
+
+	if err := viper.BindPFlags(c.PersistentFlags()); err != nil {
+		panic(fmt.Errorf("binding flags: %w", err))
+	}
 
 	c.SetOut(ec.Stdout)
 	c.SetErr(ec.Stderr)
@@ -89,7 +104,40 @@ func NewRootCommand(ec *context.ExecutionContext, initFunc InitFunc) *cobra.Comm
 	c.SetHelpCommandGroupID(GroupOther)
 	c.SetCompletionCommandGroupID(GroupOther)
 
-	return c
+	c.AddCommand(
+		GenDocsCommand(ec),
+	)
+
+	return &RootCommandBuilder{
+		cmd: c,
+		ec:  ec,
+	}
+}
+
+// WithInitFunc adds an init function to the root command
+// This sets the PersistentPreRunE function of the command
+func (b *RootCommandBuilder) WithInitFunc(fn InitFunc) *RootCommandBuilder {
+	initFunc := func(cmd *cobra.Command, args []string) error {
+		if err := initConfig(b.ec.AppName, cmd); err != nil {
+			return err
+		}
+		b.ec.Command = cmd
+		b.ec.SetLogLevel()
+		return fn(cmd, args)
+	}
+	b.cmd.PersistentPreRunE = initFunc
+	return b
+}
+
+// WithPreRunFunc adds persistent flags to the root command
+func (b *RootCommandBuilder) WithPersistentFlags(flags *pflag.FlagSet) *RootCommandBuilder {
+	b.cmd.PersistentFlags().AddFlagSet(flags)
+	return b
+}
+
+// Build builds the root command
+func (b *RootCommandBuilder) Build() *cobra.Command {
+	return b.cmd
 }
 
 // initConfig ensures that precedence of configuration setting is correct
@@ -99,8 +147,11 @@ func initConfig(appName string, cmd *cobra.Command) error {
 	v := viper.New()
 	v.SetConfigName(appName)
 	v.AddConfigPath(".")
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		v.AddConfigPath(filepath.Join(homeDir, ".config", appName))
+	}
 	if dir, err := os.UserConfigDir(); err == nil {
-		v.AddConfigPath(filepath.Join(dir, "solas"))
+		v.AddConfigPath(filepath.Join(dir, appName))
 	}
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -112,12 +163,11 @@ func initConfig(appName string, cmd *cobra.Command) error {
 	v.AutomaticEnv()
 
 	// Bind the current command's flags to viper
-	bindFlags(cmd, v)
-
-	return nil
+	return bindFlags(cmd, v)
 }
 
-func bindFlags(cmd *cobra.Command, v *viper.Viper) {
+func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
+	var errs []error
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		// Determine the naming convention of the flags when represented in the config file
 		configName := f.Name
@@ -125,7 +175,23 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 		// Apply the viper config value to the flag when the flag is not set and viper has a value
 		if !f.Changed && v.IsSet(configName) {
 			val := v.Get(configName)
-			_ = cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if setErr := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val)); setErr != nil {
+				errs = append(errs, fmt.Errorf("setting flag %q: %w", f.Name, setErr))
+			}
 		}
 	})
+	if len(errs) > 0 {
+		return fmt.Errorf("binding flags: %v", errs)
+	}
+	return nil
 }
+
+type TestRunner[T any] struct {
+	CompleteFunc func(T)
+	ValidateFunc func(T) error
+	RunFunc      func(T) error
+}
+
+func (tr *TestRunner[T]) Complete(args T)       { tr.CompleteFunc(args) }
+func (tr *TestRunner[T]) Validate(args T) error { return tr.ValidateFunc(args) }
+func (tr *TestRunner[T]) Run(args T) error      { return tr.RunFunc(args) }
