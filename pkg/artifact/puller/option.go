@@ -3,6 +3,7 @@ package puller
 import (
 	"log/slog"
 
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/neticdk/go-common/pkg/artifact/archive"
 	agit "github.com/neticdk/go-common/pkg/artifact/git"
 	"github.com/neticdk/go-common/pkg/artifact/github"
@@ -45,10 +46,10 @@ func WithHTTPOptions(o *archive.HTTPOptions) PullOption {
 	}
 }
 
-// WithRepositoryOptions sets the repository options for the puller
-func WithRepositoryOptions(o *agit.RepositoryOptions) PullOption {
+// WithRepositoryAuth sets the auth transport on the git repository
+func WithRepositoryAuth(a transport.AuthMethod) PullOption {
 	return func(p *puller) {
-		p.gitRepositoryOptions = o
+		p.gitRepositoryOptions.Auth = a
 	}
 }
 
