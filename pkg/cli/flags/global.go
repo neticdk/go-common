@@ -40,41 +40,54 @@ func AddPersistentFlags(cmd *cobra.Command, ec *context.ExecutionContext) *pflag
 	outputFlags := []string{}
 	if ec.PFlags.PlainEnabled {
 		f.BoolVar(&plain, "plain", false, "Output in plain format")
-		outputFlags = append(outputFlags, "plain")
 	}
 	if ec.PFlags.JSONEnabled {
 		f.BoolVar(&json, "json", false, "Output in JSON format")
-		outputFlags = append(outputFlags, "json")
 	}
 	if ec.PFlags.YAMLEnabled {
 		f.BoolVar(&yaml, "yaml", false, "Output in YAML format")
-		outputFlags = append(outputFlags, "yaml")
 	}
 	if ec.PFlags.MarkdownEnabled {
 		f.BoolVar(&markdown, "markdown", false, "Output in Markdown format")
-		outputFlags = append(outputFlags, "markdown")
 	}
 
-	switch {
-	case plain:
+	_ = cmd.PersistentFlags().Parse(os.Args[1:])
+
+	if logFormat, err := cmd.PersistentFlags().GetString("log-format"); err == nil {
+		ec.PFlags.LogFormat = log.Format(logFormat)
+	}
+	if logLevel, err := cmd.PersistentFlags().GetString("log-level"); err == nil {
+		ec.PFlags.LogLevel = log.Level(logLevel)
+	}
+
+	if plainArg, err := cmd.PersistentFlags().GetBool("plain"); err == nil && plainArg {
 		ec.OutputFormat = context.OutputFormatPlain
-	case json:
-		ec.OutputFormat = context.OutputFormatJSON
-	case yaml:
-		ec.OutputFormat = context.OutputFormatYAML
-	case markdown:
-		ec.OutputFormat = context.OutputFormatMarkdown
+		outputFlags = append(outputFlags, "plain")
 	}
 
-	if ec.PFlags.NoHeadersEnabled {
-		f.BoolVar(&ec.PFlags.NoHeaders, "no-headers", false, "Do not print headers")
+	if jsonArg, err := cmd.PersistentFlags().GetBool("json"); err == nil && jsonArg {
+		ec.OutputFormat = context.OutputFormatJSON
+		outputFlags = append(outputFlags, "json")
+	}
+
+	if yamlArg, err := cmd.PersistentFlags().GetBool("yaml"); err == nil && yamlArg {
+		ec.OutputFormat = context.OutputFormatYAML
+		outputFlags = append(outputFlags, "yaml")
+	}
+
+	if markdownArg, err := cmd.PersistentFlags().GetBool("markdown"); err == nil && markdownArg {
+		ec.OutputFormat = context.OutputFormatMarkdown
+		outputFlags = append(outputFlags, "markdown")
 	}
 
 	cmd.MarkFlagsMutuallyExclusive(outputFlags...)
 
-	_ = cmd.PersistentFlags().Parse(os.Args[1:])
 	if noColor, err := cmd.PersistentFlags().GetBool("no-color"); err == nil {
 		ec.SetColor(noColor)
+	}
+
+	if ec.PFlags.NoHeadersEnabled {
+		f.BoolVar(&ec.PFlags.NoHeaders, "no-headers", false, "Do not print headers")
 	}
 
 	cmd.Flags().SortFlags = false

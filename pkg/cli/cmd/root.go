@@ -77,15 +77,15 @@ func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
 		},
 	}
 
-	// 💃👄🪄✨️🌈 Add fabulous glamour 🌈✨️🪄👄💃
-	if !ec.PFlags.NoColor && ec.IsTerminal {
-		help.AddToRootCmd(c)
-	}
-
 	flags.AddPersistentFlags(c, ec)
 
 	if err := viper.BindPFlags(c.PersistentFlags()); err != nil {
 		panic(fmt.Errorf("binding flags: %w", err))
+	}
+
+	// 💃👄🪄✨️🌈 Add fabulous glamour 🌈✨️🪄👄💃
+	if !ec.PFlags.NoColor && ec.IsTerminal {
+		help.AddToRootCmd(c)
 	}
 
 	c.SetOut(ec.Stdout)
