@@ -75,6 +75,12 @@ func (b *SubCommandBuilder[T]) Build() *cobra.Command {
 	return b.cmd
 }
 
+// WithExample sets the example of the subcommand
+func (b *SubCommandBuilder[T]) WithNoArgs() *SubCommandBuilder[T] {
+	b.cmd.Args = cobra.NoArgs
+	return b
+}
+
 // mkRunE creates a RunE function for a subcommand
 // runnerArgs are passed to the runner.Complete, runner.Validate and runner.Run methods
 // it is up to the runner to decide how to use these arguments
@@ -88,3 +94,22 @@ func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command,
 		return runner.Run(ctx, runnerArg)
 	}
 }
+
+// TestRunner is a test runner for commands
+type TestRunner[T any] struct {
+	CompleteFunc func(T)
+	ValidateFunc func(T) error
+	RunFunc      func(T) error
+}
+
+func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) { tr.CompleteFunc(runnerArg) }
+func (tr *TestRunner[T]) Validate(ctx context.Context, runnerArg T) error {
+	return tr.ValidateFunc(runnerArg)
+}
+func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error { return tr.RunFunc(runnerArg) }
+
+type NoopRunner[T any] struct{}
+
+func (o *NoopRunner[T]) Complete(ctx context.Context, runnerArg T)       {}
+func (o *NoopRunner[T]) Validate(ctx context.Context, runnerArg T) error { return nil }
+func (o *NoopRunner[T]) Run(ctx context.Context, runnerArg T) error      { return nil }

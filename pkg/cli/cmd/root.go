@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/neticdk/go-common/pkg/cli/context"
+	ecctx "github.com/neticdk/go-common/pkg/cli/context"
 	"github.com/neticdk/go-common/pkg/cli/flags"
 	"github.com/neticdk/go-common/pkg/tui/help"
 	"github.com/spf13/cobra"
@@ -23,7 +23,7 @@ type InitFunc = func(cmd *cobra.Command, args []string) error
 
 type RootCommandBuilder struct {
 	cmd *cobra.Command
-	ec  *context.ExecutionContext
+	ec  *ecctx.ExecutionContext
 }
 
 // NewRootCommand creates a new root command
@@ -41,7 +41,7 @@ type RootCommandBuilder struct {
 // It uses ec.AppName as the base name for the configuration file and environment variables
 // initFunc is a function that is called before the command is executed
 // It can be used to add more context or do other initializations
-func NewRootCommand(ec *context.ExecutionContext) *RootCommandBuilder {
+func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
 	if ec == nil {
 		panic("execution context is required")
 	}
@@ -185,13 +185,3 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	}
 	return nil
 }
-
-type TestRunner[T any] struct {
-	CompleteFunc func(T)
-	ValidateFunc func(T) error
-	RunFunc      func(T) error
-}
-
-func (tr *TestRunner[T]) Complete(args T)       { tr.CompleteFunc(args) }
-func (tr *TestRunner[T]) Validate(args T) error { return tr.ValidateFunc(args) }
-func (tr *TestRunner[T]) Run(args T) error      { return tr.RunFunc(args) }
