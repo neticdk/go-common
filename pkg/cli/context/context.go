@@ -98,16 +98,6 @@ type ExecutionContext struct {
 	NoHeaders bool
 }
 
-// ExecutionContextInput is used to create a new ExecutionContext
-type ExecutionContextInput struct {
-	AppName          string
-	ShortDescription string
-	Stdin            io.Reader
-	Stdout           io.Writer
-	Stderr           io.Writer
-	Version          string
-}
-
 // NewExecutionContext creates a new ExecutionContext
 func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer) *ExecutionContext {
 	ec := &ExecutionContext{
