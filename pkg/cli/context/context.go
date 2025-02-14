@@ -53,49 +53,15 @@ type ExecutionContext struct {
 	// Flag: --version
 	Version string
 
-	// LogFormat is the log format used for the logger
-	// Flag: --log-format [plain|json]
-	LogFormat log.Format
-
-	// LogLevel is the log level used for the logger
-	// Flag: --log-level [debug|info|warn|error]
-	LogLevel log.Level
-
-	// for changing log level
-	logLevel *slog.LevelVar
-
-	// Force is used to force actions
-	// Flags: --force, -f
-	Force bool
-
-	// DryRun is used to simulate actions
-	// Flags: --dry-run
-	DryRun bool
-
-	// NoINput can be used to disable interactive mode
-	// Flags: --no-input
-	NoInput bool
-
-	// NoColor is used to control whether color is used in output
-	// Flags: --no-color
-	NoColor bool
-
-	// Quiet is used to control whether output is suppressed
-	// Flags: --quiet, -q
-	Quiet bool
-
-	// Debug is used for debugging
-	// Usually this implies verbose output
-	// Flags: --debug, -d
-	Debug bool
+	// PFlags are the persistent flag configuration
+	PFlags PFlags
 
 	// OutputFormat is the format used for outputting data
 	// Flags: --plain, --json, --yaml, --markdown, etc
 	OutputFormat OutputFormat
 
-	// NoHeaders is used to control whether headers are printed
-	// Flag: --no-headers
-	NoHeaders bool
+	// for changing log level
+	LogLevel *slog.LevelVar
 }
 
 // NewExecutionContext creates a new ExecutionContext
@@ -108,9 +74,11 @@ func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, st
 		Stdout:           stdout,
 		Stderr:           stderr,
 		OutputFormat:     OutputFormatPlain,
-		LogLevel:         log.DefaultLevel,
-		logLevel:         new(slog.LevelVar),
-		LogFormat:        log.DefaultFormat,
+		PFlags: PFlags{
+			LogFormat: log.DefaultFormat,
+			LogLevel:  log.DefaultLevel,
+		},
+		LogLevel: new(slog.LevelVar),
 	}
 
 	ec.initInput()
@@ -123,8 +91,8 @@ func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, st
 
 // SetLogLevel sets the ec.Logger log level
 func (ec *ExecutionContext) SetLogLevel() {
-	ui.Logger.Level = ui.ParseLevel(ec.LogLevel)
-	ec.logLevel.Set(log.ParseLevel(ec.LogLevel))
+	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel)
+	ec.LogLevel.Set(log.ParseLevel(ec.PFlags.LogLevel))
 }
 
 // SetColor sets weather color should be used in the output
@@ -132,7 +100,7 @@ func (ec *ExecutionContext) SetLogLevel() {
 // If the --no-color flag is set, color is disabled
 // If the --no-input flag is set, color is disabled
 func (ec *ExecutionContext) SetColor(noColor bool) {
-	if !ec.IsTerminal || ec.NoInput || noColor {
+	if !ec.IsTerminal || ec.PFlags.NoInput || noColor {
 		ui.DisableColor()
 	}
 }
@@ -147,7 +115,7 @@ func (ec *ExecutionContext) initInput() {
 		stdout = os.Stdout
 	}
 	ec.IsTerminal = term.IsTerminal(stdout)
-	ec.NoInput = !ec.IsTerminal
+	ec.PFlags.NoInput = !ec.IsTerminal
 }
 
 func (ec *ExecutionContext) initOutput() {
@@ -165,10 +133,10 @@ func (ec *ExecutionContext) initOutput() {
 
 func (ec *ExecutionContext) initLogger() {
 	if !ec.IsTerminal {
-		ec.LogFormat = log.FormatJSON
+		ec.PFlags.LogFormat = log.FormatJSON
 	}
-	ec.logLevel.Set(log.ParseLevel(log.DefaultLevel))
-	handler := ui.NewHandler(ec.Stderr, ec.LogFormat, log.DefaultLevel)
+	ec.LogLevel.Set(log.ParseLevel(log.DefaultLevel))
+	handler := ui.NewHandler(ec.Stderr, ec.PFlags.LogFormat, log.DefaultLevel)
 	ec.Logger = slog.New(handler)
 }
 

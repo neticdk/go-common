@@ -78,7 +78,7 @@ func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
 	}
 
 	// 💃👄🪄✨️🌈 Add fabulous glamour 🌈✨️🪄👄💃
-	if !ec.NoColor && ec.IsTerminal {
+	if !ec.PFlags.NoColor && ec.IsTerminal {
 		help.AddToRootCmd(c)
 	}
 
