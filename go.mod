@@ -2,9 +2,10 @@ module github.com/neticdk/go-common
 
 go 1.23.2
 
-toolchain go1.23.6
+toolchain go1.24.0
 
 require (
+	atomicgo.dev/keyboard v0.2.9
 	github.com/MicahParks/keyfunc/v2 v2.1.0
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.87.0
@@ -50,7 +51,6 @@ require (
 
 require (
 	atomicgo.dev/cursor v0.2.0 // indirect
-	atomicgo.dev/keyboard v0.2.9 // indirect
 	atomicgo.dev/schedule v0.1.0 // indirect
 	cel.dev/expr v0.20.0 // indirect
 	cloud.google.com/go v0.118.2 // indirect
