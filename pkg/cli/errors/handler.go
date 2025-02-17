@@ -9,6 +9,8 @@ import (
 	"github.com/pterm/pterm"
 )
 
+const DefaultWrapWidth = 80
+
 // Handler is an interface for handling errors.
 type Handler interface {
 	HandleError(err error)
@@ -18,7 +20,9 @@ type Handler interface {
 // Handler handles errors providing colored output to a specified writer
 // (defaults to stderr).
 type DefaultHandler struct {
-	Output io.Writer
+	Output    io.Writer
+	wrap      bool
+	wrapWidth int
 }
 
 // NewDefaultHandler creates a new DefaultErrorHandler with the specified output writer.
@@ -27,7 +31,7 @@ func NewDefaultHandler(output io.Writer) *DefaultHandler {
 	if output == nil {
 		output = os.Stderr
 	}
-	return &DefaultHandler{Output: output}
+	return &DefaultHandler{Output: output, wrap: true, wrapWidth: DefaultWrapWidth}
 }
 
 func (h *DefaultHandler) NewGeneralError(message, helpMsg string, err error, code int) *GeneralError {
@@ -50,6 +54,14 @@ func (h *DefaultHandler) HandleError(err error) {
 	}
 }
 
+func (h *DefaultHandler) SetWrap(wrap bool) {
+	h.wrap = wrap
+}
+
+func (h *DefaultHandler) SetWrapWidth(width int) {
+	h.wrapWidth = width
+}
+
 // printUserFriendlyError prints the error and help messages in a colored format.
 func (h *DefaultHandler) printErrorWithHelp(err ErrorWithHelp) {
 	var (
@@ -60,7 +72,7 @@ func (h *DefaultHandler) printErrorWithHelp(err ErrorWithHelp) {
 		helpText      string
 	)
 
-	maxWidth := uint(min(80, pterm.GetTerminalWidth())) //nolint:gosec  // if you have a terminal width larger than uint, you have other problems
+	maxWidth := uint(min(h.wrapWidth, pterm.GetTerminalWidth())) //nolint:gosec  // if you have a terminal width larger than uint, you have other problems
 	paragraph := pterm.DefaultBasicText.WithWriter(h.Output)
 
 	wrappedErr := err.Unwrap()
@@ -89,27 +101,36 @@ func (h *DefaultHandler) printErrorWithHelp(err ErrorWithHelp) {
 	if wrappedErr != nil {
 		pterm.Fprintln(h.Output)
 		pterm.Fprintln(h.Output, pterm.Yellow("Details")+": ")
-		paragraph.Print(wordwrap.WrapString(detailsText, maxWidth))
+		if h.wrap {
+			detailsText = wordwrap.WrapString(detailsText, maxWidth)
+		}
+		paragraph.Print(detailsText)
 		pterm.Fprintln(h.Output)
 	}
 
 	if helpText != "" {
 		pterm.Fprintln(h.Output)
 		pterm.Fprintln(h.Output, pterm.Magenta("Explanation")+":")
-		paragraph.Println(wordwrap.WrapString(helpText, maxWidth))
+		if h.wrap {
+			helpText = wordwrap.WrapString(helpText, maxWidth)
+		}
+		paragraph.Println(helpText)
 	}
 }
 
 // printGenericError prints a generic error message in red.
 func (h *DefaultHandler) printGenericError(err error) {
-	maxWidth := uint(min(80, pterm.GetTerminalWidth())) //nolint:gosec  // if you have a terminal width larger than uint, you have other problems
+	maxWidth := uint(min(h.wrapWidth, pterm.GetTerminalWidth())) //nolint:gosec  // if you have a terminal width larger than uint, you have other problems
 	paragraph := pterm.DefaultBasicText.WithWriter(h.Output)
 
 	pterm.Error.WithWriter(h.Output).Println("An unexpected error occurred")
 	pterm.Fprintln(h.Output)
 	pterm.Fprintln(h.Output, pterm.Yellow("Details")+": ")
 	detailsText := fmt.Sprintf("%v", err)
-	paragraph.Print(wordwrap.WrapString(detailsText, maxWidth))
+	if h.wrap {
+		detailsText = wordwrap.WrapString(detailsText, maxWidth)
+	}
+	paragraph.Print(detailsText)
 	pterm.Fprintln(h.Output)
 	pterm.Fprintln(h.Output)
 }
