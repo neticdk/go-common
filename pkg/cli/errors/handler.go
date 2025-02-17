@@ -15,6 +15,8 @@ const DefaultWrapWidth = 80
 type Handler interface {
 	HandleError(err error)
 	NewGeneralError(message, helpMsg string, err error, code int) *GeneralError
+	SetWrap(wrap bool)
+	SetWrapWidth(width int)
 }
 
 // Handler handles errors providing colored output to a specified writer
