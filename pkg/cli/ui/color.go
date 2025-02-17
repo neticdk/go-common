@@ -11,3 +11,7 @@ func DisableColor() {
 func EnableColor() {
 	pterm.EnableColor()
 }
+
+func IsColorEnabled() bool {
+	return pterm.PrintColor
+}
