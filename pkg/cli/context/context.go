@@ -37,6 +37,9 @@ type ExecutionContext struct {
 	// Command is the current command
 	Command *cobra.Command
 
+	// CommandArgs are the arguments passed to the command
+	CommandArgs []string
+
 	// Logger is the global logger
 	Logger *slog.Logger
 
