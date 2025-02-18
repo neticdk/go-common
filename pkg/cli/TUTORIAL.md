@@ -2,8 +2,7 @@
 
 ## Introduction
 
-The `cli` packages helps you build CLIs that conform to [Srcoll
-11](https://scr.k8s.netic.dk/0011/).
+The `cli` packages helps you build CLIs that conform to [Scroll 11](https://scr.k8s.netic.dk/0011/).
 
 It consists of a collection of small packages:
 
