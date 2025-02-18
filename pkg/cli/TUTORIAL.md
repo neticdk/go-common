@@ -145,7 +145,7 @@ command (`NewRootCmd().Execute()`) and handles errors.
 The `NewRootCmd()` function adds a sub-command, `HelloCmd()`, but we havn't
 set that up yet, so let's do that now.
 
-Create `src/hello.go`:
+Create `cmd/hello.go`:
 
 ```go
 package cmd
