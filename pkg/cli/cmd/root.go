@@ -48,11 +48,12 @@ func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
 	if ec.AppName == "" {
 		panic("app name is required")
 	}
-	initFunc := func(cmd *cobra.Command, _ []string) error {
+	initFunc := func(cmd *cobra.Command, args []string) error {
 		if err := initConfig(ec.AppName, cmd); err != nil {
 			return err
 		}
 		ec.Command = cmd
+		ec.CommandArgs = args
 		ec.SetLogLevel()
 		return nil
 	}
