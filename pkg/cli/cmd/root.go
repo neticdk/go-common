@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	ecctx "github.com/neticdk/go-common/pkg/cli/context"
-	"github.com/neticdk/go-common/pkg/cli/flags"
 	"github.com/neticdk/go-common/pkg/tui/help"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -23,7 +21,7 @@ type InitFunc = func(cmd *cobra.Command, args []string) error
 
 type RootCommandBuilder struct {
 	cmd *cobra.Command
-	ec  *ecctx.ExecutionContext
+	ec  *ExecutionContext
 }
 
 // NewRootCommand creates a new root command
@@ -41,7 +39,7 @@ type RootCommandBuilder struct {
 // It uses ec.AppName as the base name for the configuration file and environment variables
 // initFunc is a function that is called before the command is executed
 // It can be used to add more context or do other initializations
-func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
+func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 	if ec == nil {
 		panic("execution context is required")
 	}
@@ -78,7 +76,7 @@ func NewRootCommand(ec *ecctx.ExecutionContext) *RootCommandBuilder {
 		},
 	}
 
-	flags.AddPersistentFlags(c, ec)
+	AddPersistentFlags(c, ec)
 
 	if err := viper.BindPFlags(c.PersistentFlags()); err != nil {
 		panic(fmt.Errorf("binding flags: %w", err))
