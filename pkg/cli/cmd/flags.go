@@ -1,26 +1,89 @@
-package flags
+package cmd
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/neticdk/go-common/pkg/cli/context"
-	"github.com/neticdk/go-common/pkg/cli/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
+// PFlags represents is presistent/global flags
+type PFlags struct {
+	// LogFormat is the log format used for the logger
+	// The ForFormat flag is always enabled
+	// Flag: --log-format [plain|json]
+	LogFormat LogFormat
+
+	// LogLevel is the log level used for the logger
+	// The LogLevel flag is always enabled
+	// Flag: --log-level [debug|info|warn|error]
+	LogLevel LogLevel
+
+	// ForceEnabled is used to enable the Force flag
+	ForceEnabled bool
+
+	// Force is used to force actions
+	// Flags: --force, -f
+	Force bool
+
+	// DryRun is used to simulate actions
+	// Flags: --dry-run
+	DryRun bool
+
+	// DryRunEnabled is used to enable the DryRun flag
+	DryRunEnabled bool
+
+	// NoINput can be used to disable interactive mode
+	// Flags: --no-input
+	NoInput bool
+
+	// NoInputEnabled is used to enable the NoInput flag
+	NoInputEnabled bool
+
+	// NoColor is used to control whether color is used in output
+	// The NoColor flag is always enabled
+	// Flags: --no-color
+	NoColor bool
+
+	// Quiet is used to control whether output is suppressed
+	// Flags: --quiet, -q
+	Quiet bool
+
+	// QuietEnabled is used to enable the Quiet flag
+	QuietEnabled bool
+
+	// Debug is used for debugging
+	// Usually this implies verbose output
+	// The Debug flag is always enabled
+	// Flags: --debug, -d
+	Debug bool
+
+	// OutputFormatEnabled is used to enable the OutputFormat flag
+	PlainEnabled    bool
+	JSONEnabled     bool
+	YAMLEnabled     bool
+	MarkdownEnabled bool
+
+	// NoHeaders is used to control whether headers are printed
+	// Flag: --no-headers
+	NoHeaders bool
+
+	// NoHeadersEnabled is used to enable the NoHeaders flag
+	NoHeadersEnabled bool
+}
+
 // AddPersistentFlags adds global flags to the command and does some initialization
-func AddPersistentFlags(cmd *cobra.Command, ec *context.ExecutionContext) *pflag.FlagSet {
+func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet {
 	var plain, json, yaml, markdown bool
 
 	f := cmd.PersistentFlags()
 
-	logFormats := newEnum(log.AllFormatsStr(), log.DefaultFormat.String())
-	f.Var(logFormats, "log-format", fmt.Sprintf("Log format (%s)", log.AllFormatsJoined()))
+	logFormats := NewEnum(AllLogFormatsStr(), LogFormatDefault.String())
+	f.Var(logFormats, "log-format", fmt.Sprintf("Log format (%s)", AllLogFormatsJoined()))
 
-	logLevels := newEnum(log.AllLevelsStr(), log.DefaultLevel.String())
-	f.Var(logLevels, "log-level", fmt.Sprintf("Log level (%s)", log.AllLevelsJoined()))
+	logLevels := NewEnum(AllLogLevelsStr(), LogLevelDefault.String())
+	f.Var(logLevels, "log-level", fmt.Sprintf("Log level (%s)", AllLogLevelsJoined()))
 
 	if ec.PFlags.ForceEnabled {
 		f.BoolVarP(&ec.PFlags.Force, "force", "f", false, "Force actions")
@@ -54,29 +117,29 @@ func AddPersistentFlags(cmd *cobra.Command, ec *context.ExecutionContext) *pflag
 	_ = cmd.PersistentFlags().Parse(os.Args[1:])
 
 	if logFormat, err := cmd.PersistentFlags().GetString("log-format"); err == nil {
-		ec.PFlags.LogFormat = log.Format(logFormat)
+		ec.PFlags.LogFormat = LogFormat(logFormat)
 	}
 	if logLevel, err := cmd.PersistentFlags().GetString("log-level"); err == nil {
-		ec.PFlags.LogLevel = log.Level(logLevel)
+		ec.PFlags.LogLevel = LogLevel(logLevel)
 	}
 
 	if plainArg, err := cmd.PersistentFlags().GetBool("plain"); err == nil && plainArg {
-		ec.OutputFormat = context.OutputFormatPlain
+		ec.OutputFormat = OutputFormatPlain
 		outputFlags = append(outputFlags, "plain")
 	}
 
 	if jsonArg, err := cmd.PersistentFlags().GetBool("json"); err == nil && jsonArg {
-		ec.OutputFormat = context.OutputFormatJSON
+		ec.OutputFormat = OutputFormatJSON
 		outputFlags = append(outputFlags, "json")
 	}
 
 	if yamlArg, err := cmd.PersistentFlags().GetBool("yaml"); err == nil && yamlArg {
-		ec.OutputFormat = context.OutputFormatYAML
+		ec.OutputFormat = OutputFormatYAML
 		outputFlags = append(outputFlags, "yaml")
 	}
 
 	if markdownArg, err := cmd.PersistentFlags().GetBool("markdown"); err == nil && markdownArg {
-		ec.OutputFormat = context.OutputFormatMarkdown
+		ec.OutputFormat = OutputFormatMarkdown
 		outputFlags = append(outputFlags, "markdown")
 	}
 

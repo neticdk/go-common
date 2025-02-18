@@ -1,5 +1,6 @@
-package context
+package cmd
 
+// OutputFormat represents the output format for the command
 type OutputFormat string
 
 const (

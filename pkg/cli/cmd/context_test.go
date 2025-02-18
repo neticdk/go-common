@@ -1,4 +1,4 @@
-package context
+package cmd
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/neticdk/go-common/pkg/cli/errors"
-	"github.com/neticdk/go-common/pkg/cli/log"
 	"github.com/neticdk/go-common/pkg/cli/ui"
 	"github.com/neticdk/go-common/pkg/tui/term"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +34,7 @@ func TestNewExecutionContext(t *testing.T) {
 func TestSetLogLevel(t *testing.T) {
 	ec := &ExecutionContext{
 		PFlags: PFlags{
-			LogLevel: log.LevelInfo,
+			LogLevel: LogLevelInfo,
 		},
 		LogLevel: new(slog.LevelVar),
 	}
@@ -151,7 +150,7 @@ func TestInitLogger(t *testing.T) {
 	ec := &ExecutionContext{
 		Stderr: stderr,
 		PFlags: PFlags{
-			LogFormat: log.DefaultFormat,
+			LogFormat: LogFormatDefault,
 		},
 		IsTerminal: false,
 		LogLevel:   new(slog.LevelVar),
@@ -160,7 +159,7 @@ func TestInitLogger(t *testing.T) {
 	ec.initLogger()
 
 	assert.NotNil(t, ec.Logger)
-	assert.Equal(t, log.FormatJSON, ec.PFlags.LogFormat)
+	assert.Equal(t, LogFormatJSON, ec.PFlags.LogFormat)
 }
 
 func TestInitErrorHandler(t *testing.T) {
