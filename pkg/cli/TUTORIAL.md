@@ -26,7 +26,8 @@ above.
 ### Target Audience
 
 The target audience for this tutorial is someone proficient with go but not
-necessarily an expert.
+necessarily an expert. You should expect to read up on how
+[spf13/cobra](https://github.com/spf13/cobra) works.
 
 ### Prerequisites
 
@@ -47,8 +48,6 @@ Download the go-common module:
 ```bash
 go get -u github.com/neticdk/go-common
 ```
-
-The cobra package is the package we use to create CLIs.
 
 Create the `cmd` directory which will hold the code for the CLI commands:
 
@@ -103,8 +102,8 @@ import (
 )
 
 // NewRootCmd creates the root command
-func NewRootCmd(ec *context.ExecutionContext, ac *AppContext) *cobra.Command {
-    c := cmd.NewRootCommand(ec).
+func NewRootCmd(ac *AppContext) *cobra.Command {
+    c := cmd.NewRootCommand(ac.EC).
         Build()
 
     c.AddCommand(
@@ -126,7 +125,7 @@ func Execute(version string) int {
     ac := NewAppContext()
     ac.EC = ec
     ec.LongDescription = LongDesc
-    rootCmd := NewRootCmd(ec, ac)
+    rootCmd := NewRootCmd(ac)
     err := rootCmd.Execute()
     _ = ec.Spinner.Stop()
     if err != nil {
@@ -145,7 +144,7 @@ command (`NewRootCmd().Execute()`) and handles errors.
 The `NewRootCmd()` function adds a sub-command, `HelloCmd()`, but we havn't
 set that up yet, so let's do that now.
 
-Create `src/hello.go`:
+Create `cmd/hello.go`:
 
 ```go
 package cmd
@@ -180,6 +179,7 @@ func (o *helloOptions) Complete(_ context.Context, ac *AppContext) {
 }
 
 func (o *helloOptions) Validate(_ context.Context, _ *AppContext) error { return nil }
+
 func (o *helloOptions) Run(_ context.Context, ac *AppContext) error {
     ui.Info.Printf("Hello, %s!\n", o.who)
     return nil
@@ -248,22 +248,64 @@ Now run the CLI:
 go run .
 ```
 
-Well, that just printed the usage message. That's because you didn't specify the
-`hello` command yet. Let's add that:
+That prints out:
+
+```console
+This application greets the user with a friendly messages
+
+## Usage
+
+hello-world [command] [flags]
+hello-world [command]
+
+Basic Commands:
+
+Other Commands:
+completion  Generate the autocompletion script for the specified shell
+help        Help about any command
+
+## Additional Commands
+
+  hello       Say hello!
+
+## Flags
+
+  -d, --debug               Debug mode
+      --log-format string   Log format (plain|json) (default "plain")
+      --log-level string    Log level (debug|info|warn|error) (default "info")
+      --no-color            Do not print color
+  -h, --help                help for hello-world
+  -v, --version             version for hello-world
+
+Use "hello-world [command] --help" for more information about a command.
+```
+
+That doesn't say hello anything. That's because you didn't specify the `hello`
+command yet. Let's add that:
 
 ```bash
 go run . hello
 ```
 
-You should be greeted with a friendly 'Hello, World!' message.
+You should be greeted with a friendly 'Hello, World!' message:
+
+```console
+ INFO  Hello, World!
+```
 
 Running it with an argument:
 
 ```bash
-go run . hello $(whoami)
+go run . hello John
 ```
 
-... prints a greeting to you!
+... prints a greeting to John:
+
+```console
+ INFO  Hello, John!
+```
+
+And that concludes the getting started guide. Next up is core concepts.
 
 ## Core Concepts
 
@@ -272,26 +314,29 @@ go run . hello $(whoami)
 The `ExecutionContext` is a struct containing information relevant to the
 execution of the CLI but not necessarily coupled to the application directly.
 
-It consists of:
+Some of the important things it contains:
 
-- cobra related attributes such as `Command`, `CommandArgs` and the command
-  information
-- general attributes such as `Logger` and `ErrorHandler` and `OutputFormat`
-- persistent flags (`PFlags`) configuration
+- cobra related attributes such as `Command`, `CommandArgs` and command
+  information such as name and descriptions
+- general attributes such as `Logger`, `ErrorHandler` and `OutputFormat`
+- persistent/global flags (`PFlags`) configuration
 
 You instantiate it using:
 
 ```go
 import "github.com/neticdk/go-common/pkg/cli/context"
 
-ec := context.NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer)
+// context.NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer)
+ec := context.NewExecutionContext("driver", "app for driving cars", "0.0.1", os.Stdin, os.Stdout, os.Stderr)
 ```
 
 If the I/O arguments are `nil` the default `os` pipes (`stdin`, `stdout`,
-`stderr` will be used.
+`stderr`) are used.
 
-It can be used by itself or embedded in other context structs such an
-application context:
+#### Using the `ExecutionContext`
+
+The `ExecutionContext` can be used by itself but works better in most cases if
+embedded in other context structs such an application context:
 
 ```go
 type AppContext struct {
@@ -306,7 +351,7 @@ ac := &AppContext{
 }
 ```
 
-Use it in `Execute()` in `cmd/root.go`:
+Creat it and pass it to `NewRootCmd` from `Execute()` in `cmd/root.go`:
 
 ```go
 func Execute(version string) {
@@ -316,9 +361,7 @@ ac := &AppContext{EC: ec}
 rootCmd := NewRootCmd(ac)
 ```
 
-#### Using the `ExecutionContext`
-
-The `ExecutionContext` is passed through functions you use to create commands:
+The `ExecutionContext` is passed on to the functions used to create commands:
 
 ```go
 func NewRootCmd(ac *AppContext) {
@@ -335,25 +378,27 @@ func NewSubCmd(ac *AppContext) {
 }
 ```
 
-In the root command the `ExecutionContext` can be reached through attached run
-functions, for example when extending `PersistentPreRunE` with `WithInitFunc`:
+In the root command the `ExecutionContext` is available for all fields of the
+`*cobra.Command` passed to or retured from `NewRootCommand`:
 
 ```go
 func NewRootCmd(ac *AppContext) {
-    c := cmd.NewRootCommand(ac).
+    c := cmd.NewRootCommand(ac.EC).
         WithInitFunc(func(_ *cobra.Command, _ []string) error {
             ac.SetupDefaultGithubClient()
             ac.SetupDefaultGitRepository()
             return nil
         }).
         Build()
+    c.PreRun = func(_ *cobra.Command, args []string) {
+        ec.Logger.Info("some message")
+    }
     // ...
 }
 ```
 
-For sub=commands, the context is passed down to the `Complete`, `Validate` and
+For sub-commands, the context is passed down to the `Complete`, `Validate` and
 `Run` functions:
-
 
 ```go
 func InitComponentCmd(ac *AppContext) *cobra.Command {
@@ -363,8 +408,8 @@ func InitComponentCmd(ac *AppContext) *cobra.Command {
     // ...
 }
 
-// passing ac to NewSubCommand automatically makes it the second argument for
-// Complete, Validate and Run
+// passing ac to NewSubCommand automatically makes it available as the second
+// argument to Complete, Validate and Run
 
 func (o *options) Complete(ctx context.Context, ac *AppContext) {
     ac.EC.Logger.Info("some info")
@@ -381,6 +426,7 @@ func (o *options) Run(ctx context.Context, ac *AppContext) error {
 
 Note that the third argument passed to `NewSubCommand` is generic, so anything
 you pass there will end up becoming the second argument to the three functions.
+More on this later.
 
 ### Persistent/Global Flags
 
@@ -395,18 +441,18 @@ ec := context.NewExecutionContext(...)
 ec.PFlags.DryRunEnabled = true
 ```
 
-See `context/flags.go` for more information about available flags.
+See [`context/flags.go`](context/flags.go) for more information about available flags.
 
 Flags, that can't be disabled:
 
 - `--log-format`
 - `--log-level`
 - `--no-color`
-- `--debug`
+- `--debug|-d`
 
 #### Setting the output format
 
-The output format is stoned on the `ExecutionContext` as an enum, but to set it,
+The output format is stored on the `ExecutionContext` as an enum, but to set it,
 you have to enable the supported format flags. For now, these are `--plain`,
 `--json`, `--yaml`, and `--markdown` and they are mutually exclusive:
 
@@ -437,7 +483,7 @@ func Execute(version string) int {
     ec.PFlags.JSONEnabled = true
     ac.EC = ec
     ec.LongDescription = LongDesc
-    rootCmd := NewRootCmd(ec, ac)
+    rootCmd := NewRootCmd(ac)
     err := rootCmd.Execute()
     _ = ec.Spinner.Stop()
     if err != nil {
@@ -616,14 +662,29 @@ type SubCommandRunner[T any] interface {
 }
 ```
 
-This means that the type must implement these three commands. This pattern is
+This means that the type must implement these three functions. This pattern is
 called the complete-validate-run pattern and is used by the kubernetes project
-amongst others.
+amongst others. It adds predictability at the cost of some flexibility. Behind
+the scenes it overrides the `RunE` field of `*cobra.Command` with a function
+that looks like this:
+
+```go
+return func(cmd *cobra.Command, args []string) error {
+    ctx := cmd.Context()
+    runner.Complete(ctx, runnerArg)
+    if err := runner.Validate(ctx, runnerArg); err != nil {
+        return err
+    }
+    return runner.Run(ctx, runnerArg)
+}
+```
+
+You can always set `RunE` on `cobra.Cobra` to do your own thing.
 
 When the sub-command runs, it runs these three functions in order:
 
 `Complete` is used to complete any settings/configuration/flags/etc before
- validation. It doesn't return error.
+ validation. It doesn't return anything.
 
 Given this struct:
 
@@ -636,7 +697,7 @@ type options struct {
 }
 ```
 
-The Complete function could something like this:
+The Complete function could do something like this:
 
 ```go
 func (o *options) Complete(ctx context.Context, ac *AppContext) {
@@ -646,7 +707,7 @@ func (o *options) Complete(ctx context.Context, ac *AppContext) {
 }
 ```
 
-`Validate` is used to validate flags, arguments or other things. It always
+`Validate` is used to validate flags, arguments and other things. It always
 returns error.
 
 ```go
@@ -719,8 +780,8 @@ This binds the struct fields `o.name` and `o.age` to the values passed to
 
 Now you may also have noticed that the example above used some builder
 functions. They are essentially wrappers to set fields on the `cobra.Command`
-struct. You may use them or just set the values yourself after creating the
-sub-command.
+struct. You may use them or just set the field values yourself after creating
+the sub-command.
 
 #### Accessing the command
 
