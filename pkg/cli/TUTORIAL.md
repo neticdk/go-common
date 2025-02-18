@@ -31,6 +31,9 @@ necessarily an expert. You should expect to read up on how
 
 Let's create a hello-world CLI that prints a greeting when we run it.
 
+You can look at the code in the [examples/hello-world](examples/hello-world/)
+directory.
+
 First, initialize the project:
 
 ```bash
@@ -53,7 +56,7 @@ mkdir cmd
 
 Note, as this is a project with a single executable, we will put command code in
 `cmd/` and keep a minimal `main.go` in the root project directory. For more
-advanced tools that has multiple executables, you should create a directory for
+advanced tools that have multiple executables, you should create a directory for
 each executable named `cmd/<executable-name>/` with its own `main.go` file. This
 is an advanced topic and is not covered here.
 
@@ -315,9 +318,11 @@ execution of the CLI but not necessarily coupled to the application directly.
 
 Some of the important things it contains:
 
-- cobra related attributes such as `Command`, `CommandArgs` and command
-  information such as name and descriptions
-- general attributes such as `Logger`, `ErrorHandler` and `OutputFormat`
+- information about the CLI such as the name and description
+- a `Logger`
+- an `ErrorHandler`
+- the `OutputFormat`
+- cobra related attributes such as `Command`, `CommandArgs`
 - persistent/global flags (`PFlags`) configuration
 
 You instantiate it using:
@@ -325,12 +330,19 @@ You instantiate it using:
 ```go
 import "github.com/neticdk/go-common/pkg/cli/cmd"
 
-// cmd.NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer)
-ec := cmd.NewExecutionContext("driver", "app for driving cars", "0.0.1", os.Stdin, os.Stdout, os.Stderr)
+ec := cmd.NewExecutionContext(
+    "app name",
+    "app description",
+    "app version",
+    os.Stdin,
+    os.Stdout,
+    os.Stderr)
 ```
 
-If the I/O arguments are `nil` the `ExecutionContex` sets values to the
-default `os` pipes (`stdin`, `stdout`, `stderr`).
+The application name and description are used in the usage/help message for the
+root command. The three I/O arguments are used to determine where to read input
+and write output and errors. They can be set to `nil` in which case OS defaults
+are used.
 
 #### Using the `ExecutionContext`
 
@@ -350,6 +362,9 @@ ac := &AppContext{
 }
 ```
 
+That way you will always have things like the `Logger` and `ErrorHandler`
+as well as the I/O pipes available.
+
 Create it and pass it to `NewRootCmd` from `Execute()` in `cmd/root.go`:
 
 ```go
@@ -360,12 +375,16 @@ ac := &AppContext{EC: ec}
 rootCmd := NewRootCmd(ac)
 ```
 
-The `ExecutionContext` is passed on to the functions used to create commands:
+`NewRootCmd` passes the `ExecutionContext` to the functions used to create
+commands:
 
 ```go
 func NewRootCmd(ac *AppContext) {
     c := cmd.NewRootCommand(ac.EC)
     // ...
+    c.AddCommand(
+        NewSubCmd(ac),
+    )
 }
 
 // or
@@ -390,13 +409,13 @@ func NewRootCmd(ac *AppContext) {
         }).
         Build()
     c.PreRun = func(_ *cobra.Command, args []string) {
-        ec.Logger.Info("some message")
+        ac.EC.Logger.Info("some message")
     }
     // ...
 }
 ```
 
-For sub-commands, the `NewSubCommand` passed down the context to the
+For sub-commands, the `NewSubCommand` passes down the context to the
 `Complete`, `Validate` and `Run` functions:
 
 ```go
@@ -411,6 +430,7 @@ func InitComponentCmd(ac *AppContext) *cobra.Command {
 // argument to Complete, Validate and Run
 
 func (o *options) Complete(ctx context.Context, ac *AppContext) {
+    // Here we are using the ExecutionContext Logger
     ac.EC.Logger.Info("some info")
 }
 
@@ -419,19 +439,28 @@ func (o *options) Validate(ctx context.Context, ac *AppContext) error {
 }
 
 func (o *options) Run(ctx context.Context, ac *AppContext) error {
+    // Here we are using a GithubClient injected through the AppContext
     err := ac.GithubClient.GetRepository(...)
+    // And here we again use ExecutionContext for accessing the error handler
+    if err != nil {
+        return ac.EC.ErrorHandler.NewGeneralError(
+            "Some error",
+            "Some message",
+            err,
+            0)
+    }
 }
 ```
 
 Note that the third argument passed to `NewSubCommand` is generic, so anything
 you pass there will end up becoming the second argument to the three functions.
-More on this later.
+More on that later.
 
 ### Persistent/Global Flags
 
-The `cmd` package comes with the default persistent flags, some of which are
-permanent and some of which can be toggled. Persistent flags are always present
-for all commands.
+The `cmd` package comes with default persistent flags, some of which are
+permanent/mandatory and some of which can be toggled. Persistent flags are
+always present for all commands.
 
 To enable a flag, set `<FLAG>Enabled` to `true`:
 
@@ -442,18 +471,36 @@ ec.PFlags.DryRunEnabled = true
 
 See [`cmd/flags.go`](context/flags.go) for more information about available flags.
 
-Flags, that can't be disabled:
+Flags that can't be disabled:
 
 - `--log-format`
 - `--log-level`
 - `--no-color`
-- `--debug|-d`
+- `--debug | -d`
 
 #### Setting the output format
 
-`ExecutionContext` stores the output format as an ENUM. To set it, enable the
-supported format flags. For now, these are `--plain`, `--json`, `--yaml`,
-and `--markdown` and they are mutually exclusive:
+The output format is a way to instruct the application about the format the user
+wants output in. Typically this would be plain text for humans and something
+like JSON for machines. This can be set via flags.
+
+`ExecutionContext.OutputFormat` stores the output format as an ENUM:
+
+- `cmd.OutputFormatPlain`
+- `cmd.OutputFormatJSON`
+- `cmd.OutputFormatYAML`
+- `cmd.OutputFormatMarkdown`
+
+To set it, enable the format flags you want to support.
+
+For now, these are:
+
+- `--plain`
+- `--json`
+- `--yaml`
+- `--markdown`
+
+They are mutually exclusive. Enable them like this:
 
 ```go
 ec.PFlags.PlainEnabled = true
@@ -464,7 +511,7 @@ ec.PFlags.MarkdownEnabled = true
 
 #### Enabling flags
 
-A good place to set global flags is in the `Execute()` command in
+The best place to set global flags is in the `Execute()` command in
 `cmd/root.go`:
 
 ```go
@@ -499,9 +546,10 @@ The package uses `log/slog` for logging.
 
 #### Default Handler
 
-It includes a default handler using the `pterm` package. The default format
-depends on whether there is a TTY attached. If there is then the format is
-`plain` text unless `--log-format` is used. Otherwise is uses `json`.
+The default handler uses the `pterm` package which adds a bit of color to the
+log messages. The default format depends on whether there is a TTY attached. If
+there is then the format is `plain` text, unless `--log-format` is used.
+Otherwise it uses `json`.
 
 The default log level is INFO. To change this, use the `--log-level` flag.
 
@@ -510,9 +558,11 @@ The default log level is INFO. To change this, use the `--log-level` flag.
 You can change the handler after initialing the context:
 
 ```go
+import "github.com/charmbracelet/log"
+
 ec := cmd.NewExecutionContext(...)
 
-handler := ...
+handler := log.New(os.Stderr)
 ec.Logger = slow.New(handler)
 
 ```
@@ -521,22 +571,36 @@ ec.Logger = slow.New(handler)
 
 Just use `ec.Logger.Info()` (or `ac.EC.Logger.Info()`) etc. like you would use `slog`.
 
+It is recommended to create sub-loggers for each sub-command using:
+
+```go
+func (o *options) Run(ctx context.Context, ac *AppContext) error {
+    logger := ac.EC.Logger.WithGroup("Driver")  // or some other meaningful name
+    logger.Info("some info")
+    // ...
+}
+```
+
 ### Error Handling
 
 The `ExecutionContext` comes with a default error handler
 (`errors.DefaultHandler`) that implements this interface:
 
 ```go
+// Handler is an interface for handling errors.
 type Handler interface {
+    // HandleError handles the given error.
     HandleError(err error)
+    // NewGeneralError creates a new GeneralError with the specified message, help message, error, and code.
     NewGeneralError(message, helpMsg string, err error, code int) *GeneralError
+    // SetWrap sets whether to wrap the error message and help message.
     SetWrap(wrap bool)
+    // SetWrapWidth sets the width to wrap the error message and help message.
     SetWrapWidth(width int)
 }
 ```
 
-Errors bubble up from your application and are handled in the `Execute()`
-function in `cmd/root.go`:
+The `Execute()` function in `cmd/root.go` handles errors that bubble up from your application:
 
 ```go
 func Execute(...) int {
@@ -567,7 +631,7 @@ type ErrorWithHelp interface {
 }
 ```
 
-So using any type that implements this interface  as an `error` will make sure
+Using a type that implements this interface  as an `error` will make sure
 it is printed out in a nice format for the user.
 
 There are two error types included that implements this interface:
@@ -627,25 +691,24 @@ root commands and sub-commands respectively.
 
 They implement the builder pattern (chaining functions that modifies the return
 value) and both return a `*cobra.Command`. This means that everything you can do
-with Cobra, you can do with these helpers. They are just meant to set reasonable
-defaults and enable some features that you almost always want.
+with `cobra.Command`, you can do with these helpers. They are just meant to
+set reasonable defaults and enable some features that you almost always want.
 
-`cmd.NewRootCommand(ec *cmd.ExecutionContext).Build()` creates a root command with:
+`NewRootCommand(ec *ExecutionContext).Build()` creates a root command with:
 
-- usage, descriptions, versions, etc. set
-- default global flags added
-- logging enabled
-- configuration through configuration files, environment variables, and
+- Usage, descriptions, versions, etc. set
+- Default global flags added
+- Logging enabled
+- Configuration through configuration files, environment variables, and
   flags enabled (via `viper`)
-- colors added to `help` commands
-- two command groups added (`cmd.GroupBase`, and `cmd.GroupOther`)
-- a hidden command `gendocs` for generating documentation
+- Colors added to `help` commands
+- Two command groups added (`cmd.GroupBase`, and `cmd.GroupOther`)
+- A hidden `gendocs` command for generating documentation
 
-`cmd.NewSubCommand(name string, runner cmd.SubCommandRunner[*AppContext],
-runnerArg *AppContext)).Build()` works a little different. It takes the name of
-the command, a runner interface and an argument passed to the functions of the
-runner interface as arguments. Let's break the last two down because they are
-important to understand.
+`NewSubCommand[T any](name string, runner SubCommandRunner[T], runnerArg
+T)).Build()` works a little different. It takes the name of the command,
+a runner interface and an argument passed to the runner interface functions.
+Let's break the last two down because they are important to understand.
 
 The runner interface looks like this:
 
@@ -665,10 +728,39 @@ type SubCommandRunner[T any] interface {
 }
 ```
 
-This means that the type must implement these three functions. This pattern is
-called the complete-validate-run pattern and is used by the kubernetes project
-amongst others. It adds predictability at the cost of some flexibility. Behind
-the scenes it overrides the `RunE` field of `*cobra.Command` with a function
+This means that the type must implement these three functions.
+
+In short, to implement the `SubCommandRunner` interface the following must be in
+place:
+
+- All three functions must be implemented on the struct passed as the
+  second argument to `NewSubCommand`.
+- The type of the second argument to each of the three functions must be the
+  same as the type of the third argument passed to `NewSubCommand`.
+
+The smallest possible implementation looks like this:
+
+```go
+type runner[T any] struct{}
+
+func (o *runner[T]) Complete(ctx context.Context, runnerArg T)       {}
+func (o *runner[T]) Validate(ctx context.Context, runnerArg T) error { return nil }
+func (o *runner[T]) Run(ctx context.Context, runnerArg T) error      { return nil }
+```
+
+In fact the `cmd` package already includes a `NoopRunner` type that looks
+exactly like this (it comes in handy when you are creating sub-commands that
+does nothing but serve other sub-commands).
+
+It works together with `runnerArg` in `NewSubCommand`. `runnerArg` can by any
+type and it is available as the same type in the three functions. It ensures
+that we can pass down `AppContext` or anything else to be used later on in the
+application.
+
+The pattern with the three functions is called the complete-validate-run pattern
+and is used by the kubernetes project amongst others. It adds predictability
+because you are using the exact same pattern for all sub-commands. Behind the
+scenes it overrides the `RunE` field of `*cobra.Command` with a function
 that looks like this:
 
 ```go
@@ -682,12 +774,13 @@ return func(cmd *cobra.Command, args []string) error {
 }
 ```
 
-You can always set `RunE` on `cobra.Cobra` to do your own thing.
+It comes at the cost of loosing some flexibility. If you need that flexibility,
+you can always set `RunE` on `cobra.Cobra` to do your own thing.
 
 When the sub-command runs, it runs these three functions in order:
 
-Use `Complete` to complete any settings/configuration/flags/etc. before
-validation. It doesn't return anything.
+`Complete` completes any settings/configuration/flags/etc. before validation.
+It doesn't return anything.
 
 Given this struct:
 
@@ -703,18 +796,19 @@ type options struct {
 The `Complete` function could do something like this:
 
 ```go
-func (o *options) Complete(ctx context.Context, ac *AppContext) {
+func (o *options) Complete(_ context.Context, ac *AppContext) {
     if o.age > 50 {
-        o.car == "Mercedes"
+        ac.EC.Logger.Warn("Elderly chap found")
+        o.car == "Mercedes E350"
     }
 }
 ```
 
-Use `Validate` to validate flags, arguments and other things. It always
-returns error.
+`Validate` validates flags, arguments and other things. It always returns
+error.
 
 ```go
-func (o *options) Validate(ctx context.Context, ac *AppContext) error {
+func (o *options) Validate(_ context.Context, ac *AppContext) error {
     if o.age < 18 {
         return ac.EC.ErrorHandler.NewGeneralError(
             "Child detected",
@@ -725,7 +819,7 @@ func (o *options) Validate(ctx context.Context, ac *AppContext) error {
 }
 ```
 
-Finally, use the `Run` function to run the command. It also returns error:
+Finally, the `Run` function runs the command. It also returns error:
 
 ```go
 func (o *options) Run(ctx context.Context, ac *AppContext) error {
@@ -733,19 +827,19 @@ func (o *options) Run(ctx context.Context, ac *AppContext) error {
 }
 ```
 
-Notice that `ac *AppContext` in the function signatures? That is the third
-argument passed to `NewSubCommand`. This makes that argument available to the
-rest of the application.
+It is from the `Run` command that you usually hand over control of your
+application to other parts of your code.
 
-To fulfill the `SubCommandRunner` interface the following must be in place:
+Did you notice that `ac *AppContext` in the function signatures? That is the
+third argument passed to `NewSubCommand`. This makes that argument available
+to the rest of the application.
 
-- All three functions must be implemented on the struct passed as the
-  second argument to `NewSubCommand`.
-- The type of the second argument to each of the three functions must be the
-  same as the type of the third argument passed to `NewSubCommand`.
+#### Flags
 
 At this point you might be wondering how the options are populated from command
-line flags in the first place? This is where binding comes in:
+line flags in the first place?
+
+This is where binding comes in:
 
 ```go
 func DriveCmd(ac *AppContext) *cobra.Command {
@@ -766,7 +860,9 @@ func DriveCmd(ac *AppContext) *cobra.Command {
 ```
 
 Notice the `bindFlags` function. It binds the command line flags to the options.
-Let's see an example of how to implement it:
+You will have to create it yourself.
+
+Let's see an example of how to do that:
 
 ```go
 import "github.com/spf13/pflag"
@@ -785,13 +881,15 @@ functions. They are essentially wrappers to set fields on the `cobra.Command`
 struct. You may use them or just set the field values yourself after creating
 the sub-command.
 
-#### Accessing the command
+#### Accessing the cobra command
 
-The `cobra.Command` can be accessed through `ExecutionContext.Command`.
+Sometimes you need access to the current `cobra.Command`. Use
+`ExecutionContext.Command` to do that.
 
-#### Accessing the command args
+#### Accessing the command arguments
 
-The `args` can be accessed through `ExecutionContext.CommandArgs`.
+Checking the command arguments can also come in handy. The `args` can be
+accessed through `ExecutionContext.CommandArgs`.
 
 ### UI Elements
 
