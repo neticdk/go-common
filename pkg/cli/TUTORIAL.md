@@ -1057,4 +1057,9 @@ See [examples/ui](examples/ui/) for example usage.
 
 ## Building a Simple Project
 
-TBD
+Check out [examples/pokemon](examples/pokemon/) for a more elaborate examples
+that:
+
+- uses the application context for dependency injection
+- uses use cases
+- uses some UI functionality
