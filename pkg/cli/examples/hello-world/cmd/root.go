@@ -17,17 +17,17 @@ type AppContext struct {
 	EC *cmd.ExecutionContext
 }
 
-func NewAppContext() *AppContext {
+func newAppContext() *AppContext {
 	return &AppContext{}
 }
 
-// NewRootCmd creates the root command
-func NewRootCmd(ac *AppContext) *cobra.Command {
+// newRootCmd creates the root command
+func newRootCmd(ac *AppContext) *cobra.Command {
 	c := cmd.NewRootCommand(ac.EC).
 		Build()
 
 	c.AddCommand(
-		HelloCmd(ac),
+		helloCmd(ac),
 	)
 
 	return c
@@ -42,7 +42,7 @@ func Execute(version string) int {
 		os.Stdin,
 		os.Stdout,
 		os.Stderr)
-	ac := NewAppContext()
+	ac := newAppContext()
 	ac.EC = ec
 	ec.LongDescription = LongDesc
 	rootCmd := NewRootCmd(ac)
