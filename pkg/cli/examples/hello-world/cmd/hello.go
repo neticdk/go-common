@@ -21,12 +21,13 @@ type helloOptions struct {
 	who string
 }
 
-func (o *helloOptions) Complete(_ context.Context, ac *AppContext) {
+func (o *helloOptions) Complete(_ context.Context, ac *AppContext) error {
 	if len(ac.EC.CommandArgs) > 0 {
 		o.who = ac.EC.CommandArgs[0]
 	} else {
 		o.who = "World"
 	}
+	return nil
 }
 
 func (o *helloOptions) Validate(_ context.Context, _ *AppContext) error { return nil }
