@@ -45,7 +45,7 @@ func Execute(version string) int {
 	ac := newAppContext()
 	ac.EC = ec
 	ec.LongDescription = LongDesc
-	rootCmd := NewRootCmd(ac)
+	rootCmd := newRootCmd(ac)
 	err := rootCmd.Execute()
 	_ = ec.Spinner.Stop()
 	if err != nil {
