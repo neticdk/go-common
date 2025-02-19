@@ -13,9 +13,13 @@ const DefaultWrapWidth = 80
 
 // Handler is an interface for handling errors.
 type Handler interface {
+	// HandleError handles the given error.
 	HandleError(err error)
+	// NewGeneralError creates a new GeneralError with the specified message, help message, error, and code.
 	NewGeneralError(message, helpMsg string, err error, code int) *GeneralError
+	// SetWrap sets whether to wrap the error message and help message.
 	SetWrap(wrap bool)
+	// SetWrapWidth sets the width to wrap the error message and help message.
 	SetWrapWidth(width int)
 }
 

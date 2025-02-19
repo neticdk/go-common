@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	ecctx "github.com/neticdk/go-common/pkg/cli/context"
-	"github.com/neticdk/go-common/pkg/cli/flags"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -20,10 +18,10 @@ func TestNewRootCommand(t *testing.T) {
 	})
 
 	assert.Panics(t, func() {
-		NewRootCommand(&ecctx.ExecutionContext{})
+		NewRootCommand(&ExecutionContext{})
 	})
 
-	ec := &ecctx.ExecutionContext{
+	ec := &ExecutionContext{
 		AppName: "test",
 	}
 	cmd := NewRootCommand(ec).Build()
@@ -40,10 +38,10 @@ func TestWithInitFunc(t *testing.T) {
 		return nil
 	}
 
-	cmd := NewRootCommand(ec).WithInitFunc(initFunc).Build()
-	assert.NotNil(t, cmd)
+	c := NewRootCommand(ec).WithInitFunc(initFunc).Build()
+	assert.NotNil(t, c)
 
-	err := cmd.Execute()
+	err := c.Execute()
 	assert.NoError(t, err)
 	assert.True(t, initFuncCalled)
 
@@ -51,9 +49,9 @@ func TestWithInitFunc(t *testing.T) {
 	initFunc = func(cmd *cobra.Command, args []string) error {
 		return initFuncError
 	}
-	cmd = NewRootCommand(ec).WithInitFunc(initFunc).Build()
+	c = NewRootCommand(ec).WithInitFunc(initFunc).Build()
 
-	err = cmd.Execute()
+	err = c.Execute()
 	assert.ErrorIs(t, err, initFuncError)
 }
 
@@ -63,28 +61,28 @@ func TestWithPersistentFlags(t *testing.T) {
 	flags := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	flags.String("test-flag", "", "test flag")
 
-	cmd := NewRootCommand(ec).WithPersistentFlags(flags).Build()
-	assert.NotNil(t, cmd)
+	c := NewRootCommand(ec).WithPersistentFlags(flags).Build()
+	assert.NotNil(t, c)
 
-	assert.NotNil(t, cmd.PersistentFlags().Lookup("test-flag"))
+	assert.NotNil(t, c.PersistentFlags().Lookup("test-flag"))
 }
 
 func TestBuild(t *testing.T) {
 	ec := newEC()
 
-	cmd := NewRootCommand(ec).Build()
-	assert.NotNil(t, cmd)
+	c := NewRootCommand(ec).Build()
+	assert.NotNil(t, c)
 }
 
 func Test_initConfig(t *testing.T) {
 	appName := "test"
-	cmd := &cobra.Command{
+	c := &cobra.Command{
 		Use: appName,
 	}
 
-	flags.AddPersistentFlags(cmd, &ecctx.ExecutionContext{})
+	AddPersistentFlags(c, &ExecutionContext{})
 
-	err := initConfig(appName, cmd)
+	err := initConfig(appName, c)
 	assert.NoError(t, err)
 
 	homeDir, err := os.UserHomeDir()
@@ -99,7 +97,7 @@ func Test_initConfig(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.RemoveAll(configDir)
 
-	err = initConfig(appName, cmd)
+	err = initConfig(appName, c)
 	assert.NoError(t, err)
 }
 
@@ -107,37 +105,37 @@ func Test_bindFlags(t *testing.T) {
 	v := viper.New()
 	v.Set("test-flag", "test-value")
 
-	cmd := &cobra.Command{}
+	c := &cobra.Command{}
 	flags := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	flags.String("test-flag", "", "test flag")
-	cmd.Flags().AddFlagSet(flags)
+	c.Flags().AddFlagSet(flags)
 
-	err := bindFlags(cmd, v)
+	err := bindFlags(c, v)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "test-value", cmd.Flags().Lookup("test-flag").Value.String())
+	assert.Equal(t, "test-value", c.Flags().Lookup("test-flag").Value.String())
 
-	cmd = &cobra.Command{}
+	c = &cobra.Command{}
 	flags = pflag.NewFlagSet("test", pflag.ContinueOnError)
 	flags.String("test-flag", "default-value", "test flag")
-	cmd.Flags().AddFlagSet(flags)
-	_ = cmd.Flags().Set("test-flag", "flag-value")
+	c.Flags().AddFlagSet(flags)
+	_ = c.Flags().Set("test-flag", "flag-value")
 
-	err = bindFlags(cmd, v)
+	err = bindFlags(c, v)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "flag-value", cmd.Flags().Lookup("test-flag").Value.String())
+	assert.Equal(t, "flag-value", c.Flags().Lookup("test-flag").Value.String())
 }
 
 func TestGenDocsCommand(t *testing.T) {
 	ec := newEC()
 
-	cmd := GenDocsCommand(ec)
+	c := GenDocsCommand(ec)
 
-	assert.NotNil(t, cmd)
-	assert.Equal(t, "gendocs", cmd.Name())
+	assert.NotNil(t, c)
+	assert.Equal(t, "gendocs", c.Name())
 }
 
-func newEC() *ecctx.ExecutionContext {
-	return ecctx.NewExecutionContext("test", "test", "0.0.0", os.Stdin, os.Stdout, os.Stderr)
+func newEC() *ExecutionContext {
+	return NewExecutionContext("test", "test", "0.0.0", os.Stdin, os.Stdout, os.Stderr)
 }

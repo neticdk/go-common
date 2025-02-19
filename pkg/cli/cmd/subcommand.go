@@ -9,7 +9,7 @@ import (
 // SubCommandRunner is an interface for a subcommand runner
 type SubCommandRunner[T any] interface {
 	// Complete performs any setup or completion of arguments
-	Complete(ctx context.Context, arg T)
+	Complete(ctx context.Context, arg T) error
 
 	// Validate checks if the arguments are valid
 	// Returns error if validation fails
@@ -87,7 +87,9 @@ func (b *SubCommandBuilder[T]) WithNoArgs() *SubCommandBuilder[T] {
 func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
-		runner.Complete(ctx, runnerArg)
+		if err := runner.Complete(ctx, runnerArg); err != nil {
+			return err
+		}
 		if err := runner.Validate(ctx, runnerArg); err != nil {
 			return err
 		}
@@ -97,19 +99,25 @@ func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command,
 
 // TestRunner is a test runner for commands
 type TestRunner[T any] struct {
-	CompleteFunc func(T)
+	CompleteFunc func(T) error
 	ValidateFunc func(T) error
 	RunFunc      func(T) error
 }
 
-func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) { tr.CompleteFunc(runnerArg) }
+func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) error {
+	return tr.CompleteFunc(runnerArg)
+}
+
 func (tr *TestRunner[T]) Validate(ctx context.Context, runnerArg T) error {
 	return tr.ValidateFunc(runnerArg)
 }
-func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error { return tr.RunFunc(runnerArg) }
+
+func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error {
+	return tr.RunFunc(runnerArg)
+}
 
 type NoopRunner[T any] struct{}
 
-func (o *NoopRunner[T]) Complete(ctx context.Context, runnerArg T)       {}
+func (o *NoopRunner[T]) Complete(ctx context.Context, runnerArg T) error { return nil }
 func (o *NoopRunner[T]) Validate(ctx context.Context, runnerArg T) error { return nil }
 func (o *NoopRunner[T]) Run(ctx context.Context, runnerArg T) error      { return nil }

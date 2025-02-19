@@ -1,4 +1,4 @@
-package flags
+package cmd
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ type enum struct {
 	Value   string
 }
 
-// newEnum give a list of allowed flag parameters, where the second argument is the default
-func newEnum(allowed []string, d string) *enum {
+// NewEnum give a list of allowed flag parameters, where the second argument is the default
+func NewEnum(allowed []string, d string) *enum {
 	return &enum{
 		Allowed: allowed,
 		Value:   d,

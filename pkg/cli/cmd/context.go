@@ -1,4 +1,4 @@
-package context
+package cmd
 
 import (
 	"io"
@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/neticdk/go-common/pkg/cli/errors"
-	"github.com/neticdk/go-common/pkg/cli/log"
 	"github.com/neticdk/go-common/pkg/cli/ui"
 	"github.com/neticdk/go-common/pkg/tui/term"
 	"github.com/spf13/cobra"
@@ -67,7 +66,7 @@ type ExecutionContext struct {
 	LogLevel *slog.LevelVar
 }
 
-// NewExecutionContext creates a new ExecutionContext
+// NewExecutionContext creates a new Context
 func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer) *ExecutionContext {
 	ec := &ExecutionContext{
 		AppName:          appName,
@@ -78,8 +77,8 @@ func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, st
 		Stderr:           stderr,
 		OutputFormat:     OutputFormatPlain,
 		PFlags: PFlags{
-			LogFormat: log.DefaultFormat,
-			LogLevel:  log.DefaultLevel,
+			LogFormat: LogFormatDefault,
+			LogLevel:  LogLevelDefault,
 		},
 		LogLevel: new(slog.LevelVar),
 	}
@@ -94,8 +93,8 @@ func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, st
 
 // SetLogLevel sets the ec.Logger log level
 func (ec *ExecutionContext) SetLogLevel() {
-	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel)
-	ec.LogLevel.Set(log.ParseLevel(ec.PFlags.LogLevel))
+	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel.String())
+	ec.LogLevel.Set(ParseLogLevel(ec.PFlags.LogLevel))
 }
 
 // SetColor sets weather color should be used in the output
@@ -136,10 +135,10 @@ func (ec *ExecutionContext) initOutput() {
 
 func (ec *ExecutionContext) initLogger() {
 	if !ec.IsTerminal {
-		ec.PFlags.LogFormat = log.FormatJSON
+		ec.PFlags.LogFormat = LogFormatJSON
 	}
-	ec.LogLevel.Set(log.ParseLevel(log.DefaultLevel))
-	handler := ui.NewHandler(ec.Stderr, ec.PFlags.LogFormat, log.DefaultLevel)
+	ec.LogLevel.Set(ParseLogLevel(LogLevelDefault))
+	handler := ui.NewHandler(ec.Stderr, ec.PFlags.LogFormat.String(), LogLevelDefault.String())
 	ec.Logger = slog.New(handler)
 }
 
