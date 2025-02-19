@@ -28,7 +28,6 @@ func (o *helloOptions) Complete(_ context.Context, ac *hello_world.Context) {
     } else {
         o.who = "World"
     }
-}
 
 func (o *helloOptions) Validate(_ context.Context, _ *hello_world.Context) error { return nil }
 

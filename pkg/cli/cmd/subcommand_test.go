@@ -41,7 +41,10 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("complete_called", func(t *testing.T) {
 		completeCalled := false
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) { completeCalled = true },
+			CompleteFunc: func(a arg) error {
+				completeCalled = true
+				return nil
+			},
 			ValidateFunc: func(a arg) error { return nil },
 			RunFunc:      func(a arg) error { return nil },
 		}
@@ -54,7 +57,7 @@ func Test_mkRunE(t *testing.T) {
 
 	t.Run("validate_error", func(t *testing.T) {
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) {},
+			CompleteFunc: func(a arg) error { return nil },
 			ValidateFunc: func(a arg) error { return assert.AnError },
 			RunFunc:      func(a arg) error { return nil },
 		}
@@ -67,7 +70,7 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("run_called", func(t *testing.T) {
 		runCalled := false
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) {},
+			CompleteFunc: func(a arg) error { return nil },
 			ValidateFunc: func(a arg) error { return nil },
 			RunFunc:      func(a arg) error { runCalled = true; return nil },
 		}

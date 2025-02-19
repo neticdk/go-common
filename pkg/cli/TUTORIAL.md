@@ -171,12 +171,13 @@ type helloOptions struct {
     who string
 }
 
-func (o *helloOptions) Complete(_ context.Context, ac *AppContext) {
+func (o *helloOptions) Complete(_ context.Context, ac *AppContext) error {
     if len(ac.EC.CommandArgs) > 0 {
         o.who = ac.EC.CommandArgs[0]
     } else {
         o.who = "World"
     }
+    return nil
 }
 
 func (o *helloOptions) Validate(_ context.Context, _ *AppContext) error { return nil }
@@ -428,9 +429,10 @@ func InitComponentCmd(ac *AppContext) *cobra.Command {
 // passing ac to NewSubCommand automatically makes it available as the second
 // argument to Complete, Validate and Run
 
-func (o *options) Complete(ctx context.Context, ac *AppContext) {
+func (o *options) Complete(ctx context.Context, ac *AppContext) error {
     // Here we are using the ExecutionContext Logger
     ac.EC.Logger.Info("some info")
+    return nil
 }
 
 func (o *options) Validate(ctx context.Context, ac *AppContext) error {
@@ -715,7 +717,7 @@ The runner interface looks like this:
 // SubCommandRunner is an interface for a subcommand runner
 type SubCommandRunner[T any] interface {
     // Complete performs any setup or completion of arguments
-    Complete(ctx context.Context, arg T)
+    Complete(ctx context.Context, arg T) error
 
     // Validate checks if the arguments are valid
     // Returns error if validation fails
@@ -742,7 +744,7 @@ The smallest possible implementation looks like this:
 ```go
 type runner[T any] struct{}
 
-func (o *runner[T]) Complete(ctx context.Context, runnerArg T)       {}
+func (o *runner[T]) Complete(ctx context.Context, runnerArg T) error { return nil }
 func (o *runner[T]) Validate(ctx context.Context, runnerArg T) error { return nil }
 func (o *runner[T]) Run(ctx context.Context, runnerArg T) error      { return nil }
 ```
@@ -765,7 +767,9 @@ that looks like this:
 ```go
 return func(cmd *cobra.Command, args []string) error {
     ctx := cmd.Context()
-    runner.Complete(ctx, runnerArg)
+    if err := runner.Complete(ctx, runnerArg); err != nil {
+        return err
+    }
     if err := runner.Validate(ctx, runnerArg); err != nil {
         return err
     }
@@ -779,7 +783,7 @@ you can always set `RunE` on `cobra.Cobra` to do your own thing.
 When the sub-command runs, it runs these three functions in order:
 
 `Complete` completes any settings/configuration/flags/etc. before validation.
-It doesn't return anything.
+It return an error.
 
 Given this struct:
 
@@ -795,16 +799,16 @@ type options struct {
 The `Complete` function could do something like this:
 
 ```go
-func (o *options) Complete(_ context.Context, ac *AppContext) {
+func (o *options) Complete(_ context.Context, ac *AppContext) error {
     if o.age > 50 {
         ac.EC.Logger.Warn("Elderly chap found")
         o.car == "Mercedes E350"
     }
+    return nil
 }
 ```
 
-`Validate` validates flags, arguments and other things. It always returns
-error.
+`Validate` validates flags, arguments and other things. It returns an error.
 
 ```go
 func (o *options) Validate(_ context.Context, ac *AppContext) error {
