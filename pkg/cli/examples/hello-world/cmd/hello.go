@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func helloCmd(ac *AppContext) *cobra.Command {
+func newHelloCmd(ac *AppContext) *cobra.Command {
 	o := &helloOptions{}
 	c := cmd.NewSubCommand("hello", o, ac).
 		WithShortDesc("Say hello!").

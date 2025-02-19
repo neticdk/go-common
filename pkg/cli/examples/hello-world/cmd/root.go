@@ -27,7 +27,7 @@ func newRootCmd(ac *AppContext) *cobra.Command {
 		Build()
 
 	c.AddCommand(
-		helloCmd(ac),
+		newHelloCmd(ac),
 	)
 
 	return c
