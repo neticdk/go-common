@@ -31,7 +31,7 @@ necessarily an expert. You should expect to read up on how
 
 Let's create a hello world CLI that prints a greeting when we run it.
 
-You can look at the code in the [examples/helloworld](examples/hello-world/)
+You can look at the code in the [examples/helloworld](examples/helloworld/)
 directory.
 
 First, initialize the project:
