@@ -16,7 +16,7 @@ trim_trailing_whitespace = false
 indent_size = 2
 
 
-[Makefile,go.mod,go.sum,*.go]
+[{Makefile,go.mod,go.sum,*.go}]
 indent_style = tab
 tab_width = 4
 max_line_length = 0

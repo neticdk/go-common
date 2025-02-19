@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -75,9 +76,66 @@ func (b *SubCommandBuilder[T]) Build() *cobra.Command {
 	return b.cmd
 }
 
-// WithExample sets the example of the subcommand
+// WithNoArgs causes the subcommand to return an error if any arguments are passed
 func (b *SubCommandBuilder[T]) WithNoArgs() *SubCommandBuilder[T] {
-	b.cmd.Args = cobra.NoArgs
+	b.cmd.Args = func(cmd *cobra.Command, args []string) error {
+		if len(args) > 0 {
+			return fmt.Errorf(
+				"%q does not accept any arguments\n\nUsage: %s",
+				cmd.CommandPath(),
+				cmd.UseLine(),
+			)
+		}
+		return nil
+	}
+	return b
+}
+
+// WithExactArgs causes the subcommand to return an error if there are not exactly n arguments
+func (b *SubCommandBuilder[T]) WithExactArgs(n int) *SubCommandBuilder[T] {
+	b.cmd.Args = func(cmd *cobra.Command, args []string) error {
+		if len(args) != n {
+			return fmt.Errorf(
+				"%q requires exactly %d arguments\n\nUsage: %s",
+				cmd.CommandPath(),
+				n,
+				cmd.UseLine(),
+			)
+		}
+		return nil
+	}
+	return b
+}
+
+// WithMinArgs causes the subcommand to return an error if there is not at least n arguments
+func (b *SubCommandBuilder[T]) WithMinArgs(n int) *SubCommandBuilder[T] {
+	b.cmd.Args = func(cmd *cobra.Command, args []string) error {
+		if len(args) < n {
+			return fmt.Errorf(
+				"%q requires at least %d arguments\n\nUsage: %s",
+				cmd.CommandPath(),
+				n,
+				cmd.UseLine(),
+			)
+		}
+		return nil
+	}
+	return b
+}
+
+// WithMaxArgs causes the subcommand to return an error if there are more than n arguments
+func (b *SubCommandBuilder[T]) WithMaxArgs(n int) *SubCommandBuilder[T] {
+	b.cmd.Args = func(cmd *cobra.Command, args []string) error {
+		if len(args) > n {
+			return fmt.Errorf(
+				"%q accepts at most %d arguments\n\nUsage: %s",
+				cmd.CommandPath(),
+				n,
+				cmd.UseLine(),
+			)
+		}
+		return nil
+	}
 	return b
 }
 

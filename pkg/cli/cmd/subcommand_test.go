@@ -82,3 +82,77 @@ func Test_mkRunE(t *testing.T) {
 		assert.True(t, runCalled)
 	})
 }
+
+func TestArgsHelpers(t *testing.T) {
+	t.Run("NoArgsReturnsErrorWhenArgsProvided", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithNoArgs()
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1"})
+		assert.Error(t, err)
+	})
+
+	t.Run("NoArgsSucceedsWhenNoArgsProvided", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithNoArgs()
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{})
+		assert.NoError(t, err)
+	})
+
+	t.Run("ExactArgsReturnsErrorWhenArgsCountMismatch", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithExactArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1"})
+		assert.Error(t, err)
+	})
+
+	t.Run("ExactArgsSucceedsWhenArgsCountMatches", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithExactArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1", "arg2"})
+		assert.NoError(t, err)
+	})
+
+	t.Run("MinArgsReturnsErrorWhenArgsCountLessThanMin", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithMinArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1"})
+		assert.Error(t, err)
+	})
+
+	t.Run("MinArgsSucceedsWhenArgsCountAtLeastMin", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithMinArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1", "arg2"})
+		assert.NoError(t, err)
+	})
+
+	t.Run("MaxArgsReturnsErrorWhenArgsCountMoreThanMax", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithMaxArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1", "arg2", "arg3"})
+		assert.Error(t, err)
+	})
+
+	t.Run("MaxArgsSucceedsWhenArgsCountAtMostMax", func(t *testing.T) {
+		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
+		builder.WithMaxArgs(2)
+		cmd := builder.Build()
+
+		err := cmd.Args(cmd, []string{"arg1", "arg2"})
+		assert.NoError(t, err)
+	})
+}
