@@ -2,17 +2,18 @@
 
 ## Introduction
 
-The `cli` packages helps you build CLIs that conform to [Scroll 11](https://scr.k8s.netic.dk/0011/).
+The `cli` packages help you build Command Line Interfaces (CLIs) that conform
+to [Scroll 11](https://scr.k8s.netic.dk/0011/).
 
-It consists of a collection of small packages:
+The packages are:
 
-- `cmd` provides helpers for building the root command and sub-commands.
-   It sets sensible defaults, global flags, configuration files, etc. It
-   also adds an interface to sub-commands that makes completing, validating
-   and running commands more uniform.
-- `errors` provides error handling and error types.
-- `ui` provides UI elements such as tables, spinners, select boxes, prompts,
-  etc.
+- `cmd` — provides helpers for building the root command and
+  sub-commands. It sets sensible defaults, global flags, configuration
+  files, etc. It also adds an interface to sub-commands that makes
+  completing, validating and running commands more uniform.
+- `errors` — provides error handling and error types.
+- `ui` — provides UI elements such as tables, spinners, select boxes,
+  prompts, etc.
 
 This tutorial covers basic usage and the core concepts of these packages.
 
@@ -485,7 +486,7 @@ ec := cmd.NewExecutionContext(...)
 ec.PFlags.DryRunEnabled = true
 ```
 
-See [`cmd/flags.go`](context/flags.go) for more information about available flags.
+See [`cmd/flags.go`](cmd/flags.go) for more information about available flags.
 
 Flags that can't be disabled:
 
@@ -909,6 +910,75 @@ Sometimes you need access to the current `cobra.Command`. Use
 
 Checking the command arguments can also come in handy. The `args` can be
 accessed through `ExecutionContext.CommandArgs`.
+
+### Use Cases
+
+When creating your application you want to separate all of the command line
+logic (flags parsing and validation, dependency injection, etc.) from the actual
+business logic. In the Getting Started example above we cheated and just printed
+out "Hello" in the `Run` function directly:
+
+```go
+func (o *helloOptions) Run(_ context.Context, ac *helloworld.Context) error {
+    ui.Info.Printf("Hello, %s!\n", o.who)
+    return nil
+}
+```
+
+In real life applications things are rarely so simple. So, we encourage the use
+of the 'Use cases' term taken from Clean Architecture.
+
+From the Clean Architecture book:
+
+> These use cases orchestrate the flow of data to and from the entities, and
+> direct those entities to use their Critical Business Rules to achieve the
+> goals of the use case.
+
+In our case we don't follow Clean 100%, so we can take some liberties and
+paraphrase this to something more broadly like:
+
+> Use Cases encapsulate application-specific business rules
+
+This means there are very loose constraints. Think of it as separation of
+concerns or grouping logic into autonomous units. Often they will be named after
+a thing within a business domain on which one can perform actions.
+
+To implement this, keep your use cases in separate directories under
+`internal/usecases`.
+
+An example. Even though `car` is a very broad use case let's use it anyway.
+
+The file `internal/usecases/car/drive.go` could contain something like:
+
+```go
+package car
+
+import (
+    "context"
+    "log/slog"
+)
+
+func Drive(ctx context.Context, ac *myapp.Context, name, carName, dst string) error {
+    ac.EC.Logger.InfoContext(ctx, "Driving my car!",
+        slog.String("name", name),
+        slog.String("car", carName),
+        slog.String("destination", dst))
+    car := ac.CarService.Get(ctx, carName)
+    driver := ac.UserService.Get(ctx, name)
+    destination := ac.LocationService.Get(ctx, dst)
+    return ac.CarService.Drive(ctx, driver, car, dest)
+}
+```
+
+An in our sub-command:
+
+```go
+func (o *options) Run(ctx context.Context, ac *myapp.Context) error {
+    return car.Drive(ctx, ac, o.name, o.car, o.dest)
+}
+```
+
+This makes it easier to separate concerns.
 
 ### UI Elements
 
