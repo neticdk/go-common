@@ -1,15 +1,16 @@
 package cmd
 
 import (
-	"hello-world/internal/helloworld"
 	"os"
+
+	"helloworld/internal/helloworld"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"
 	"github.com/spf13/cobra"
 )
 
 const (
-	AppName   = "hello-world"
+	AppName   = "helloworld"
 	ShortDesc = "A greeting app"
 	LongDesc  = `This application greets the user with a friendly messages`
 )
