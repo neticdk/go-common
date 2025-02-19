@@ -1057,9 +1057,10 @@ See [examples/ui](examples/ui/) for example usage.
 
 ## Building a Simple Project
 
-Check out [examples/pokemon](examples/pokemon/) for a more elaborate examples
-that:
+Check out [examples/pokemon](examples/pokemon/) for a more elaborate example
+that showvases:
 
-- uses the application context for dependency injection
-- uses use cases
-- uses some UI functionality
+- dependency injection using the application context
+- use cases
+- some UI functionality
+- and more!
