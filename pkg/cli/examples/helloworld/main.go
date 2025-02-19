@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"hello-world/cmd"
+	"helloworld/cmd"
 )
 
 var version = "HEAD"

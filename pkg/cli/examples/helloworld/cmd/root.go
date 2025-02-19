@@ -3,19 +3,20 @@ package cmd
 import (
 	"os"
 
+	"helloworld/internal/helloworld"
+
 	"github.com/neticdk/go-common/pkg/cli/cmd"
 	"github.com/spf13/cobra"
-	hello_world "hello-world/internal/hello-world"
 )
 
 const (
-	AppName   = "hello-world"
+	AppName   = "helloworld"
 	ShortDesc = "A greeting app"
 	LongDesc  = `This application greets the user with a friendly messages`
 )
 
 // newRootCmd creates the root command
-func newRootCmd(ac *hello_world.Context) *cobra.Command {
+func newRootCmd(ac *helloworld.Context) *cobra.Command {
 	c := cmd.NewRootCommand(ac.EC).
 		Build()
 
@@ -35,7 +36,7 @@ func Execute(version string) int {
 		os.Stdin,
 		os.Stdout,
 		os.Stderr)
-	ac := hello_world.NewContext()
+	ac := helloworld.NewContext()
 	ac.EC = ec
 	ec.LongDescription = LongDesc
 	rootCmd := newRootCmd(ac)
