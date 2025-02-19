@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"os"
-
 	"helloworld/internal/helloworld"
+	"os"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"
 	"github.com/spf13/cobra"
