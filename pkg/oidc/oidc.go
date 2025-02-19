@@ -7,9 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/MicahParks/keyfunc/v2"
+	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/neticdk/go-common/pkg/log"
 )
@@ -32,7 +31,7 @@ func NewKeyfunc(ctx context.Context, issuers ...string) (jwt.Keyfunc, error) {
 
 	client := http.DefaultClient
 
-	providers := map[string]*keyfunc.JWKS{}
+	providers := map[string]keyfunc.Keyfunc{}
 	for _, issuer := range issuers {
 		logger.DebugContext(ctx, "resolving certificates", slog.String("issuer", issuer))
 		wellKnown := strings.TrimSuffix(issuer, "/") + "/.well-known/openid-configuration"
@@ -52,7 +51,7 @@ func NewKeyfunc(ctx context.Context, issuers ...string) (jwt.Keyfunc, error) {
 			return nil, fmt.Errorf("unable to parse OpenID configuration document: %w", err)
 		}
 
-		jwks, err := keyfunc.Get(config.JWKS, keyfunc.Options{RefreshInterval: 5 * time.Minute})
+		jwks, err := keyfunc.NewDefault([]string{config.JWKS})
 		if err != nil {
 			return nil, err
 		}

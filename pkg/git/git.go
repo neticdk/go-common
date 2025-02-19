@@ -180,6 +180,7 @@ func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.
 		return nil, fmt.Errorf("creating SSH public keys from private key: %w", err)
 	}
 	if ignoreHostKeys {
+		//nolint:gosec
 		v.HostKeyCallback = ssh2.InsecureIgnoreHostKey()
 	}
 	return v, nil
