@@ -7,6 +7,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	AppName   = "hello-world"
+	ShortDesc = "A greeting app"
+	LongDesc  = `This application greets the user with a friendly messages`
+)
+
+type AppContext struct {
+	EC *cmd.ExecutionContext
+}
+
+func NewAppContext() *AppContext {
+	return &AppContext{}
+}
+
 // NewRootCmd creates the root command
 func NewRootCmd(ac *AppContext) *cobra.Command {
 	c := cmd.NewRootCommand(ac.EC).
