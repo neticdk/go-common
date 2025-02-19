@@ -702,7 +702,7 @@ func (o *options) Validate(ctx context.Context, ac *myapp.Context) {
 }
 ```
 
-### Commands
+### Commands and Sub-Commands
 
 The two helpers `cmd.NewRootCommand` and `cmd.NewSubCommand` are used to create
 root commands and sub-commands respectively.
@@ -911,6 +911,64 @@ Sometimes you need access to the current `cobra.Command`. Use
 Checking the command arguments can also come in handy. The `args` can be
 accessed through `ExecutionContext.CommandArgs`.
 
+#### Documentation
+
+It's pretty important to provide good documentation of your CLI and the
+commands. A `cobra.Command` has a few fields to help with that, namely:
+
+- `Use` which sets the short usage of the command
+- `Short` which sets the short description of the command
+- `Long` which sets the long description of the command
+- `GroupID` which groups together commands
+- `Example` which provides example usage for the command
+
+`Use` is set automatically by `NewSubCommand`.
+
+`Short` is set with `WithShortDesc()`.
+
+`Long` is set with `WithLongDesc()`.
+
+`GroupID` defaults to `cmd.GroupBase`. You can create your own groups by
+defining them on the parent with `AddGroup`:
+
+```go
+const driveGroup = "group-drive"
+
+c.AddGroup(
+    &cobra.Group{
+        ID:    groupDrive,
+        Title: "Component Commands:",
+    },
+)
+```
+
+Then, reference the group in your sub-command:
+
+```go
+c := NewSubCommand(...).WithGroupID(driveGroup)
+```
+
+`Example` is pretty important, especially if the command is not straight forward
+to use or if there are many flag combinations. You can set it with
+`WithExample()` and it's recommended to create a separate function that returns
+example usage:
+
+```go
+func newDriveCmd(...) {
+    c := NewSubCommand("drive", ...).WithEaxmple(driveCmdExample())
+    // ...
+}
+
+func driveCmdExample() string {
+    b := strings.Builder{}
+
+    b.WriteString("# Let john drive\n")
+    b.WriteString("car drive --name john --age 62\n")
+
+    return b.String()
+}
+```
+
 ### Use Cases
 
 When creating your application you want to separate all of the command line
@@ -994,6 +1052,8 @@ There's a couple of UI elements included in the `ui` package. There are:
   `ui.Success.Println("Yay!")`
 
 Look at the [package](ui/) to see what is available.
+
+See [examples/ui](examples/ui/) for example usage.
 
 ## Building a Simple Project
 
