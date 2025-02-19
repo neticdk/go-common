@@ -14,7 +14,7 @@ type genDocsOptions struct {
 	dir string
 }
 
-func (o *genDocsOptions) Complete(ctx context.Context, ec *ExecutionContext)       {}
+func (o *genDocsOptions) Complete(ctx context.Context, ec *ExecutionContext) error { return nil }
 func (o *genDocsOptions) Validate(ctx context.Context, ec *ExecutionContext) error { return nil }
 func (o *genDocsOptions) Run(ctx context.Context, ec *ExecutionContext) error {
 	if err := os.MkdirAll(o.dir, 0o755); err != nil {
