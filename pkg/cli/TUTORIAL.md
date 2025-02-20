@@ -1,7 +1,7 @@
 # CLI packages Tutorial
 
-## Introduction
 ## Table of Contents
+
 - [Introduction](#introduction)
 - [Getting Started](#getting-started)
 - [Core Concepts](#core-concepts)
@@ -12,6 +12,8 @@
   - [Commands and Sub-Commands](#commands-and-sub-commands)
   - [UI Elements](#ui-elements)
 - [Building a Simple Project](#building-a-simple-project)
+
+## Introduction
 
 The `cli` packages help you build Command Line Interfaces (CLIs) that conform
 to [Scroll 11](https://scr.k8s.netic.dk/0011/).
