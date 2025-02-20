@@ -13,7 +13,7 @@ func TestAddPersistentFlags(t *testing.T) {
 	tests := []struct {
 		name           string
 		args           []string
-		expectedFormat cmd.OutputFormat
+		expectedFormat string
 		expectedFlags  []string
 	}{
 		{
@@ -39,6 +39,12 @@ func TestAddPersistentFlags(t *testing.T) {
 			args:           []string{"--markdown"},
 			expectedFormat: cmd.OutputFormatMarkdown,
 			expectedFlags:  []string{"markdown"},
+		},
+		{
+			name:           "Table format",
+			args:           []string{"--table"},
+			expectedFormat: cmd.OutputFormatTable,
+			expectedFlags:  []string{"table"},
 		},
 	}
 
