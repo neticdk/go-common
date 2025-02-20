@@ -570,13 +570,13 @@ The output format is a way to instruct the application about the format the user
 wants output in. Typically this would be plain text for humans and something
 like JSON for machines. This can be set via flags.
 
-`ExecutionContext.OutputFormat` stores the output format as an ENUM:
+`ExecutionContext.OutputFormat` stores the output format as a string:
 
-- `cmd.OutputFormatPlain`
-- `cmd.OutputFormatJSON`
-- `cmd.OutputFormatYAML`
-- `cmd.OutputFormatMarkdown`
-- `cmd.OutputFormatTable`
+- `cmd.OutputFormatPlain` - `plain`
+- `cmd.OutputFormatJSON` - `json`
+- `cmd.OutputFormatYAML` - `yaml`
+- `cmd.OutputFormatMarkdown` - `markdown`
+- `cmd.OutputFormatTable` - `table`
 
 To set it, enable the format flags you want to support.
 
