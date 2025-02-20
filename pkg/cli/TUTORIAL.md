@@ -1,6 +1,17 @@
 # CLI packages Tutorial
 
 ## Introduction
+## Table of Contents
+- [Introduction](#introduction)
+- [Getting Started](#getting-started)
+- [Core Concepts](#core-concepts)
+  - [The Execution Context](#the-execution-context)
+  - [Persistent/Global Flags](#persistentglobal-flags)
+  - [Logging](#logging)
+  - [Error Handling](#error-handling)
+  - [Commands and Sub-Commands](#commands-and-sub-commands)
+  - [UI Elements](#ui-elements)
+- [Building a Simple Project](#building-a-simple-project)
 
 The `cli` packages help you build Command Line Interfaces (CLIs) that conform
 to [Scroll 11](https://scr.k8s.netic.dk/0011/).
@@ -205,8 +216,7 @@ description, "Say hello!" and a struct `helloOptions` to hold information such
 as flag values or in this case who to say hello to.
 
 You may notice the Application Context (`ac`) being passed to
-`NewSubCommand()` along with `helloOptions`. There is some magic going on
-here which will be explained later, but for now you need to know that it makes
+The following mechanism enables automatic command execution and will be explained in detail in the Commands section
 sure that `Complete()`, `Validate()` and `Run()` are executed when the
 sub-command runs.
 
@@ -336,6 +346,39 @@ And that concludes the getting started guide. Next up is core concepts.
 
 ## Core Concepts
 
+### Execution Overview
+
+```mermaid
+sequenceDiagram
+    participant main.go
+    participant cmd/root.go
+    participant pkg/cli/cmd
+    participant cobra.Command
+    main.go->>cmd/root.go: cmd.Execute(...)
+    cmd/root.go->>pkg/cli/cmd: NewExecutionContext(...)
+    pkg/cli/cmd-->>cmd/root.go: *ExecutionContext
+    cmd/root.go->>cmd/root.go: new(myapp.Context)
+    cmd/root.go->>cmd/root.go: myapp.Context.EC = *ExecutionContext
+    cmd/root.go->>cmd/root.go: newRootCmd(*myapp.Context)
+    cmd/root.go->>pkg/cli/cmd: NewRootCommand(*ExecutionContext)
+    activate pkg/cli/cmd
+    pkg/cli/cmd->>cobra.Command: new(cobra.Command)
+    cobra.Command-->>pkg/cli/cmd: *cobra.Command
+    pkg/cli/cmd-->>cmd/root.go: *cobra.Command
+    deactivate pkg/cli/cmd
+    cmd/root.go->>cmd/root.go: AddCommand(newSubCmd(*myapp.Context), ...)
+    cmd/root.go->>cobra.Command: *cobra.Command.Execute()
+    activate cobra.Command
+    cobra.Command->>cobra.Command: Run (sub-)command code
+    cobra.Command-->>cmd/root.go: error
+    deactivate cobra.Command
+    cmd/root.go->>pkg/cli/cmd: ec.ErrorHandler.HandleError()
+    pkg/cli/cmd-->>cmd/root.go: error
+    cmd/root.go-->>main.go: exit code
+```
+
+This is how the CLI executes. It is explained in details below.
+
 ### The Execution Context
 
 The `ExecutionContext` is a struct containing information relevant to the
@@ -402,7 +445,7 @@ ac := &myapp.Context{EC: ec}
 rootCmd := newRootCmd(ac)
 ```
 
-The pass it from `newRootCmd` via `myapp.Context` to the functions used to
+Then pass it from `newRootCmd` via `myapp.Context` to the functions used to
 create commands:
 
 ```go
@@ -821,7 +864,7 @@ return func(cmd *cobra.Command, args []string) error {
 }
 ```
 
-It comes at the cost of loosing some flexibility. If you need that flexibility,
+It comes at the cost of losing some flexibility. If you need that flexibility,
 you can always set `RunE` on `cobra.Cobra` to do your own thing.
 
 When the sub-command runs, it runs these three functions in order:
@@ -852,7 +895,8 @@ func (o *options) Complete(_ context.Context, ac *myapp.Context) error {
 }
 ```
 
-`Validate` validates flags, arguments and other things. It returns an error.
+`Validate` validates flags, arguments and other settings/requirements. It
+returns an error.
 
 ```go
 func (o *options) Validate(_ context.Context, ac *myapp.Context) error {
@@ -1077,16 +1121,60 @@ much.
 
 ### UI Elements
 
-There's a couple of UI elements included in the `ui` package. There are:
+The `ui` package provides several components for building interactive command-line interfaces:
 
-- `ui.NewTable()` - for creating tables
-- `ui.Select()` - for creating selection inputs
-- `ui.Spin()` - for running functions with a spinner
-- `ui.Confirm()` - for creating confirmation prompts
-- `ui.Prompt()` - for prompting for input
-- a range of prefix writers (`ui.Info`, `ui.Success`, etc.) each of
-  which are chained command that takes printer functions (e.g.
-  `ui.Success.Println("Yay!")`
+#### Tables
+
+Use `ui.NewTable()` to create formatted tables:
+
+```go
+table := ui.NewTable(ac.EC.Stdout, []string{"Name", "Age", "City"})
+err := table.WithData([][]string{
+    {"John", "30", "New York"},
+    {"Jane", "25", "Los Angeles"},
+}).Render()
+```
+
+#### Selection Menus
+
+`ui.Select()` creates interactive selection menus:
+
+```go
+options := []string{"Option 1", "Option 2", "Option 3"}
+selected, err := ui.Select("Choose an option:", options)
+```
+
+#### Progress Indicators
+
+`ui.Spin()` shows a spinner during long operations:
+
+```go
+ui.Spin(ac.EC.Spinner, "Processing...", func(s ui.Spinner) {
+    // Long running operation
+})
+```
+
+#### User Input
+
+For user interaction:
+
+- `ui.Confirm()` - Yes/No confirmations
+- `ui.Prompt()` - Text input with optional validation
+
+#### Status Output
+
+Status prefix writers for consistent output formatting:
+
+- `ui.Info` - Information messages
+- `ui.Success` - Success messages
+- `ui.Warning` - Warning messages
+- `ui.Error` - Error messages
+
+Example:
+
+```go
+ui.Success.Printf("Operation completed: %s\n", result)
+```
 
 Look at the [package](ui/) to see what is available.
 
@@ -1095,7 +1183,7 @@ See [examples/ui](examples/ui/) for example usage.
 ## Building a Simple Project
 
 Check out [examples/pokemon](examples/pokemon/) for a more elaborate example
-that showvases:
+that showcases:
 
 - dependency injection using the application context
 - use cases
