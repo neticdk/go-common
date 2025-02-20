@@ -55,6 +55,7 @@ func TestAddPersistentFlags(t *testing.T) {
 			ec.PFlags.JSONEnabled = true
 			ec.PFlags.YAMLEnabled = true
 			ec.PFlags.MarkdownEnabled = true
+			ec.PFlags.TableEnabled = true
 
 			os.Args = append([]string{"cmd"}, tt.args...)
 			cmd.AddPersistentFlags(c, ec)
