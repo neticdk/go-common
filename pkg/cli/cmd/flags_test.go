@@ -13,7 +13,7 @@ func TestAddPersistentFlags(t *testing.T) {
 	tests := []struct {
 		name           string
 		args           []string
-		expectedFormat cmd.OutputFormat
+		expectedFormat string
 		expectedFlags  []string
 	}{
 		{
@@ -40,6 +40,12 @@ func TestAddPersistentFlags(t *testing.T) {
 			expectedFormat: cmd.OutputFormatMarkdown,
 			expectedFlags:  []string{"markdown"},
 		},
+		{
+			name:           "Table format",
+			args:           []string{"--table"},
+			expectedFormat: cmd.OutputFormatTable,
+			expectedFlags:  []string{"table"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -49,6 +55,7 @@ func TestAddPersistentFlags(t *testing.T) {
 			ec.PFlags.JSONEnabled = true
 			ec.PFlags.YAMLEnabled = true
 			ec.PFlags.MarkdownEnabled = true
+			ec.PFlags.TableEnabled = true
 
 			os.Args = append([]string{"cmd"}, tt.args...)
 			cmd.AddPersistentFlags(c, ec)

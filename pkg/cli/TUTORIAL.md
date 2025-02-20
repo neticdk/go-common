@@ -7,13 +7,13 @@ to [Scroll 11](https://scr.k8s.netic.dk/0011/).
 
 The packages are:
 
-- `cmd` — provides helpers for building the root command and
+- [`cmd`](cmd/) — provides helpers for building the root command and
   sub-commands. It sets sensible defaults, global flags, configuration
   files, etc. It also adds an interface to sub-commands that makes
-  completing, validating and running commands more uniform.
-- `errors` — provides error handling and error types.
-- `ui` — provides UI elements such as tables, spinners, select boxes,
-  prompts, etc.
+  completing, validating and running commands more predictable.
+- [`errors`](errors/) — provides error handling and error types.
+- [`ui`](ui/) — provides UI elements such as tables, spinners, select
+  boxes, prompts, etc.
 
 This tutorial covers basic usage and the core concepts of these packages.
 
@@ -74,8 +74,8 @@ func NewContext() *Context {
 Here we set up the Application Context . Think of it as the container for
 application information and dependencies. It will vary from project to project.
 
-For now it just holds a pointer to the `ExecutionContext` which you will learn
-more about later.
+For now it just holds a pointer to the
+[`ExecutionContext`](#the-execution-context) which you will learn more about later.
 
 Create the `cmd` directory which will hold the code for the CLI commands:
 
@@ -237,6 +237,17 @@ func main() {
 }
 ```
 
+This runs the `Execute` function and exits with the status code returned.
+
+We use the `version` variable to set the version of the CLI when building it.
+The `go build` flag `-ldflags` can override variable values at build time and we
+use that to set the version to the current git tag. Example:
+
+```bash
+VERSION=$(git describe --tags --always --match=v* 2>/dev/null || echo v0 | sed -e s/^v//)
+go build -o bin/ -ldflags '-s -w -X main.version=${VERSION}'
+```
+
 Install dependencies:
 
 ```bash
@@ -360,8 +371,8 @@ are used.
 
 #### Using the `ExecutionContext`
 
-The `ExecutionContext` can be used by itself but works better in most cases if
-embedded in other context structs such an application context:
+The `ExecutionContext` can be used by itself but works better when embedded in
+other context structs such an application context:
 
 ```go
 package myapp
@@ -378,8 +389,8 @@ ac := &Context{
 }
 ```
 
-That way you will always have things like the `Logger` and `ErrorHandler`
-as well as the I/O pipes available.
+That way you will always have things like the `Logger`, `ErrorHandler`
+and I/O pipes available.
 
 Create it and pass it to `newRootCmd` from `Execute()` in `cmd/root.go`:
 
@@ -391,8 +402,8 @@ ac := &myapp.Context{EC: ec}
 rootCmd := newRootCmd(ac)
 ```
 
-`newRootCmd` passes the `ExecutionContext` to the functions used to create
-commands:
+The pass it from `newRootCmd` via `myapp.Context` to the functions used to
+create commands:
 
 ```go
 func newRootCmd(ac *myapp.Context) {
@@ -403,7 +414,7 @@ func newRootCmd(ac *myapp.Context) {
     )
 }
 
-// or
+// or for sub-commands
 
 func newSubCmd(ac *myapp.Context) {
     o := &options{}
@@ -411,6 +422,11 @@ func newSubCmd(ac *myapp.Context) {
     // ...
 }
 ```
+
+The [Commands and Sub-Commands](#commands-and-sub-commands) section explains
+the `NewRootCommand` and `NewSubCommand` functions in detail. For now it's fine
+to know that they create the respective `cobra.Command` and make the `Context`
+available later on.
 
 In the root command the `ExecutionContext` is available for all fields of the
 `*cobra.Command` passed to or returned from `NewRootCommand`:
@@ -430,6 +446,11 @@ func newRootCmd(ac *myapp.Context) {
     // ...
 }
 ```
+
+Here the `WithInitFunc` uses functions on the `Context` to do some
+initialization. `WithInitFunc` is a way to add code to the `PersistentPreRunE`
+function on the `cobra.Command` struct. It can be used like here to setup
+defaults or dependencies on the `Concext`.
 
 For sub-commands, the `NewSubCommand` passes down the context to the
 `Complete`, `Validate` and `Run` functions:
@@ -471,7 +492,7 @@ func (o *options) Run(ctx context.Context, ac *myapp.Context) error {
 
 Note that the third argument passed to `NewSubCommand` is generic, so anything
 you pass there will end up becoming the second argument to the three functions.
-More on that later.
+In most cases this will be the Application Context. More on that later.
 
 ### Persistent/Global Flags
 
@@ -479,12 +500,15 @@ The `cmd` package comes with default persistent flags, some of which are
 permanent/mandatory and some of which can be toggled. Persistent flags are
 always present for all commands.
 
-To enable a flag, set `<FLAG>Enabled` to `true`:
+To enable setting a flag (not enabling the flag itself), set `<FLAG>Enabled`
+to `true`:
 
 ```go
 ec := cmd.NewExecutionContext(...)
 ec.PFlags.DryRunEnabled = true
 ```
+
+This makes it possible to use the `--dry-run` flag.
 
 See [`cmd/flags.go`](cmd/flags.go) for more information about available flags.
 
@@ -507,6 +531,7 @@ like JSON for machines. This can be set via flags.
 - `cmd.OutputFormatJSON`
 - `cmd.OutputFormatYAML`
 - `cmd.OutputFormatMarkdown`
+- `cmd.OutputFormatTable`
 
 To set it, enable the format flags you want to support.
 
@@ -516,6 +541,7 @@ For now, these are:
 - `--json`
 - `--yaml`
 - `--markdown`
+- `--table`
 
 They are mutually exclusive. Enable them like this:
 
@@ -524,6 +550,7 @@ ec.PFlags.PlainEnabled = true
 ec.PFlags.JSONEnabled = true
 ec.PFlags.YAMLEnabled = true
 ec.PFlags.MarkdownEnabled = true
+ec.PFlags.TableEnabled = true
 ```
 
 #### Enabling flags
@@ -984,7 +1011,7 @@ func (o *helloOptions) Run(_ context.Context, ac *helloworld.Context) error {
 ```
 
 In real life applications things are rarely so simple. So, we encourage the use
-of the 'Use cases' term taken from Clean Architecture.
+of 'Use cases', a term taken from Clean Architecture.
 
 From the Clean Architecture book:
 
@@ -1037,6 +1064,16 @@ func (o *options) Run(ctx context.Context, ac *myapp.Context) error {
 ```
 
 This makes it easier to separate concerns.
+
+#### When to Create Use Cases
+
+As mentioned, we encourage the use of use cases. But there is no need to
+needlessly complicate things. If you are just doing something that borders what
+may be called business logic or something small (think a few lines of code) it
+is OK to keep the code in `Run`. But keep in mind that code in `cmd/` is *meant*
+to handle command line logic, not business logic. So in the long run and for
+maintainability it might be smart to create use cases even though they don't do
+much.
 
 ### UI Elements
 
