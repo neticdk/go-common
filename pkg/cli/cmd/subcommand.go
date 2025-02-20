@@ -46,6 +46,12 @@ func NewSubCommand[T any](
 	}
 }
 
+// Build builds the subcommand
+func (b *SubCommandBuilder[T]) Build() *cobra.Command {
+	b.cmd.RunE = mkRunE(b.runner, b.runnerArg)
+	return b.cmd
+}
+
 // WithShortDesc sets the short description of the subcommand
 func (b *SubCommandBuilder[T]) WithShortDesc(desc string) *SubCommandBuilder[T] {
 	b.cmd.Short = desc
@@ -70,10 +76,10 @@ func (b *SubCommandBuilder[T]) WithExample(example string) *SubCommandBuilder[T]
 	return b
 }
 
-// Build builds the subcommand
-func (b *SubCommandBuilder[T]) Build() *cobra.Command {
-	b.cmd.RunE = mkRunE(b.runner, b.runnerArg)
-	return b.cmd
+// WithAliases sets the aliases of the subcommand
+func (b *SubCommandBuilder[T]) WithAliases(aliases ...string) *SubCommandBuilder[T] {
+	b.cmd.Aliases = aliases
+	return b
 }
 
 // WithNoArgs causes the subcommand to return an error if any arguments are passed
