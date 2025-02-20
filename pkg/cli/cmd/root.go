@@ -46,15 +46,6 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 	if ec.AppName == "" {
 		panic("app name is required")
 	}
-	initFunc := func(cmd *cobra.Command, args []string) error {
-		if err := initConfig(ec.AppName, cmd); err != nil {
-			return err
-		}
-		ec.Command = cmd
-		ec.CommandArgs = args
-		ec.SetLogLevel()
-		return nil
-	}
 
 	c := &cobra.Command{
 		Use:                   fmt.Sprintf("%s [command] [flags]", ec.AppName),
@@ -64,7 +55,7 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 		SilenceUsage:          true,
 		SilenceErrors:         true,
 		Version:               ec.Version,
-		PersistentPreRunE:     initFunc,
+		PersistentPreRunE:     defaultInitFunc(ec),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				_ = cmd.Help()
@@ -113,16 +104,18 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 	}
 }
 
+// Build builds the root command
+func (b *RootCommandBuilder) Build() *cobra.Command {
+	return b.cmd
+}
+
 // WithInitFunc adds an init function to the root command
 // This sets the PersistentPreRunE function of the command
 func (b *RootCommandBuilder) WithInitFunc(fn InitFunc) *RootCommandBuilder {
 	initFunc := func(cmd *cobra.Command, args []string) error {
-		if err := initConfig(b.ec.AppName, cmd); err != nil {
+		if err := defaultInitFunc(b.ec)(cmd, args); err != nil {
 			return err
 		}
-		b.ec.Command = cmd
-		b.ec.CommandArgs = args
-		b.ec.SetLogLevel()
 		return fn(cmd, args)
 	}
 	b.cmd.PersistentPreRunE = initFunc
@@ -135,9 +128,10 @@ func (b *RootCommandBuilder) WithPersistentFlags(flags *pflag.FlagSet) *RootComm
 	return b
 }
 
-// Build builds the root command
-func (b *RootCommandBuilder) Build() *cobra.Command {
-	return b.cmd
+// WithExample sets the example of the root command
+func (b *RootCommandBuilder) WithExample(example string) *RootCommandBuilder {
+	b.cmd.Example = example
+	return b
 }
 
 // initConfig ensures that precedence of configuration setting is correct
@@ -184,4 +178,16 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 		return fmt.Errorf("binding flags: %v", errs)
 	}
 	return nil
+}
+
+func defaultInitFunc(ec *ExecutionContext) InitFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := initConfig(ec.AppName, cmd); err != nil {
+			return err
+		}
+		ec.Command = cmd
+		ec.CommandArgs = args
+		ec.SetLogLevel()
+		return nil
+	}
 }
