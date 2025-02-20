@@ -121,6 +121,7 @@ func (b *RootCommandBuilder) WithInitFunc(fn InitFunc) *RootCommandBuilder {
 			return err
 		}
 		b.ec.Command = cmd
+		b.ec.CommandArgs = args
 		b.ec.SetLogLevel()
 		return fn(cmd, args)
 	}
