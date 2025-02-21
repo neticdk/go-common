@@ -4,12 +4,12 @@ import "fmt"
 
 type Set[E comparable] map[E]struct{}
 
-// NewSet creates a new set with the given values.
+// New creates a new set with the given values.
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-func NewSet[E comparable](vals ...E) Set[E] {
+// s := New(1, 2, 3)
+func New[E comparable](vals ...E) Set[E] {
 	s := Set[E]{}
 	for _, v := range vals {
 		s[v] = struct{}{}
@@ -54,7 +54,7 @@ func (s Set[E]) Add(vals ...E) {
 // fmt.Println(s2.Members())
 // [1 2 3 4 5]
 func (s Set[E]) AddImmutable(vals ...E) Set[E] {
-	n := NewSet(s.Members()...)
+	n := New(s.Members()...)
 	n.Add(vals...)
 	return n
 }
@@ -85,7 +85,7 @@ func (s Set[E]) Remove(vals ...E) {
 // fmt.Println(s2.Members())
 // [1]
 func (s Set[E]) RemoveImmutable(vals ...E) Set[E] {
-	n := NewSet(s.Members()...)
+	n := New(s.Members()...)
 	n.Remove(vals...)
 	return n
 }
@@ -140,7 +140,7 @@ func (s Set[E]) String() string {
 //	fmt.Println(s1.Union(s2))
 //	[1 2 3 4 5]
 func (s Set[E]) Union(s2 Set[E]) Set[E] {
-	result := NewSet(s.Members()...)
+	result := New(s.Members()...)
 	result.Add(s2.Members()...)
 	return result
 }
@@ -155,7 +155,7 @@ func (s Set[E]) Union(s2 Set[E]) Set[E] {
 //	fmt.Println(s1.Intersection(s2))
 //	[3]
 func (s Set[E]) Intersection(s2 Set[E]) Set[E] {
-	result := NewSet[E]()
+	result := New[E]()
 	for _, v := range s.Members() {
 		if s2.Contains(v) {
 			result.Add(v)
@@ -173,7 +173,7 @@ func (s Set[E]) Intersection(s2 Set[E]) Set[E] {
 //	fmt.Println(s1.Difference(s2))
 //	[1]
 func (s Set[E]) Difference(s2 Set[E]) Set[E] {
-	result := NewSet(s.Members()...)
+	result := New(s.Members()...)
 	for _, v := range s2.Members() {
 		delete(result, v)
 	}
