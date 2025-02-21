@@ -26,3 +26,11 @@ func IsDir(path string) bool {
 
 	return fileInfo.IsDir()
 }
+
+func IsFile(path string) bool {
+	if exists, _ := Exists(path); !exists {
+		return false
+	}
+
+	return !IsDir(path)
+}
