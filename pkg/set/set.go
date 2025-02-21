@@ -1,6 +1,9 @@
 package set
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Set[E comparable] map[E]struct{}
 
@@ -27,6 +30,22 @@ func New[E comparable](vals ...E) Set[E] {
 func (s Set[E]) Contains(v E) bool {
 	_, ok := s[v]
 	return ok
+}
+
+// ContainsAll returns true if the set contains all the given values.
+//
+// Example:
+//
+//	s := NewSet(1, 2, 3)
+//	fmt.Println(s.ContainsAll(2, 3))
+//	true
+func (s Set[E]) ContainsAll(vals ...E) bool {
+	for _, v := range vals {
+		if !s.Contains(v) {
+			return false
+		}
+	}
+	return true
 }
 
 // Add adds the given values to the set.
@@ -221,4 +240,37 @@ func (s Set[E]) IsSupersetOf(s2 Set[E]) bool {
 func (s Set[E]) Equal(s2 Set[E]) bool {
 	// return len(s) == len(s2) && s.IsSubset(s2)
 	return s.IsSubsetOf(s2) && s.IsSupersetOf(s2)
+}
+
+// Len returns the number of elements in the set.
+//
+// Example:
+//
+//	s := NewSet(1, 2, 3)
+//	fmt.Println(s.Len())
+//	3
+func (s Set[E]) Len() int {
+	return len(s)
+}
+
+// MarshalJSON implements the json.Marshaler interface to convert the map into
+// a JSON object.
+func (s *Set[E]) MarshalJSON() (out []byte, err error) {
+	if s.Len() == 0 {
+		return []byte("[]"), nil
+	}
+	return json.Marshal(s.Members())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface to convert a json
+// object to a Set.
+//
+// The JSON must start with a list.
+func (s *Set[E]) UnmarshalJSON(in []byte) (err error) {
+	var v []E
+
+	if err = json.Unmarshal(in, &v); err == nil {
+		s.Add(v...)
+	}
+	return
 }

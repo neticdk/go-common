@@ -20,6 +20,20 @@ func TestSetContains(t *testing.T) {
 	assert.False(t, s.Contains(4))
 }
 
+func TestSetContainsAll(t *testing.T) {
+	s := New(1, 2, 3)
+	assert.True(t, s.ContainsAll(1, 2))
+	assert.True(t, s.ContainsAll(1, 3))
+	assert.True(t, s.ContainsAll(2, 3))
+
+	assert.False(t, s.ContainsAll(1, 4))
+}
+
+func TestSetLen(t *testing.T) {
+	s := New(1, 2, 3)
+	assert.Equal(t, 3, s.Len())
+}
+
 func TestSetAdd(t *testing.T) {
 	s := New(1, 2, 3)
 	s.Add(4, 5)
@@ -153,4 +167,26 @@ func TestSetEqual(t *testing.T) {
 
 	s3 := New(1, 2)
 	assert.False(t, s1.Equal(s3))
+}
+
+func TestSetMarshalJSON(t *testing.T) {
+	s := New(1, 2, 3)
+	out, err := s.MarshalJSON()
+
+	assert.NoError(t, err)
+	assert.Contains(t, []string{"[1,2,3]", "[1,3,2]", "[2,1,3]", "[2,3,1]", "[3,1,2]", "[3,2,1]"}, string(out))
+
+	s = New[int]()
+	out, err = s.MarshalJSON()
+	assert.NoError(t, err)
+	assert.Equal(t, "[]", string(out))
+}
+
+func TestSetUnmarshalJSON(t *testing.T) {
+	in := []byte(`[1, 2, 3]`)
+	s := New[int]()
+
+	err := s.UnmarshalJSON(in)
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, []int{1, 2, 3}, s.Members())
 }
