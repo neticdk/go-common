@@ -16,9 +16,7 @@ type Set[E comparable] map[E]struct{}
 // s := New(1, 2, 3)
 func New[E comparable](vals ...E) Set[E] {
 	s := Set[E]{}
-	for _, v := range vals {
-		s[v] = struct{}{}
-	}
+	s.Add(vals...)
 	return s
 }
 
