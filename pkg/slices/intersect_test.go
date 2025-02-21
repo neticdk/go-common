@@ -58,7 +58,7 @@ func TestIntersectionOfTwoSlices(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ToSet(tt.a, tt.b)
+			result := Intersect(tt.a, tt.b)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

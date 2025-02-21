@@ -1,7 +1,7 @@
 package slices
 
-// ToSet returns the intersection of two comparable slices.
-func ToSet[T comparable](a, b []T) []T {
+// Intersect returns the intersection of two comparable slices.
+func Intersect[T comparable](a, b []T) []T {
 	seen := make(map[T]struct{})
 	set := make([]T, 0)
 
