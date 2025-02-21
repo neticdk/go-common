@@ -1,25 +1,32 @@
 package set
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
-// Set is a set that does not maintain the order of its elements when returned.
-// It leverages an underlying map for efficient membership checks.
-type Set[E comparable] map[E]struct{}
+// OrderedSet is a set that maintains the order of its elements when returned.
+// It leverages an underlying map for efficient membership checks,
+// but imposes sorting when elements are retrieved.
+//
+// Specifically the Members(), String(), and MarshalJSON() methods sort the
+// elements.
+// To get the unsorted elements, use InsertionOrderMembers().
+type OrderedSet[E cmp.Ordered] struct {
+	Set[E]
+}
 
-// New creates a new set with the given values.
+// NewOrdered creates a new ordered set with the given values.
 //
 // Example:
 //
-// s := New(1, 2, 3)
-func New[E comparable](vals ...E) Set[E] {
-	s := Set[E]{}
-	for _, v := range vals {
-		s[v] = struct{}{}
+// s := New(3, 1, 2)
+func NewOrdered[E cmp.Ordered](vals ...E) OrderedSet[E] {
+	return OrderedSet[E]{
+		New(vals...),
 	}
-	return s
 }
 
 // Contains returns true if the set contains the given value.
@@ -29,9 +36,8 @@ func New[E comparable](vals ...E) Set[E] {
 //	s := NewSet(1, 2, 3)
 //	fmt.Println(s.Contains(2))
 //	true
-func (s Set[E]) Contains(v E) bool {
-	_, ok := s[v]
-	return ok
+func (s OrderedSet[E]) Contains(v E) bool {
+	return s.Set.Contains(v)
 }
 
 // ContainsAll returns true if the set contains all the given values.
@@ -41,13 +47,8 @@ func (s Set[E]) Contains(v E) bool {
 //	s := NewSet(1, 2, 3)
 //	fmt.Println(s.ContainsAll(2, 3))
 //	true
-func (s Set[E]) ContainsAll(vals ...E) bool {
-	for _, v := range vals {
-		if !s.Contains(v) {
-			return false
-		}
-	}
-	return true
+func (s OrderedSet[E]) ContainsAll(vals ...E) bool {
+	return s.Set.ContainsAll(vals...)
 }
 
 // Add adds the given values to the set.
@@ -58,9 +59,9 @@ func (s Set[E]) ContainsAll(vals ...E) bool {
 //	s.Add(4, 5)
 //	fmt.Println(s.Members())
 //	[1 2 3 4 5]
-func (s Set[E]) Add(vals ...E) {
+func (s OrderedSet[E]) Add(vals ...E) {
 	for _, v := range vals {
-		s[v] = struct{}{}
+		s.Set.Add(v)
 	}
 }
 
@@ -74,10 +75,8 @@ func (s Set[E]) Add(vals ...E) {
 // [1 2 3]
 // fmt.Println(s2.Members())
 // [1 2 3 4 5]
-func (s Set[E]) AddImmutable(vals ...E) SetI[E] {
-	n := New(s.Members()...)
-	n.Add(vals...)
-	return n
+func (s OrderedSet[E]) AddImmutable(vals ...E) SetI[E] {
+	return s.Set.AddImmutable(vals...)
 }
 
 // Remove removes the given values from the set.
@@ -88,10 +87,8 @@ func (s Set[E]) AddImmutable(vals ...E) SetI[E] {
 // s.Remove(2, 3)
 // fmt.Println(s.Members())
 // [1]
-func (s Set[E]) Remove(vals ...E) {
-	for _, v := range vals {
-		delete(s, v)
-	}
+func (s OrderedSet[E]) Remove(vals ...E) {
+	s.Set.Remove(vals...)
 }
 
 // RemoveImmutable removes the given values from the set and returns
@@ -105,10 +102,8 @@ func (s Set[E]) Remove(vals ...E) {
 // [1 2 3]
 // fmt.Println(s2.Members())
 // [1]
-func (s Set[E]) RemoveImmutable(vals ...E) SetI[E] {
-	n := New(s.Members()...)
-	n.Remove(vals...)
-	return n
+func (s OrderedSet[E]) RemoveImmutable(vals ...E) SetI[E] {
+	return s.Set.RemoveImmutable(vals...)
 }
 
 // Clear removes all values from the set.
@@ -119,37 +114,48 @@ func (s Set[E]) RemoveImmutable(vals ...E) SetI[E] {
 //	s.Clear()
 //	fmt.Println(s.Members())
 //	[]
-func (s Set[E]) Clear() {
-	for k := range s {
-		delete(s, k)
-	}
+func (s OrderedSet[E]) Clear() {
+	s.Set.Clear()
 }
 
 // Members returns the members of the set as a slice.
+// The result is sorted in ascending order.
+//
+// Example:
+//
+//	s := NewSet(3, 1, 3)
+//	fmt.Println(s.Members())
+//	[1 2 3]
+func (s OrderedSet[E]) Members() []E {
+	result := s.Set.Members()
+	slices.Sort(result)
+	return result
+}
+
+// InsertionOrderMembers returns the members of the set as a slice in the order
+// they were inserted.
 //
 // Example:
 //
 //	s := NewSet(1, 2, 3)
 //	fmt.Println(s.Members())
 //	[1 2 3]
-func (s Set[E]) Members() []E {
-	result := make([]E, 0, len(s))
-	for v := range s {
-		result = append(result, v)
-	}
-	return result
+func (s OrderedSet[E]) InsertionOrderMembers() []E {
+	return s.Set.Members()
 }
 
-// String returns a string representation of the set. Order is not
-// guaranteed.
+// String returns a string representation of the set.
+// Order is guaranteed (ascending).
 //
 // Example:
 //
 //	s := NewSet(1, 2, 3)
 //	fmt.Println(s)
-//	[1 2 3] *or* [3 2 1] *or* [2 1 3] *or* ...
-func (s Set[E]) String() string {
-	return fmt.Sprintf("%v", s.Members())
+//	[1 2 3]
+func (s OrderedSet[E]) String() string {
+	result := s.Set.Members()
+	slices.Sort(result)
+	return fmt.Sprintf("%v", result)
 }
 
 // Union returns the union of the set with another set.
@@ -160,10 +166,8 @@ func (s Set[E]) String() string {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Union(s2))
 //	[1 2 3 4 5]
-func (s Set[E]) Union(s2 SetI[E]) SetI[E] {
-	result := New(s.Members()...)
-	result.Add(s2.Members()...)
-	return result
+func (s OrderedSet[E]) Union(s2 SetI[E]) SetI[E] {
+	return s.Set.Union(s2)
 }
 
 // Intersection returns the intersection of the set with another
@@ -175,14 +179,8 @@ func (s Set[E]) Union(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Intersection(s2))
 //	[3]
-func (s Set[E]) Intersection(s2 SetI[E]) SetI[E] {
-	result := New[E]()
-	for _, v := range s.Members() {
-		if s2.Contains(v) {
-			result.Add(v)
-		}
-	}
-	return result
+func (s OrderedSet[E]) Intersection(s2 SetI[E]) SetI[E] {
+	return s.Set.Intersection(s2)
 }
 
 // Difference returns the difference of the set with another set.
@@ -193,12 +191,8 @@ func (s Set[E]) Intersection(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Difference(s2))
 //	[1]
-func (s Set[E]) Difference(s2 SetI[E]) SetI[E] {
-	result := New(s.Members()...)
-	for _, v := range s2.Members() {
-		delete(result, v)
-	}
-	return result
+func (s OrderedSet[E]) Difference(s2 SetI[E]) SetI[E] {
+	return s.Set.Difference(s2)
 }
 
 // IsSubsetOf returns true if the set is a subset of another set.
@@ -209,13 +203,8 @@ func (s Set[E]) Difference(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.IsSubsetOf(s2))
 //	true
-func (s Set[E]) IsSubsetOf(s2 SetI[E]) bool {
-	for _, v := range s.Members() {
-		if !s2.Contains(v) {
-			return false
-		}
-	}
-	return true
+func (s OrderedSet[E]) IsSubsetOf(s2 SetI[E]) bool {
+	return s.Set.IsSubsetOf(s2)
 }
 
 // IsSupersetOf returns true if the set is a superset of another
@@ -227,13 +216,8 @@ func (s Set[E]) IsSubsetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2)
 //	fmt.Println(s1.IsSupersetOf(s2))
 //	true
-func (s Set[E]) IsSupersetOf(s2 SetI[E]) bool {
-	for _, v := range s2.Members() {
-		if !s.Contains(v) {
-			return false
-		}
-	}
-	return true
+func (s OrderedSet[E]) IsSupersetOf(s2 SetI[E]) bool {
+	return s.Set.IsSupersetOf(s2)
 }
 
 // Equal returns true if the set is equal to another set.
@@ -244,8 +228,8 @@ func (s Set[E]) IsSupersetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.Equal(s2))
 //	true
-func (s Set[E]) Equal(s2 SetI[E]) bool {
-	return s.IsSubsetOf(s2) && s.IsSupersetOf(s2)
+func (s OrderedSet[E]) Equal(s2 SetI[E]) bool {
+	return s.Set.Equal(s2)
 }
 
 // Len returns the number of elements in the set.
@@ -255,13 +239,13 @@ func (s Set[E]) Equal(s2 SetI[E]) bool {
 //	s := NewSet(1, 2, 3)
 //	fmt.Println(s.Len())
 //	3
-func (s Set[E]) Len() int {
-	return len(s)
+func (s OrderedSet[E]) Len() int {
+	return s.Set.Len()
 }
 
 // MarshalJSON implements the json.Marshaler interface to convert the map into
-// a JSON object.
-func (s Set[E]) MarshalJSON() (out []byte, err error) {
+// a JSON object. The values are ordered (ascending).
+func (s OrderedSet[E]) MarshalJSON() (out []byte, err error) {
 	if s.Len() == 0 {
 		return []byte("[]"), nil
 	}
@@ -272,11 +256,6 @@ func (s Set[E]) MarshalJSON() (out []byte, err error) {
 // object to a Set.
 //
 // The JSON must start with a list.
-func (s Set[E]) UnmarshalJSON(in []byte) (err error) {
-	var v []E
-
-	if err = json.Unmarshal(in, &v); err == nil {
-		s.Add(v...)
-	}
-	return
+func (s OrderedSet[E]) UnmarshalJSON(in []byte) (err error) {
+	return s.Set.UnmarshalJSON(in)
 }

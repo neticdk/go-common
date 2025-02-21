@@ -45,8 +45,8 @@ func TestSetAdd(t *testing.T) {
 func TestSetAddImmutable(t *testing.T) {
 	s := New(1, 2, 3)
 	s2 := s.AddImmutable(4, 5)
-	assert.Equal(t, 3, len(s))
-	assert.Equal(t, 5, len(s2))
+	assert.Equal(t, 3, s.Len())
+	assert.Equal(t, 5, s2.Len())
 	assert.True(t, s2.Contains(4))
 	assert.True(t, s2.Contains(5))
 }
@@ -68,7 +68,7 @@ func TestSetRemoveImmutable(t *testing.T) {
 	assert.True(t, s.Contains(2))
 	assert.True(t, s.Contains(3))
 
-	assert.Equal(t, 1, len(s2))
+	assert.Equal(t, 1, s2.Len())
 	assert.True(t, s2.Contains(1))
 	assert.False(t, s2.Contains(2))
 	assert.False(t, s2.Contains(3))
