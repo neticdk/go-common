@@ -1,15 +1,13 @@
 module github.com/neticdk/go-common
 
-go 1.23.2
-
-toolchain go1.24.0
+go 1.24.0
 
 require (
 	atomicgo.dev/keyboard v0.2.9
 	github.com/MicahParks/keyfunc/v3 v3.3.10
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.87.0
-	github.com/anchore/syft v1.19.0
+	github.com/anchore/syft v1.20.0
 	github.com/charmbracelet/glamour v0.8.0
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/charmbracelet/log v0.4.0
@@ -92,7 +90,7 @@ require (
 	github.com/anchore/go-logger v0.0.0-20250211213027-778b61f36378 // indirect
 	github.com/anchore/go-macholibre v0.0.0-20250211213245-0aec544d18a1 // indirect
 	github.com/anchore/go-struct-converter v0.0.0-20250211213226-cce56d595160 // indirect
-	github.com/anchore/packageurl-go v0.1.1-0.20250117185454-edf36a908b10 // indirect
+	github.com/anchore/packageurl-go v0.1.1-0.20250220190351-d62adb6e1115 // indirect
 	github.com/anchore/stereoscope v0.0.13 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -105,6 +103,7 @@ require (
 	github.com/becheran/wildmatch-go v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
+	github.com/bitnami/go-version v0.0.0-20250131085805-b1f57a8634ef // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v2 v2.0.4 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
@@ -135,7 +134,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/docker/cli v27.5.1+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
-	github.com/docker/docker v27.5.1+incompatible // indirect
+	github.com/docker/docker v28.0.0+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.2 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-events v0.0.0-20250114142523-c867878c5e32 // indirect
