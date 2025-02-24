@@ -137,9 +137,11 @@ func (s OrderedSet[E]) Members() []E {
 //
 // Example:
 //
-//	s := NewSet(1, 2, 3)
+//	s := NewSet(2, 3, 1)
 //	fmt.Println(s.Members())
 //	[1 2 3]
+//	fmt.Println(s.InsertionOrderMembers())
+//	[2 3 1]
 func (s OrderedSet[E]) InsertionOrderMembers() []E {
 	return s.Set.Members()
 }
