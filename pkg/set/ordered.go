@@ -22,7 +22,7 @@ type OrderedSet[E cmp.Ordered] struct {
 //
 // Example:
 //
-// s := New(3, 1, 2)
+//	s := New(3, 1, 2)
 func NewOrdered[E cmp.Ordered](vals ...E) OrderedSet[E] {
 	return OrderedSet[E]{
 		New(vals...),
@@ -69,12 +69,12 @@ func (s OrderedSet[E]) Add(vals ...E) {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s2 := s.AddImmutable(4, 5)
-// fmt.Println(s.Members())
-// [1 2 3]
-// fmt.Println(s2.Members())
-// [1 2 3 4 5]
+//	s := NewSet(1, 2, 3)
+//	s2 := s.AddImmutable(4, 5)
+//	fmt.Println(s.Members())
+//	[1 2 3]
+//	fmt.Println(s2.Members())
+//	[1 2 3 4 5]
 func (s OrderedSet[E]) AddImmutable(vals ...E) SetI[E] {
 	return s.Set.AddImmutable(vals...)
 }
@@ -83,10 +83,10 @@ func (s OrderedSet[E]) AddImmutable(vals ...E) SetI[E] {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s.Remove(2, 3)
-// fmt.Println(s.Members())
-// [1]
+//	s := NewSet(1, 2, 3)
+//	s.Remove(2, 3)
+//	fmt.Println(s.Members())
+//	[1]
 func (s OrderedSet[E]) Remove(vals ...E) {
 	s.Set.Remove(vals...)
 }
@@ -96,12 +96,12 @@ func (s OrderedSet[E]) Remove(vals ...E) {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s2 := s.RemoveImmutable(2, 3)
-// fmt.Println(s1.Members())
-// [1 2 3]
-// fmt.Println(s2.Members())
-// [1]
+//	s := NewSet(1, 2, 3)
+//	s2 := s.RemoveImmutable(2, 3)
+//	fmt.Println(s1.Members())
+//	[1 2 3]
+//	fmt.Println(s2.Members())
+//	[1]
 func (s OrderedSet[E]) RemoveImmutable(vals ...E) SetI[E] {
 	return s.Set.RemoveImmutable(vals...)
 }

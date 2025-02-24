@@ -13,7 +13,7 @@ type Set[E comparable] map[E]struct{}
 //
 // Example:
 //
-// s := New(1, 2, 3)
+//	s := New(1, 2, 3)
 func New[E comparable](vals ...E) Set[E] {
 	s := Set[E]{}
 	s.Add(vals...)
@@ -66,12 +66,12 @@ func (s Set[E]) Add(vals ...E) {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s2 := s.AddImmutable(4, 5)
-// fmt.Println(s.Members())
-// [1 2 3]
-// fmt.Println(s2.Members())
-// [1 2 3 4 5]
+//	s := NewSet(1, 2, 3)
+//	s2 := s.AddImmutable(4, 5)
+//	fmt.Println(s.Members())
+//	[1 2 3]
+//	fmt.Println(s2.Members())
+//	[1 2 3 4 5]
 func (s Set[E]) AddImmutable(vals ...E) SetI[E] {
 	n := New(s.Members()...)
 	n.Add(vals...)
@@ -82,10 +82,10 @@ func (s Set[E]) AddImmutable(vals ...E) SetI[E] {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s.Remove(2, 3)
-// fmt.Println(s.Members())
-// [1]
+//	s := NewSet(1, 2, 3)
+//	s.Remove(2, 3)
+//	fmt.Println(s.Members())
+//	[1]
 func (s Set[E]) Remove(vals ...E) {
 	for _, v := range vals {
 		delete(s, v)
@@ -97,12 +97,12 @@ func (s Set[E]) Remove(vals ...E) {
 //
 // Example:
 //
-// s := NewSet(1, 2, 3)
-// s2 := s.RemoveImmutable(2, 3)
-// fmt.Println(s1.Members())
-// [1 2 3]
-// fmt.Println(s2.Members())
-// [1]
+//	s := NewSet(1, 2, 3)
+//	s2 := s.RemoveImmutable(2, 3)
+//	fmt.Println(s1.Members())
+//	[1 2 3]
+//	fmt.Println(s2.Members())
+//	[1]
 func (s Set[E]) RemoveImmutable(vals ...E) SetI[E] {
 	n := New(s.Members()...)
 	n.Remove(vals...)
