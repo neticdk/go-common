@@ -151,6 +151,64 @@ func TestIsDir(t *testing.T) {
 	}
 }
 
+func TestIsRegular(t *testing.T) {
+	// Create temporary test files/directories
+	tmpDir := t.TempDir()
+	regularFile := filepath.Join(tmpDir, "regular.txt")
+	if err := os.WriteFile(regularFile, []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	subDir := filepath.Join(tmpDir, "subdir")
+	if err := os.Mkdir(subDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name  string
+		path  string
+		want  bool
+		setup func() error
+	}{
+		{
+			name: "existing directory",
+			path: subDir,
+			want: false,
+		},
+		{
+			name: "regular file",
+			path: regularFile,
+			want: true,
+		},
+		{
+			name: "non-existent path",
+			path: filepath.Join(tmpDir, "nonexistent"),
+			want: false,
+		},
+		{
+			name: "symlink to file",
+			path: filepath.Join(tmpDir, "symlink"),
+			want: false,
+			setup: func() error {
+				return os.Symlink(regularFile, filepath.Join(tmpDir, "symlink"))
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				if err := tt.setup(); err != nil {
+					t.Skip("Symlink creation not supported on this platform")
+				}
+			}
+
+			if got := IsRegular(tt.path); got != tt.want {
+				t.Errorf("IsRegular() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestIsFile(t *testing.T) {
 	// Create temporary test files/directories
 	tmpDir := t.TempDir()

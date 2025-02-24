@@ -18,6 +18,7 @@ func Exists(path string) (bool, error) {
 	return false, err
 }
 
+// IsDir returns true if a directory exists at the path
 func IsDir(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -27,11 +28,22 @@ func IsDir(path string) bool {
 	return fileInfo.IsDir()
 }
 
-func IsFile(path string) bool {
-	fileStat, err := os.Stat(path)
+// IsRegular returns true if a regular file exists at the path
+func IsRegular(path string) bool {
+	fileInfo, err := os.Lstat(path)
 	if os.IsNotExist(err) {
 		return false
 	}
 
-	return fileStat.Mode().IsRegular()
+	return fileInfo.Mode().IsRegular()
+}
+
+// IsFile returns true if any type of file exists at the path
+func IsFile(path string) bool {
+	exists, err := Exists(path)
+	if err != nil {
+		return false
+	}
+
+	return exists && !IsDir(path)
 }
