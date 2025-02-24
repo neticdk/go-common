@@ -28,9 +28,10 @@ func IsDir(path string) bool {
 }
 
 func IsFile(path string) bool {
-	if exists, _ := Exists(path); !exists {
+	fileStat, err := os.Stat(path)
+	if os.IsNotExist(err) {
 		return false
 	}
 
-	return !IsDir(path)
+	return fileStat.Mode().IsRegular()
 }
