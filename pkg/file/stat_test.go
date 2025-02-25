@@ -20,22 +20,6 @@ func TestExists(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name     string
 		path     string
@@ -87,16 +71,26 @@ func TestExists(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: true,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -104,7 +98,7 @@ func TestExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Fatal(err)
+					t.Skipf("Failed to setup test: %s", err)
 				}
 			}
 
@@ -136,22 +130,6 @@ func TestIsDir(t *testing.T) {
 	subDir := filepath.Join(tmpDir, "subdir")
 	if err := os.Mkdir(subDir, 0755); err != nil {
 		t.Fatal(err)
-	}
-
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
 	}
 
 	tests := []struct {
@@ -187,16 +165,26 @@ func TestIsDir(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: false,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -204,7 +192,7 @@ func TestIsDir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -227,22 +215,6 @@ func TestIsRegular(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -267,7 +239,7 @@ func TestIsRegular(t *testing.T) {
 		{
 			name: "symlink to file",
 			path: filepath.Join(tmpDir, "symlink"),
-			want: false,
+			want: true,
 			setup: func() error {
 				return os.Symlink(regularFile, filepath.Join(tmpDir, "symlink"))
 			},
@@ -276,16 +248,26 @@ func TestIsRegular(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: false,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -293,7 +275,7 @@ func TestIsRegular(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -316,22 +298,6 @@ func TestIsSymlink(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -365,16 +331,26 @@ func TestIsSymlink(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: false,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -382,7 +358,7 @@ func TestIsSymlink(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -405,22 +381,6 @@ func TestIsSocket(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -454,16 +414,26 @@ func TestIsSocket(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: true,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -471,7 +441,7 @@ func TestIsSocket(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -494,22 +464,6 @@ func TestIsNamedPipe(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -543,16 +497,26 @@ func TestIsNamedPipe(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: false,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: false,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -560,7 +524,7 @@ func TestIsNamedPipe(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -583,22 +547,6 @@ func TestIsDevice(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -632,16 +580,26 @@ func TestIsDevice(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: false,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: false,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -649,7 +607,7 @@ func TestIsDevice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 
@@ -672,22 +630,6 @@ func TestIsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	socket, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
-	if err != nil {
-		t.Skip("Socket creation not supported on this platform")
-	}
-	defer socket.Close()
-
-	err = syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
-	if err != nil {
-		t.Skip("Named pipe creation not supported on this platform")
-	}
-
-	err = syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
-	if err != nil {
-		t.Skip("Character device creation not supported on this platform")
-	}
-
 	tests := []struct {
 		name  string
 		path  string
@@ -721,16 +663,26 @@ func TestIsFile(t *testing.T) {
 			name: "socket",
 			path: filepath.Join(tmpDir, "socket"),
 			want: true,
+			setup: func() error {
+				_, err := net.Listen("unix", filepath.Join(tmpDir, "socket"))
+				return err
+			},
 		},
 		{
 			name: "named pipe",
 			path: filepath.Join(tmpDir, "pipe"),
 			want: true,
+			setup: func() error {
+				return syscall.Mkfifo(filepath.Join(tmpDir, "pipe"), 0644)
+			},
 		},
 		{
 			name: "character device",
 			path: filepath.Join(tmpDir, "chardev"),
 			want: true,
+			setup: func() error {
+				return syscall.Mknod(filepath.Join(tmpDir, "chardev"), syscall.S_IFCHR|0644, 0)
+			},
 		},
 	}
 
@@ -738,7 +690,7 @@ func TestIsFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setup != nil {
 				if err := tt.setup(); err != nil {
-					t.Skip("Symlink creation not supported on this platform")
+					t.Skipf("File type %s creation not supported on this platform", tt.name)
 				}
 			}
 

@@ -35,9 +35,10 @@ func IsDir(path string) bool {
 
 // IsRegular returns true if the given path is a regular file
 //
+// It resolves all symbolic links
 // It returns false on any error, e.g. if the file does not exist or on insufficient permissions
 func IsRegular(path string) bool {
-	fileInfo, err := os.Lstat(path)
+	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false
 	}
@@ -47,6 +48,7 @@ func IsRegular(path string) bool {
 
 // IsSymlink returns true if the given path is a symlink
 //
+// It does not resolve any symbolic links
 // It returns false on any error, e.g. if the file does not exist or on insufficient permissions
 func IsSymlink(path string) bool {
 	fileInfo, err := os.Lstat(path)
@@ -59,9 +61,10 @@ func IsSymlink(path string) bool {
 
 // IsNamedPipe returns true if the given path is a named pipe
 //
+// It resolves all symbolic links
 // It returns false on any error, e.g. if the file does not exist or on insufficient permissions
 func IsNamedPipe(path string) bool {
-	fileInfo, err := os.Lstat(path)
+	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false
 	}
@@ -71,9 +74,10 @@ func IsNamedPipe(path string) bool {
 
 // IsSocket returns true if the given path is a socket
 //
+// It resolves all symbolic links
 // It returns false on any error, e.g. if the file does not exist or on insufficient permissions
 func IsSocket(path string) bool {
-	fileInfo, err := os.Lstat(path)
+	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false
 	}
@@ -83,9 +87,10 @@ func IsSocket(path string) bool {
 
 // IsDevice returns true if the given path is a device
 //
+// It resolves all symbolic links
 // It returns false on any error, e.g. if the file does not exist or on insufficient permissions
 func IsDevice(path string) bool {
-	fileInfo, err := os.Lstat(path)
+	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false
 	}
