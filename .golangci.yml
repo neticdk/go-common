@@ -1,67 +1,106 @@
 linters:
-    enable:
-        - gofmt
-        - govet
-        - errcheck
-        - staticcheck
-        - gosimple
-        - ineffassign
-        - gocritic
-        - gosec
-        - sloglint
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - goimports
+    - gosimple
+    - ineffassign
+    - gocritic
+    - gosec
+    - sloglint
+    - misspell
+    - revive
+    - bodyclose
+    - nilerr
+    - prealloc
+    - unused
+    - unconvert
+    - unparam
 
 run:
-    timeout: 5m
-    tests: false
+  timeout: 5m
+  tests: false
 
 linters-settings:
-    sloglint:
-        # Enforce not mixing key-value pairs and attributes.
-        # Default: true
-        no-mixed-args: false
-        # Enforce using key-value pairs only (overrides no-mixed-args, incompatible with attr-only).
-        # Default: false
-        kv-only: false
-        # Enforce using attributes only (overrides no-mixed-args, incompatible with kv-only).
-        # Default: false
-        attr-only: false
-        # Enforce not using global loggers.
-        # Values:
-        # - "": disabled
-        # - "all": report all global loggers
-        # - "default": report only the default slog logger
-        # https://github.com/go-simpler/sloglint?tab=readme-ov-file#no-global
-        # Default: ""
-        no-global: default
-        # Enforce using methods that accept a context.
-        # Default: false
-        context: all
-        # Enforce using static values for log messages.
-        # Default: false
-        # static-msg: true
-        # Enforce using constants instead of raw keys.
-        # Default: false
-        # no-raw-keys: true
-        # Enforce a single key naming convention.
-        # Values: snake, kebab, camel, pascal
-        # Default: ""
-        # key-naming-case: snake
-        # Enforce putting arguments on separate lines.
-        # Default: false
-        # args-on-sep-lines: false
-    gosec:
-        severity: medium
-        confidence: medium
-        config:
-            G302: "0640"
-            G306: "0640"
+  sloglint:
+    # Enforce not mixing key-value pairs and attributes.
+    # Default: true
+    no-mixed-args: true
+    # Enforce using key-value pairs only (overrides no-mixed-args, incompatible with attr-only).
+    # Default: false
+    # kv-only: false
+    # Enforce using attributes only (overrides no-mixed-args, incompatible with kv-only).
+    # Default: false
+    # attr-only: false
+    # Enforce not using global loggers.
+    # Values:
+    # - "": disabled
+    # - "all": report all global loggers
+    # - "default": report only the default slog logger
+    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#no-global
+    # Default: ""
+    no-global: all
+    # Enforce using methods that accept a context.
+    # Default: false
+    context: all
+    # Enforce using static values for log messages.
+    # Default: false
+    # static-msg: true
+    # Enforce using constants instead of raw keys.
+    # Default: false
+    # no-raw-keys: true
+    # Enforce a single key naming convention.
+    # Values: snake, kebab, camel, pascal
+    # Default: ""
+    # key-naming-case: snake
+    # Enforce putting arguments on separate lines.
+    # Default: false
+    # args-on-sep-lines: false
+  gosec:
+    severity: medium
+    confidence: medium
+    config:
+      G302: "0640"
+      G306: "0640"
+
+  gofmt:
+    rewrite-rules:
+      - pattern: "interface{}"
+        replacement: "any"
+
+  revive:
+    enable-all-rules: false
+    ignore-generated-header: true
+    rules:
+      - name: atomic
+      - name: context-keys-type
+      - name: defer
+        arguments:
+          - # Calling 'recover' at the time a defer is registered (i.e. "defer
+            # recover()") has no effect.
+            - "immediate-recover"
+            # Calling 'recover' outside of a deferred function has no effect
+            - "recover"
+            # Returning values from a deferred function has no effect
+            - "return"
+      - name: duplicated-imports
+      - name: errorf
+      - name: string-of-int
+      - name: time-equal
+      - name: unconditional-recursion
+      - name: useless-break
+      - name: waitgroup-by-value
 
 issues:
-    exclude-rules:
-        - path: _test\.go
-          linters:
-              - errcheck
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+  max-issues-per-linter: 0
+  max-same-issues: 0
 
 output:
-    print-issued-lines: true
-    print-linter-name: true
+  print-issued-lines: true
+  print-linter-name: true
