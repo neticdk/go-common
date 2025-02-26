@@ -157,11 +157,9 @@ func ParseJSONPointer(path string) ([]string, error) {
 			}
 			if !isStarted {
 				isStarted = true
-			} else {
-				if current.Len() > 0 {
-					segments = append(segments, current.String())
-					current.Reset()
-				}
+			} else if current.Len() > 0 {
+				segments = append(segments, current.String())
+				current.Reset()
 			}
 
 		default:
