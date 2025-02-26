@@ -16,12 +16,12 @@ const (
 
 // TemplateChart renders a Helm chart with the given namespace and values
 // If namespace is empty, it defaults to "default"
-func TemplateChart(ctx context.Context, chart *chart.Chart, namespace string, vals map[string]interface{}) (string, error) {
+func TemplateChart(ctx context.Context, chart *chart.Chart, namespace string, vals map[string]any) (string, error) {
 	if chart == nil {
 		return "", fmt.Errorf("chart is required")
 	}
 	if vals == nil {
-		vals = map[string]interface{}{}
+		vals = map[string]any{}
 	}
 	if namespace == "" {
 		namespace = DefaultNamespace

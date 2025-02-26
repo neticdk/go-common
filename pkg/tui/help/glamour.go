@@ -81,7 +81,7 @@ var templateFuncs = template.FuncMap{
 	"eq":                      Eq,
 }
 
-func Gt(a, b interface{}) bool {
+func Gt(a, b any) bool {
 	var left, right int64
 	av := reflect.ValueOf(a)
 
@@ -108,10 +108,12 @@ func Gt(a, b interface{}) bool {
 	return left > right
 }
 
-// FIXME Eq is unused by cobra and should be removed in a version 2. It exists only for compatibility with users of cobra.
+// FIXME Eq is unused by cobra and should be removed in a version 2. It exists
+// only for compatibility with users of cobra.
 
-// Eq takes two types and checks whether they are equal. Supported types are int and string. Unsupported types will panic.
-func Eq(a, b interface{}) bool {
+// Eq takes two types and checks whether they are equal. Supported types are
+// int and string. Unsupported types will panic.
+func Eq(a, b any) bool {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -151,7 +153,7 @@ func fixIndentForPFlags(subject string) string {
 }
 
 // tmpl executes the given template text on data, writing the result to w.
-func tmpl(w io.Writer, text string, data interface{}) error {
+func tmpl(w io.Writer, text string, data any) error {
 	t := template.New("top")
 	t.Funcs(templateFuncs)
 	template.Must(t.Parse(text))

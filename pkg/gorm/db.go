@@ -44,26 +44,25 @@ func (l *zl) LogMode(logger.LogLevel) logger.Interface {
 	return l
 }
 
-func (l *zl) Error(ctx context.Context, msg string, opts ...interface{}) {
+func (l *zl) Error(ctx context.Context, msg string, opts ...any) {
 	logger := log.FromContext(ctx)
 	if logger.Enabled(ctx, slog.LevelError) {
 		logger.ErrorContext(ctx, fmt.Sprintf(msg, opts...))
 	}
 }
 
-func (l *zl) Warn(ctx context.Context, msg string, opts ...interface{}) {
+func (l *zl) Warn(ctx context.Context, msg string, opts ...any) {
 	logger := log.FromContext(ctx)
 	if logger.Enabled(ctx, slog.LevelWarn) {
 		logger.WarnContext(ctx, fmt.Sprintf(msg, opts...))
 	}
 }
 
-func (l *zl) Info(ctx context.Context, msg string, opts ...interface{}) {
+func (l *zl) Info(ctx context.Context, msg string, opts ...any) {
 	logger := log.FromContext(ctx)
 	if logger.Enabled(ctx, slog.LevelInfo) {
 		logger.InfoContext(ctx, fmt.Sprintf(msg, opts...))
 	}
-
 }
 
 func (l *zl) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {

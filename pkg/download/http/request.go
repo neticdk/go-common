@@ -78,11 +78,12 @@ func (r *Request) DownloadToWriter(originURL string, w io.Writer) (int64, error)
 	if err != nil {
 		return 0, err
 	}
-	r.resp, err = r.client.Do(r.req)
+	resp, err := r.client.Do(r.req)
 	if err != nil {
 		return 0, err
 	}
-	defer r.resp.Body.Close()
+	defer resp.Body.Close()
+	r.resp = resp
 	return io.Copy(w, r.resp.Body)
 }
 

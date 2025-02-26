@@ -58,7 +58,7 @@ func NewKeyfunc(ctx context.Context, issuers ...string) (jwt.Keyfunc, error) {
 		providers[issuer] = jwks
 	}
 
-	f := func(token *jwt.Token) (interface{}, error) {
+	f := func(token *jwt.Token) (any, error) {
 		iss, err := token.Claims.GetIssuer()
 		if err != nil {
 			return nil, err
