@@ -52,10 +52,7 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 	}
 
 	if isNil(data) {
-		if len(parts) > 0 {
-			return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
-		}
-		return data, nil
+		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
 	}
 
 	part := parts[0]
@@ -106,10 +103,7 @@ func getNonReflectPathValueRecursive(data any, parts []string) (any, error) {
 	}
 
 	if data == nil {
-		if len(parts) > 0 {
-			return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
-		}
-		return data, nil
+		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
 	}
 
 	switch val := data.(type) {
