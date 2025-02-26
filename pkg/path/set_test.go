@@ -110,6 +110,16 @@ func TestSetPathValue(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "nil data",
+			data: nil,
+			path: "b[0].c",
+			value: map[string]any{
+				"d": 2,
+			},
+			expected: nil,
+			wantErr:  false,
+		},
 	}
 
 	for _, tt := range tests {

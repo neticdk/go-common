@@ -9,8 +9,13 @@ import (
 // SetPathValue sets the given value at the given path in the data.
 //
 // Currently only supports []any and map[string]any data types.
+// If data is nil, the value cannot be set, but no error is returned.
 // It returns an error if the path is invalid or the value cannot be set.
 func SetPathValue[T any](data T, path string, value any) error {
+	if isNil(data) {
+		return nil
+	}
+
 	parts, err := ParseDottedPath(path)
 	if err != nil {
 		return fmt.Errorf("parsing dotted path: %w", err)
@@ -26,6 +31,7 @@ func SetPathValue[T any](data T, path string, value any) error {
 // getNonReflectPathValueRecursive returns the value at the given path in the data.
 //
 // It is used for non-reflectable data types like map[string]any and []any.
+// If data is nil, the result is returned.
 // It returns an error if the path is invalid or the value is not found.
 func setNonReflectPathValueRecursive(data any, parts []string, value any) (any, error) {
 	var err error
