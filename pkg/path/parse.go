@@ -13,6 +13,7 @@ func ParseDottedPath(path string) ([]string, error) {
 	var segments []string
 	var current strings.Builder
 	var inQuotes bool
+	var inBraces bool
 
 	runes := []rune(path)
 	for i := 0; i < len(runes); i++ {
@@ -40,6 +41,23 @@ func ParseDottedPath(path string) ([]string, error) {
 				segments = append(segments, current.String())
 				current.Reset()
 			}
+
+		case ch == '[' && !inQuotes:
+			// Bracket outside quotes is a slice separator
+			if current.Len() > 0 {
+				segments = append(segments, current.String())
+				current.Reset()
+			}
+			inBraces = true
+
+		case ch == ']' && inBraces:
+			// End of slice separator
+			if current.Len() == 0 {
+				return nil, fmt.Errorf("empty index in path")
+			}
+			segments = append(segments, current.String())
+			current.Reset()
+			inBraces = false
 
 		case unicode.IsSpace(ch) && !inQuotes:
 			// Ignore spaces outside quotes

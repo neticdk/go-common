@@ -21,7 +21,7 @@ func TestParseDottedPath(t *testing.T) {
 		{
 			name:     "simple path with slices",
 			input:    "a.b[1].c",
-			expected: []string{"a", "b[1]", "c"},
+			expected: []string{"a", "b", "1", "c"},
 			wantErr:  false,
 		},
 		{
