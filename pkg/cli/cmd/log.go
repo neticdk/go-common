@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/neticdk/go-common/pkg/slices"
+	"github.com/neticdk/go-common/pkg/slice"
 )
 
 type LogFormat string
@@ -31,7 +31,7 @@ func AllLogFormats() []LogFormat {
 
 // AllLogFormatsStr returns all formats as strings
 func AllLogFormatsStr() []string {
-	return slices.Map(AllLogFormats(), func(f LogFormat) string {
+	return slice.Map(AllLogFormats(), func(f LogFormat) string {
 		return f.String()
 	})
 }
@@ -72,7 +72,7 @@ func AllLogLevels() []LogLevel {
 
 // LogLevelsAllStr returns all levels as strings
 func AllLogLevelsStr() []string {
-	return slices.Map(AllLogLevels(), func(l LogLevel) string {
+	return slice.Map(AllLogLevels(), func(l LogLevel) string {
 		return l.String()
 	})
 }

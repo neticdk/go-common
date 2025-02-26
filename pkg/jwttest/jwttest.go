@@ -18,9 +18,9 @@ func GenerateJwt(t *testing.T, iss string, roles map[string][]string) (*jwt.Toke
 	claims["iss"] = iss
 	claims["exp"] = time.Now().Add(10 * time.Minute)
 	claims["azp"] = "inventory.k8s.netic.dk"
-	access := make(map[string]interface{})
+	access := make(map[string]any)
 	for c, r := range roles {
-		access[c] = map[string]interface{}{
+		access[c] = map[string]any{
 			"roles": r,
 		}
 	}

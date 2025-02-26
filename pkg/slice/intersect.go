@@ -1,4 +1,4 @@
-package slices
+package slice
 
 // Intersect returns the intersection of two comparable slices.
 func Intersect[T comparable](a, b []T) []T {

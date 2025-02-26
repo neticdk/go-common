@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -39,14 +40,7 @@ func (u User) HasRole(role string) bool {
 
 func (u User) HasRolesAnd(roles []string) bool {
 	for _, neededRole := range roles {
-		found := false
-
-		for _, role := range u.Roles {
-			if role == string(neededRole) {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(u.Roles, neededRole)
 
 		if !found {
 			return false
@@ -58,10 +52,8 @@ func (u User) HasRolesAnd(roles []string) bool {
 
 func (u User) HasRolesOr(roles []string) bool {
 	for _, neededRole := range roles {
-		for _, role := range u.Roles {
-			if role == string(neededRole) {
-				return true
-			}
+		if slices.Contains(u.Roles, neededRole) {
+			return true
 		}
 	}
 
@@ -87,13 +79,13 @@ func UserFromJWTToken(token *jwt.Token, clientID string) (User, error) {
 	user.Email = stringClaim(claims, "email")
 	user.Username = stringClaim(claims, "preferred_username")
 
-	resourceAccess, ok := claims["resource_access"].(map[string]interface{})
+	resourceAccess, ok := claims["resource_access"].(map[string]any)
 	if !ok {
-		resourceAccess = map[string]interface{}{}
+		resourceAccess = map[string]any{}
 	}
 
-	if clientResources, ok := resourceAccess[clientID].(map[string]interface{}); ok {
-		if roles, ok := clientResources["roles"].([]interface{}); ok {
+	if clientResources, ok := resourceAccess[clientID].(map[string]any); ok {
+		if roles, ok := clientResources["roles"].([]any); ok {
 			for _, role := range roles {
 				if roleStr, ok := role.(string); ok {
 					user.Roles = append(user.Roles, roleStr)
@@ -105,8 +97,8 @@ func UserFromJWTToken(token *jwt.Token, clientID string) (User, error) {
 	adminClients := []string{"inventory", "inventory-cli"}
 outer:
 	for _, c := range adminClients {
-		if clientResources, ok := resourceAccess[c].(map[string]interface{}); ok {
-			if roles, ok := clientResources["roles"].([]interface{}); ok {
+		if clientResources, ok := resourceAccess[c].(map[string]any); ok {
+			if roles, ok := clientResources["roles"].([]any); ok {
 				for _, role := range roles {
 					if roleStr, ok := role.(string); ok {
 						if roleStr == "admin" {
@@ -124,7 +116,7 @@ outer:
 	return user, nil
 }
 
-func stringClaim(claims map[string]interface{}, key string) string {
+func stringClaim(claims map[string]any, key string) string {
 	if value, ok := claims[key].(string); ok {
 		return value
 	}
