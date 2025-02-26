@@ -19,7 +19,7 @@ type Problem struct {
 	// Title is short humanreadable summary RFC-9457#3.1.3
 	Title string `json:"title,omitempty"`
 
-	// Detail is humanreadable explanation of the specific occurence of the problem RFC-9457#3.1.4
+	// Detail is humanreadable explanation of the specific occurrence of the problem RFC-9457#3.1.4
 	Detail string `json:"detail,omitempty"`
 
 	// Instance identifies the specific instance of the problem RFC-9457#3.1.5

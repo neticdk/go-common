@@ -1,4 +1,4 @@
-package slices
+package slice
 
 import (
 	"testing"
@@ -49,3 +49,4 @@ func TestMap(t *testing.T) {
 		})
 	}
 }
+

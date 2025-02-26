@@ -8,8 +8,9 @@ import (
 	"github.com/neticdk/go-common/pkg/log"
 )
 
-// SlogContext is a middleware function to add the given logger is to the request context. The logger may then
-// be retrieved from the context using [log.FromContext]
+// SlogContext is a middleware function to add the given logger is to the
+// request context. The logger may then be retrieved from the context using
+// [log.FromContext]
 func SlogContext(logger *slog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -21,8 +22,9 @@ func SlogContext(logger *slog.Logger) echo.MiddlewareFunc {
 	}
 }
 
-// RequestLogger is a middleware function to log requests in echo using slog. It will try to retrive a logger from the [context.Context] but will fall back to
-// the default logger.
+// RequestLogger is a middleware function to log requests in echo using slog.
+// It will try to retrieve a logger from the [context.Context] but will fall
+// back to the default logger.
 func RequestLogger() echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:       true,

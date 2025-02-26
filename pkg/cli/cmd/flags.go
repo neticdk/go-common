@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// PFlags represents is presistent/global flags
+// PFlags represents is persistent/global flags
 type PFlags struct {
 	// LogFormat is the log format used for the logger
 	// The ForFormat flag is always enabled

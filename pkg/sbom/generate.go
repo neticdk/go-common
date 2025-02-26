@@ -25,7 +25,7 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom
 		return nil, fmt.Errorf("extracting image names from manifest: %w", err)
 	}
 
-	var sboms []*sbom.SBOM
+	sboms := make([]*sbom.SBOM, len(imageNames))
 	for _, imageName := range imageNames {
 		cfg := syft.DefaultCreateSBOMConfig().WithParallelism(10)
 		src, err := syft.GetSource(
@@ -85,7 +85,7 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 
 	multidocReader := utilyaml.NewYAMLReader(bufio.NewReader(manifest))
 	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-	var containers []interface{}
+	var containers []any
 	for {
 		buf, err := multidocReader.Read()
 		if err != nil {
@@ -125,9 +125,9 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 	}
 
 	for _, container := range containers {
-		containerMap, ok := container.(map[string]interface{})
+		containerMap, ok := container.(map[string]any)
 		if !ok {
-			logger.DebugContext(ctx, "converting container to map[string]interface{}")
+			logger.DebugContext(ctx, "converting container to map[string]any")
 			continue
 		}
 		imageName, found, err := unstructured.NestedString(containerMap, "image")
@@ -143,10 +143,10 @@ func extractImageNamesFromManifest(ctx context.Context, manifest io.Reader) ([]s
 	return imageNames, nil
 }
 
-func getContainers(obj *unstructured.Unstructured) ([]interface{}, error) {
+func getContainers(obj *unstructured.Unstructured) ([]any, error) {
 	kind := obj.GetKind()
 	var (
-		containers []interface{}
+		containers []any
 		err        error
 	)
 	if kind == "Pod" {
