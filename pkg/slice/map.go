@@ -1,4 +1,4 @@
-package slices
+package slice
 
 // Map applies a function to each element of a slice and returns a new slice
 // with the results.

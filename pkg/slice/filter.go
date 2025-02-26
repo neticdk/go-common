@@ -1,4 +1,4 @@
-package slices
+package slice
 
 // Filter returns a new slice containing only the elements of the slice that
 // satisfy the predicate.
