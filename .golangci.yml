@@ -258,6 +258,7 @@ linters-settings:
       - name: string-of-int
       # Struct tags are not checked at compile time
       - name: struct-tag
+        arguments: ["json,inline"]
       # This rule highlights redundant else-blocks that can be eliminated from
       # the code
       - name: superfluous-else
