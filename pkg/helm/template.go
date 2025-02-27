@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
+	helmChart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/storage"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
@@ -16,7 +16,7 @@ const (
 
 // TemplateChart renders a Helm chart with the given namespace and values
 // If namespace is empty, it defaults to "default"
-func TemplateChart(ctx context.Context, chart *chart.Chart, namespace string, vals map[string]any) (string, error) {
+func TemplateChart(ctx context.Context, chart *helmChart.Chart, namespace string, vals map[string]any) (string, error) {
 	if chart == nil {
 		return "", fmt.Errorf("chart is required")
 	}

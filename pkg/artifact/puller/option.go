@@ -11,17 +11,17 @@ import (
 	"github.com/neticdk/go-common/pkg/git"
 )
 
-type PullerOption func(*puller)
+type Option func(*puller)
 
 // WithLogger sets the logger for the puller
-func WithLogger(l *slog.Logger) PullerOption {
+func WithLogger(l *slog.Logger) Option {
 	return func(p *puller) {
 		p.logger = l
 	}
 }
 
 // WithGitRepository sets the git repository for the puller
-func WithGitRepository(r git.Repository) PullerOption {
+func WithGitRepository(r git.Repository) Option {
 	return func(p *puller) {
 		if p.gitRepositoryOptions == nil {
 			p.gitRepositoryOptions = &agit.RepositoryOptions{}

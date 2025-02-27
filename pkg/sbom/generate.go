@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/anchore/syft/syft"
-	"github.com/anchore/syft/syft/sbom"
+	syftSbom "github.com/anchore/syft/syft/sbom"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -19,13 +19,13 @@ import (
 )
 
 // GenerateSBOMsFromManifest generates SBOMs from the given manifest
-func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom.SBOM, error) {
+func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*syftSbom.SBOM, error) {
 	imageNames, err := extractImageNamesFromManifest(ctx, manifest)
 	if err != nil {
 		return nil, fmt.Errorf("extracting image names from manifest: %w", err)
 	}
 
-	sboms := make([]*sbom.SBOM, len(imageNames))
+	sboms := make([]*syftSbom.SBOM, len(imageNames))
 	for _, imageName := range imageNames {
 		cfg := syft.DefaultCreateSBOMConfig().WithParallelism(10)
 		src, err := syft.GetSource(
@@ -47,32 +47,28 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*sbom
 }
 
 // GenerateSBOMsFromPath generates SBOMs from all manifests in the given path
-func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*sbom.SBOM, error) {
-	logger := slog.Default()
-
+func GenerateSBOMsFromPath(ctx context.Context, path string) ([]*syftSbom.SBOM, error) {
 	if path == "" {
-		return make([]*sbom.SBOM, 0), nil
+		return make([]*syftSbom.SBOM, 0), nil
 	}
 
 	manifests, err := filepath.Glob(filepath.Join(path, "*.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("reading manifests: %w", err)
 	}
-	var sboms []*sbom.SBOM
+	var sboms []*syftSbom.SBOM
 	for _, manifest := range manifests {
 		f, err := os.Open(manifest)
-		defer func() {
-			err := f.Close()
-			if err != nil {
-				logger.ErrorContext(ctx, "closing manifest file", slog.String("file", manifest), slog.Any("error", err))
-			}
-		}()
 		if err != nil {
 			return nil, fmt.Errorf("opening manifest file %s: %v", manifest, err)
 		}
 		sbom, err := GenerateSBOMsFromManifest(ctx, f)
+		closeErr := f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("generating SBOM from manifest file %s: %v", manifest, err)
+		}
+		if closeErr != nil {
+			return nil, fmt.Errorf("closing manifest file %q: %w", manifest, closeErr)
 		}
 		sboms = append(sboms, sbom...)
 	}

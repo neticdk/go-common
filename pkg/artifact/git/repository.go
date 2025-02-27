@@ -10,6 +10,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/neticdk/go-common/pkg/artifact"
+	"github.com/neticdk/go-common/pkg/file"
 	"github.com/neticdk/go-common/pkg/git"
 )
 
@@ -54,7 +55,7 @@ func PullRepository(ctx context.Context, a *artifact.Artifact, opts *RepositoryO
 	defer os.RemoveAll(tmpDir)
 
 	tmpDstDir := filepath.Join(tmpDir, a.Name)
-	if err := os.MkdirAll(tmpDstDir, 0o750); err != nil {
+	if err := os.MkdirAll(tmpDstDir, file.FileModeNewDirectory); err != nil {
 		return nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 	repo, err := opts.Repository.PlainCloneContext(ctx, tmpDstDir, cloneOptions)

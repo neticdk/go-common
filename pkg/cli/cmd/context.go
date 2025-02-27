@@ -67,14 +67,14 @@ type ExecutionContext struct {
 }
 
 // NewExecutionContext creates a new Context
-func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer) *ExecutionContext {
+func NewExecutionContext(appName, shortDesc, version string) *ExecutionContext {
 	ec := &ExecutionContext{
 		AppName:          appName,
 		ShortDescription: shortDesc,
 		Version:          version,
-		Stdin:            stdin,
-		Stdout:           stdout,
-		Stderr:           stderr,
+		Stdin:            os.Stdin,
+		Stdout:           os.Stdout,
+		Stderr:           os.Stderr,
 		OutputFormat:     OutputFormatPlain,
 		PFlags: PFlags{
 			LogFormat: LogFormatDefault,
@@ -101,7 +101,7 @@ func (ec *ExecutionContext) SetLogLevel() {
 // If the output is not a terminal, color is disabled
 // If the --no-color flag is set, color is disabled
 // If the --no-input flag is set, color is disabled
-func (ec *ExecutionContext) SetColor(noColor bool) {
+func (ec *ExecutionContext) SetColor(noColor bool) { // nolint:revive
 	if !ec.IsTerminal || ec.PFlags.NoInput || noColor {
 		ui.DisableColor()
 	}

@@ -14,14 +14,31 @@ import (
 
 // Repository is an interface for interacting with git repositories
 type Repository interface {
+	// Repo returns the git repository
 	Repo() *git.Repository
+
+	// Init initializes a new git repository in the specified path with the
 	Init(path string, branch string) (*git.Repository, error)
+
+	// PlainCloneContext clones a git repository to the specified path
 	PlainCloneContext(ctx context.Context, path string, o *git.CloneOptions) (*git.Repository, error)
+
+	// CreateRemote creates a new remote with the specified name and url
 	CreateRemote(name string, url string) (*git.Remote, error)
+
+	// Add adds the specified files to the repository
 	Add(paths ...string) error
+
+	// Commit commits the changes to the repository
 	Commit(message string) (plumbing.Hash, error)
+
+	// Push pushes the changes to the remote
 	Push(o *git.PushOptions) error
+
+	// InitAndCommit initializes a git repository, adds all files in the directory,
 	InitAndCommit(dir string, url string, cfg *config.Config) error
+
+	// Config returns the repository configuration
 	Config() (*config.Config, error)
 }
 
@@ -171,7 +188,7 @@ func (g *gitRepository) Config() (*config.Config, error) {
 	return cfg, nil
 }
 
-func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.AuthMethod, error) {
+func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.AuthMethod, error) { // nolint:revive
 	if user == "" {
 		user = "git"
 	}

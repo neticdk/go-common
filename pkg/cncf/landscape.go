@@ -48,12 +48,14 @@ type Project struct {
 
 // HTTPClient is an interface that abstracts the http.Get function.
 type HTTPClient interface {
-	Get(url string) (*http.Response, error)
+	// Get gets the content of the URL and returns the response.
+	Get(rawURL string) (*http.Response, error)
 }
 
 // DefaultHTTPClient is the default implementation of HTTPClient that uses http.Get.
 type DefaultHTTPClient struct{}
 
+// Get gets the content of the URL and returns the response.
 func (c *DefaultHTTPClient) Get(rawURL string) (*http.Response, error) {
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
@@ -99,10 +101,16 @@ func GetLandscape(client HTTPClient) (*Landscape, error) {
 	return nil, nil
 }
 
+// FindProjectOptions is a set of options to find a project in the landscape.
 type FindProjectOptions struct {
-	RepoURL     string
+	// RepoURL is the URL of the repository.
+	RepoURL string
+
+	// HomepageURL is the URL of the project's homepage.
 	HomepageURL string
-	Name        string
+
+	// Name is the name of the project.
+	Name string
 }
 
 // FindProject finds a project in the landscape by repo URL, homepage URL, or name.

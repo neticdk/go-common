@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const OSWindows = "windows"
+
 var (
 	ErrEmptyPath = errors.New("path cannot be empty")
 	ErrNullByte  = errors.New("path contains null byte")
@@ -65,7 +67,7 @@ func SafeReadFile(root, path string) ([]byte, error) {
 
 // ValidMode checks if the given mode is a valid file mode
 func ValidMode(mode int64) (os.FileMode, error) {
-	if mode < 0 || mode > 0777 {
+	if mode < FileModeMinValid || mode > FileModeMaxValid {
 		return 0, fmt.Errorf("invalid file mode: %o", mode)
 	}
 	return os.FileMode(mode), nil
@@ -155,7 +157,7 @@ func SafePath(root, path string) (string, error) {
 // location, so it works even though `file.txt` itself does not exist.
 func resolveSymlinks(path string) (string, error) {
 	var currentPath string
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == OSWindows {
 		currentPath = filepath.VolumeName(path) + string(filepath.Separator)
 	} else if filepath.IsAbs(path) {
 		currentPath = string(filepath.Separator)
@@ -168,7 +170,7 @@ func resolveSymlinks(path string) (string, error) {
 		}
 
 		nextPath := filepath.Join(currentPath, component)
-		if runtime.GOOS != "windows" && filepath.IsAbs(path) && !strings.HasPrefix(nextPath, "/") {
+		if runtime.GOOS != OSWindows && filepath.IsAbs(path) && !strings.HasPrefix(nextPath, "/") {
 			nextPath = "/" + nextPath
 		}
 
@@ -192,7 +194,7 @@ func resolveSymlinks(path string) (string, error) {
 		}
 	}
 
-	if runtime.GOOS != "windows" && filepath.IsAbs(path) && !strings.HasPrefix(currentPath, "/") {
+	if runtime.GOOS != OSWindows && filepath.IsAbs(path) && !strings.HasPrefix(currentPath, "/") {
 		currentPath = "/" + currentPath
 	}
 
@@ -203,7 +205,7 @@ func isWithinRoot(root, path string) bool {
 	cleanRoot := filepath.Clean(root)
 	cleanPath := filepath.Clean(path)
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == OSWindows {
 		cleanRoot = strings.ToLower(cleanRoot)
 		cleanPath = strings.ToLower(cleanPath)
 	}

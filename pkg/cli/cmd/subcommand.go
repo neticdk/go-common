@@ -149,7 +149,7 @@ func (b *SubCommandBuilder[T]) WithMaxArgs(n int) *SubCommandBuilder[T] {
 // runnerArgs are passed to the runner.Complete, runner.Validate and runner.Run methods
 // it is up to the runner to decide how to use these arguments
 func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command, []string) error {
-	return func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, _ []string) error {
 		ctx := cmd.Context()
 		if err := runner.Complete(ctx, runnerArg); err != nil {
 			return err
@@ -163,25 +163,25 @@ func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command,
 
 // TestRunner is a test runner for commands
 type TestRunner[T any] struct {
-	CompleteFunc func(T) error
-	ValidateFunc func(T) error
-	RunFunc      func(T) error
+	CompleteFunc func(context.Context, T) error
+	ValidateFunc func(context.Context, T) error
+	RunFunc      func(context.Context, T) error
 }
 
 func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) error {
-	return tr.CompleteFunc(runnerArg)
+	return tr.CompleteFunc(ctx, runnerArg)
 }
 
 func (tr *TestRunner[T]) Validate(ctx context.Context, runnerArg T) error {
-	return tr.ValidateFunc(runnerArg)
+	return tr.ValidateFunc(ctx, runnerArg)
 }
 
 func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error {
-	return tr.RunFunc(runnerArg)
+	return tr.RunFunc(ctx, runnerArg)
 }
 
 type NoopRunner[T any] struct{}
 
-func (o *NoopRunner[T]) Complete(ctx context.Context, runnerArg T) error { return nil }
-func (o *NoopRunner[T]) Validate(ctx context.Context, runnerArg T) error { return nil }
-func (o *NoopRunner[T]) Run(ctx context.Context, runnerArg T) error      { return nil }
+func (o *NoopRunner[T]) Complete(_ context.Context, _ T) error { return nil }
+func (o *NoopRunner[T]) Validate(_ context.Context, _ T) error { return nil }
+func (o *NoopRunner[T]) Run(_ context.Context, _ T) error      { return nil }

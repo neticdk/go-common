@@ -11,6 +11,7 @@ import (
 	gh "github.com/google/go-github/v69/github"
 	"github.com/neticdk/go-common/pkg/artifact"
 	"github.com/neticdk/go-common/pkg/artifact/archive"
+	"github.com/neticdk/go-common/pkg/file"
 	"github.com/neticdk/go-common/pkg/github"
 )
 
@@ -87,7 +88,7 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 	}
 
 	tmpDstDir := filepath.Join(tmpDir, a.Name)
-	if err := os.MkdirAll(tmpDstDir, 0o750); err != nil {
+	if err := os.MkdirAll(tmpDstDir, file.FileModeNewDirectory); err != nil {
 		return nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 

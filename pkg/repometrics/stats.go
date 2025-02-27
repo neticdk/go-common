@@ -76,9 +76,12 @@ type ReleaseMetrics struct {
 }
 
 const (
-	daysInWeek  = 7
-	daysInMonth = 30.44
-	daysInYear  = 365.25
+	daysInWeek       = 7
+	daysInMonth      = 30.44
+	daysInYear       = 365.25
+	hoursInDay       = 24
+	roundOneDecimal  = 10
+	roundTwoDecimals = 100
 )
 
 // CalculateReleaseMetrics calculates the release metrics based on the first and
@@ -93,7 +96,7 @@ func CalculateReleaseMetrics(firstRelease, lastRelease *time.Time, totalReleases
 		return ReleaseMetrics{}
 	}
 
-	daysInPeriod := period.Hours() / 24
+	daysInPeriod := period.Hours() / hoursInDay
 	if daysInPeriod == 0 {
 		return ReleaseMetrics{}
 	}
@@ -108,9 +111,13 @@ func CalculateReleaseMetrics(firstRelease, lastRelease *time.Time, totalReleases
 	releasesPerYear := float64(totalReleases) / yearsInPeriod
 
 	return ReleaseMetrics{
-		PerDay:   math.Round(releasesPerDay*10) / 10,
-		PerWeek:  math.Round(releasesPerWeek*10) / 10,
-		PerMonth: math.Round(releasesPerMonth*100) / 100,
-		PerYear:  math.Round(releasesPerYear*100) / 100,
+		PerDay:   roundTo(releasesPerDay, roundOneDecimal),
+		PerWeek:  roundTo(releasesPerWeek, roundOneDecimal),
+		PerMonth: roundTo(releasesPerMonth, roundTwoDecimals),
+		PerYear:  roundTo(releasesPerYear, roundTwoDecimals),
 	}
+}
+
+func roundTo(f float64, d float64) float64 {
+	return math.Round(f*d) / d
 }

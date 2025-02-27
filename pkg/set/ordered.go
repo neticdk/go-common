@@ -75,7 +75,7 @@ func (s OrderedSet[E]) Add(vals ...E) {
 //	[1 2 3]
 //	fmt.Println(s2.Members())
 //	[1 2 3 4 5]
-func (s OrderedSet[E]) AddImmutable(vals ...E) SetI[E] {
+func (s OrderedSet[E]) AddImmutable(vals ...E) Interface[E] {
 	return s.Set.AddImmutable(vals...)
 }
 
@@ -102,7 +102,7 @@ func (s OrderedSet[E]) Remove(vals ...E) {
 //	[1 2 3]
 //	fmt.Println(s2.Members())
 //	[1]
-func (s OrderedSet[E]) RemoveImmutable(vals ...E) SetI[E] {
+func (s OrderedSet[E]) RemoveImmutable(vals ...E) Interface[E] {
 	return s.Set.RemoveImmutable(vals...)
 }
 
@@ -168,7 +168,7 @@ func (s OrderedSet[E]) String() string {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Union(s2))
 //	[1 2 3 4 5]
-func (s OrderedSet[E]) Union(s2 SetI[E]) SetI[E] {
+func (s OrderedSet[E]) Union(s2 Interface[E]) Interface[E] {
 	return s.Set.Union(s2)
 }
 
@@ -181,7 +181,7 @@ func (s OrderedSet[E]) Union(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Intersection(s2))
 //	[3]
-func (s OrderedSet[E]) Intersection(s2 SetI[E]) SetI[E] {
+func (s OrderedSet[E]) Intersection(s2 Interface[E]) Interface[E] {
 	return s.Set.Intersection(s2)
 }
 
@@ -193,7 +193,7 @@ func (s OrderedSet[E]) Intersection(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Difference(s2))
 //	[1]
-func (s OrderedSet[E]) Difference(s2 SetI[E]) SetI[E] {
+func (s OrderedSet[E]) Difference(s2 Interface[E]) Interface[E] {
 	return s.Set.Difference(s2)
 }
 
@@ -205,7 +205,7 @@ func (s OrderedSet[E]) Difference(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.IsSubsetOf(s2))
 //	true
-func (s OrderedSet[E]) IsSubsetOf(s2 SetI[E]) bool {
+func (s OrderedSet[E]) IsSubsetOf(s2 Interface[E]) bool {
 	return s.Set.IsSubsetOf(s2)
 }
 
@@ -218,7 +218,7 @@ func (s OrderedSet[E]) IsSubsetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2)
 //	fmt.Println(s1.IsSupersetOf(s2))
 //	true
-func (s OrderedSet[E]) IsSupersetOf(s2 SetI[E]) bool {
+func (s OrderedSet[E]) IsSupersetOf(s2 Interface[E]) bool {
 	return s.Set.IsSupersetOf(s2)
 }
 
@@ -230,7 +230,7 @@ func (s OrderedSet[E]) IsSupersetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.Equal(s2))
 //	true
-func (s OrderedSet[E]) Equal(s2 SetI[E]) bool {
+func (s OrderedSet[E]) Equal(s2 Interface[E]) bool {
 	return s.Set.Equal(s2)
 }
 

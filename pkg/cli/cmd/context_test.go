@@ -17,7 +17,10 @@ func TestNewExecutionContext(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 
-	ec := NewExecutionContext("testapp", "A test app", "v1.0.0", stdin, stdout, stderr)
+	ec := NewExecutionContext("testapp", "A test app", "v1.0.0")
+	ec.Stdin = stdin
+	ec.Stdout = stdout
+	ec.Stderr = stderr
 
 	assert.Equal(t, "testapp", ec.AppName)
 	assert.Equal(t, "A test app", ec.ShortDescription)

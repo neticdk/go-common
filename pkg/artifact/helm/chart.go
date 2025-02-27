@@ -12,7 +12,7 @@ import (
 type ChartOptions struct{}
 
 // PullChart pulls a helm chart to the destination directory
-func PullChart(ctx context.Context, a *artifact.Artifact, opts *ChartOptions) (*artifact.PullResult, error) {
+func PullChart(ctx context.Context, a *artifact.Artifact, _ *ChartOptions) (*artifact.PullResult, error) {
 	res, err := helm.PullChart(ctx, a.Repository, a.Name, a.DestDir())
 	if err != nil {
 		return nil, fmt.Errorf("pulling helm chart: %w", err)

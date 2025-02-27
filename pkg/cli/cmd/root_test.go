@@ -137,5 +137,5 @@ func TestGenDocsCommand(t *testing.T) {
 }
 
 func newEC() *ExecutionContext {
-	return NewExecutionContext("test", "test", "0.0.0", os.Stdin, os.Stdout, os.Stderr)
+	return NewExecutionContext("test", "test", "0.0.0")
 }
