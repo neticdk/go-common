@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -10,7 +11,7 @@ type enum struct {
 	Value   string
 }
 
-// NewEnum give a list of allowed flag parameters, where the second argument is the default
+// NewEnum gives a list of allowed flag parameters, where the second argument is the default
 func NewEnum(allowed []string, d string) *enum {
 	return &enum{
 		Allowed: allowed,
@@ -24,15 +25,7 @@ func (a enum) String() string {
 
 // Set sets the value of the flag
 func (a *enum) Set(p string) error {
-	isIncluded := func(opts []string, val string) bool {
-		for _, opt := range opts {
-			if val == opt {
-				return true
-			}
-		}
-		return false
-	}
-	if !isIncluded(a.Allowed, p) {
+	if !slices.Contains(a.Allowed, p) {
 		return fmt.Errorf("%s is not included in %s", p, strings.Join(a.Allowed, ","))
 	}
 	a.Value = p
