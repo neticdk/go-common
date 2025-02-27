@@ -94,6 +94,9 @@ func NewExecutionContext(appName, shortDesc, version string) *ExecutionContext {
 // SetLogLevel sets the ec.Logger log level
 func (ec *ExecutionContext) SetLogLevel() {
 	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel.String())
+	if ui.Logger.Level == ui.ParseLevel(string(LogLevelDebug)) {
+		ui.Logger.ShowCaller = true
+	}
 	ec.LogLevel.Set(ParseLogLevel(ec.PFlags.LogLevel))
 }
 
