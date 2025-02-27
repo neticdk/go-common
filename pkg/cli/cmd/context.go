@@ -93,8 +93,14 @@ func NewExecutionContext(appName, shortDesc, version string) *ExecutionContext {
 
 // SetLogLevel sets the ec.Logger log level
 func (ec *ExecutionContext) SetLogLevel() {
-	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel.String())
-	ec.LogLevel.Set(ParseLogLevel(ec.PFlags.LogLevel))
+	logLevel := ec.PFlags.LogLevel
+	if ec.PFlags.Debug {
+		logLevel = LogLevelDebug
+	}
+	ui.Logger.Level = ui.ParseLevel(logLevel.String())
+	ec.LogLevel.Set(ParseLogLevel(logLevel))
+
+	ui.Logger.ShowCaller = ec.PFlags.Debug || ui.Logger.Level == ui.ParseLevel(LogLevelDebug.String())
 }
 
 // SetColor sets weather color should be used in the output
