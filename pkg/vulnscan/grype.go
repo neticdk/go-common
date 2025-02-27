@@ -13,7 +13,7 @@ import (
 	"github.com/anchore/go-version"
 	"github.com/anchore/grype/grype"
 	"github.com/anchore/grype/grype/db/legacy/distribution"
-	v5 "github.com/anchore/grype/grype/db/v5"
+	grypeDb "github.com/anchore/grype/grype/db/v5"
 	grypeMatch "github.com/anchore/grype/grype/match"
 	grypePkg "github.com/anchore/grype/grype/pkg"
 	grypeVulnerability "github.com/anchore/grype/grype/vulnerability"
@@ -22,7 +22,12 @@ import (
 	"github.com/neticdk/go-common/pkg/types"
 )
 
-const DefaultDBRootDir = "/tmp/grypedb"
+const (
+	DefaultDBRootDir = "/tmp/grypedb"
+
+	// Number of scanner workers
+	scannerWorkers = 10
+)
 
 // GrypeScanner is a scanner that uses Grype to find vulnerabilities in a
 // project
@@ -168,11 +173,8 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	// Use a WaitGroup to wait for all workers to finish
 	var wg sync.WaitGroup
 
-	// Number of workers
-	numWorkers := 10
-
 	// Start workers
-	for i := 0; i < numWorkers; i++ {
+	for range scannerWorkers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -200,7 +202,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	return vulns, nil
 }
 
-func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *v5.ProviderStore, resultChan chan<- types.Vulnerability) {
+func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *grypeDb.ProviderStore, resultChan chan<- types.Vulnerability) {
 	logger := slog.Default()
 	metadata, err := datastore.GetMetadata(match.Vulnerability.ID, match.Vulnerability.Namespace)
 	if err != nil {

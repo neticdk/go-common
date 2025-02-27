@@ -88,7 +88,7 @@ func (r *Request) DownloadToWriter(originURL string, w io.Writer) (int64, error)
 }
 
 func (r *Request) Download(originURL, filePath string) (int64, error) {
-	f, err := file.SafeCreate(filepath.Dir(filePath), filePath, 0o640)
+	f, err := file.SafeCreate(filepath.Dir(filePath), filePath, file.FileModeNewFile)
 	if err != nil {
 		return 0, err
 	}

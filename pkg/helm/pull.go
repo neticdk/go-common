@@ -8,7 +8,7 @@ import (
 
 	"github.com/neticdk/go-common/pkg/version"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
+	helmChart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/registry"
@@ -22,7 +22,7 @@ type pullOption struct {
 type PullOption func(*pullOption)
 
 type PullResult struct {
-	Chart   *chart.Chart
+	Chart   *helmChart.Chart
 	Version string
 }
 
@@ -34,15 +34,15 @@ func WithRegistryClient(client *registry.Client) PullOption {
 }
 
 // WithVersion sets the version of the chart to pull
-func WithVersion(version string) PullOption {
+func WithVersion(v string) PullOption {
 	return func(o *pullOption) {
-		o.Version = version
+		o.Version = v
 	}
 }
 
 // PullChart pulls a helm chart to the destination directory
 // Version defaults to "latest"
-func PullChart(ctx context.Context, repository, chartName, dstDir string, opts ...PullOption) (*PullResult, error) {
+func PullChart(_ context.Context, repository, chartName, dstDir string, opts ...PullOption) (*PullResult, error) {
 	if repository == "" {
 		return nil, fmt.Errorf("repository is required")
 	}

@@ -16,7 +16,7 @@ func copyFileOrDir(sourcePath, destPath string, fileInfo os.FileInfo) error {
 
 	switch fileInfo.Mode() & os.ModeType {
 	case os.ModeDir:
-		if err := os.MkdirAll(destPath, 0o750); err != nil {
+		if err := os.MkdirAll(destPath, FileModeNewDirectory); err != nil {
 			return fmt.Errorf("creating directory: %q, error: %q", destPath, err.Error())
 		}
 		if err := CopyDirectory(sourcePath, destPath); err != nil {

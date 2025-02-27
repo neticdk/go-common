@@ -51,7 +51,7 @@ func TestAddPersistentFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &cobra.Command{}
-			ec := cmd.NewExecutionContext("test", "test", "0.0.0", os.Stdin, os.Stdout, os.Stderr)
+			ec := cmd.NewExecutionContext("test", "test", "0.0.0")
 			ec.PFlags.JSONEnabled = true
 			ec.PFlags.YAMLEnabled = true
 			ec.PFlags.MarkdownEnabled = true

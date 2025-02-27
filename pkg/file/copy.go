@@ -14,7 +14,7 @@ func CopyDirectory(srcDir, dest string) error {
 		return fmt.Errorf("reading directory: %q, error: %q", srcDir, err.Error())
 	}
 	if !IsDir(dest) {
-		if err := os.MkdirAll(dest, 0o750); err != nil {
+		if err := os.MkdirAll(dest, FileModeNewDirectory); err != nil {
 			return fmt.Errorf("creating directory: %q, error: %q", dest, err.Error())
 		}
 	}

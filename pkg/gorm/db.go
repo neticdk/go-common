@@ -10,7 +10,7 @@ import (
 	"github.com/neticdk/go-common/pkg/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormLogger "gorm.io/gorm/logger"
 	gtrace "gorm.io/plugin/opentelemetry/tracing"
 )
 
@@ -40,7 +40,7 @@ func ConfigureDatabase(dbDriver, dbDSN string) (*gorm.DB, error) {
 
 type zl struct{}
 
-func (l *zl) LogMode(logger.LogLevel) logger.Interface {
+func (l *zl) LogMode(gormLogger.LogLevel) gormLogger.Interface {
 	return l
 }
 

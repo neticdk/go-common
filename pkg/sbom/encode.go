@@ -8,7 +8,7 @@ import (
 	"github.com/anchore/syft/syft/format/cyclonedxxml"
 	"github.com/anchore/syft/syft/format/spdxjson"
 	"github.com/anchore/syft/syft/format/spdxtagvalue"
-	"github.com/anchore/syft/syft/sbom"
+	syftSbom "github.com/anchore/syft/syft/sbom"
 )
 
 type Format int
@@ -21,11 +21,12 @@ const (
 )
 
 type Encoder interface {
-	Encode(io.Writer, sbom.SBOM) error
+	// Encode writes the SBOM to the writer in the specified format
+	Encode(io.Writer, syftSbom.SBOM) error
 }
 
 // Encode writes the SBOM to the writer in the specified format
-func Encode(w io.Writer, sbom sbom.SBOM, f Format) error {
+func Encode(w io.Writer, sbom syftSbom.SBOM, f Format) error {
 	var encoder Encoder
 	switch f {
 	case FormatSPDXJSON:

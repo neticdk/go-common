@@ -119,11 +119,11 @@ func untarGz(r io.Reader, dir string) error {
 		path := filepath.Join(dir, baseFile)
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(path, 0o750); err != nil {
+			if err := os.MkdirAll(path, file.FileModeNewDirectory); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}
 		case tar.TypeReg:
-			if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+			if err := os.MkdirAll(filepath.Dir(path), file.FileModeNewDirectory); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}
 			outFile, err := file.SafeOpenFile(dir, baseFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, header.Mode)

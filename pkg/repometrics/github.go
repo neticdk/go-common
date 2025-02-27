@@ -282,13 +282,13 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 	return nil
 }
 
-func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (*github.RepositoryRelease, *github.RepositoryRelease) {
+func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (first *github.RepositoryRelease, last *github.RepositoryRelease) {
 	if len(releases) == 0 {
 		return nil, nil
 	}
-	firstRelease := releases[len(releases)-1]
-	lastRelease := releases[0]
-	return firstRelease, lastRelease
+	first = releases[len(releases)-1]
+	last = releases[0]
+	return first, last
 }
 
 func (gr *ghRepo) guessVersion() string {

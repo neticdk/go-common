@@ -62,7 +62,7 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return nil
 		},
 	}
