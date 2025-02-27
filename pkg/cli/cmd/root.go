@@ -68,6 +68,7 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 	}
 
 	AddPersistentFlags(c, ec)
+	ec.SetLogLevel()
 
 	if err := viper.BindPFlags(c.PersistentFlags()); err != nil {
 		panic(fmt.Errorf("binding flags: %w", err))
