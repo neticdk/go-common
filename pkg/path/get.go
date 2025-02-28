@@ -61,16 +61,14 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 	case reflect.Struct:
 		if f := reflect.Indirect(val).FieldByName(part); f.IsValid() {
 			return getPathValueRecursive(f.Interface(), parts)
-		} else {
-			return nil, fmt.Errorf("cannot find field %s in struct-value %v", part, val)
 		}
+		return nil, fmt.Errorf("cannot find field %s in struct-value %v", part, val)
 
 	case reflect.Map:
 		if v, ok := data.(map[string]any)[part]; ok {
 			return getPathValueRecursive(v, parts)
-		} else {
-			return nil, fmt.Errorf("cannot find key %s in map-value %v", part, val)
 		}
+		return nil, fmt.Errorf("cannot find key %s in map-value %v", part, val)
 
 	case reflect.Slice:
 		v, ok := data.([]any)
@@ -82,9 +80,9 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 				return nil, fmt.Errorf("index %d out of bounds for slice-value %v", i, val)
 			}
 			return getPathValueRecursive(v[i], parts)
-		} else {
-			return nil, fmt.Errorf("invalid index %s for slice-value %v", part, val)
 		}
+		return nil, fmt.Errorf("invalid index %s for slice-value %v", part, val)
+
 	default:
 		return nil, fmt.Errorf("cannot get path %s from non-map non-slice value %v", strings.Join(parts, "."), data)
 	}

@@ -143,12 +143,11 @@ func ParseJSONPointer(path string) ([]string, error) {
 
 		// If the character is a quote, it is the start or end of a quoted section
 		case ch == '"':
-			if inEscape {
-				current.WriteRune(ch)
-				inEscape = false
-			} else {
+			if !inEscape {
 				return nil, fmt.Errorf("quotes must be escaped in path")
 			}
+			current.WriteRune(ch)
+			inEscape = false
 
 		case ch == '/':
 			// Check if trying to encode or escape slash
