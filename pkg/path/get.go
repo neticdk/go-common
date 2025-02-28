@@ -93,7 +93,7 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 // getNonReflectPathValueRecursive returns the value at the given path in the data.
 //
 // It is used for non-reflectable data types like map[string]any and []any.
-// This is increases performance as opposed to the reflect-version
+// This increases performance as opposed to the reflect-version
 // but is limited to only map[string]any and []any data types.
 // It returns an error if the path is invalid or the value is not found.
 func getNonReflectPathValueRecursive(data any, parts []string) (any, error) {
