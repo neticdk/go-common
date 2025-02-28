@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -41,12 +42,12 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("complete_called", func(t *testing.T) {
 		completeCalled := false
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) error {
+			CompleteFunc: func(ctx context.Context, a arg) error {
 				completeCalled = true
 				return nil
 			},
-			ValidateFunc: func(a arg) error { return nil },
-			RunFunc:      func(a arg) error { return nil },
+			ValidateFunc: func(ctx context.Context, a arg) error { return nil },
+			RunFunc:      func(ctx context.Context, a arg) error { return nil },
 		}
 		runE := mkRunE(runner, arg{})
 		cmd := &cobra.Command{}
@@ -57,9 +58,9 @@ func Test_mkRunE(t *testing.T) {
 
 	t.Run("validate_error", func(t *testing.T) {
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) error { return nil },
-			ValidateFunc: func(a arg) error { return assert.AnError },
-			RunFunc:      func(a arg) error { return nil },
+			CompleteFunc: func(ctx context.Context, a arg) error { return nil },
+			ValidateFunc: func(ctx context.Context, a arg) error { return assert.AnError },
+			RunFunc:      func(ctx context.Context, a arg) error { return nil },
 		}
 		runE := mkRunE(runner, arg{})
 		cmd := &cobra.Command{}
@@ -70,9 +71,9 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("run_called", func(t *testing.T) {
 		runCalled := false
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(a arg) error { return nil },
-			ValidateFunc: func(a arg) error { return nil },
-			RunFunc:      func(a arg) error { runCalled = true; return nil },
+			CompleteFunc: func(ctx context.Context, a arg) error { return nil },
+			ValidateFunc: func(ctx context.Context, a arg) error { return nil },
+			RunFunc:      func(ctx context.Context, a arg) error { runCalled = true; return nil },
 		}
 
 		runE := mkRunE(runner, arg{})

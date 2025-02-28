@@ -72,7 +72,7 @@ func (s Set[E]) Add(vals ...E) {
 //	[1 2 3]
 //	fmt.Println(s2.Members())
 //	[1 2 3 4 5]
-func (s Set[E]) AddImmutable(vals ...E) SetI[E] {
+func (s Set[E]) AddImmutable(vals ...E) Interface[E] {
 	n := New(s.Members()...)
 	n.Add(vals...)
 	return n
@@ -103,7 +103,7 @@ func (s Set[E]) Remove(vals ...E) {
 //	[1 2 3]
 //	fmt.Println(s2.Members())
 //	[1]
-func (s Set[E]) RemoveImmutable(vals ...E) SetI[E] {
+func (s Set[E]) RemoveImmutable(vals ...E) Interface[E] {
 	n := New(s.Members()...)
 	n.Remove(vals...)
 	return n
@@ -158,7 +158,7 @@ func (s Set[E]) String() string {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Union(s2))
 //	[1 2 3 4 5]
-func (s Set[E]) Union(s2 SetI[E]) SetI[E] {
+func (s Set[E]) Union(s2 Interface[E]) Interface[E] {
 	result := New(s.Members()...)
 	result.Add(s2.Members()...)
 	return result
@@ -173,7 +173,7 @@ func (s Set[E]) Union(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Intersection(s2))
 //	[3]
-func (s Set[E]) Intersection(s2 SetI[E]) SetI[E] {
+func (s Set[E]) Intersection(s2 Interface[E]) Interface[E] {
 	result := New[E]()
 	for _, v := range s.Members() {
 		if s2.Contains(v) {
@@ -191,7 +191,7 @@ func (s Set[E]) Intersection(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(2, 3, 4)
 //	fmt.Println(s1.Difference(s2))
 //	[1]
-func (s Set[E]) Difference(s2 SetI[E]) SetI[E] {
+func (s Set[E]) Difference(s2 Interface[E]) Interface[E] {
 	result := New(s.Members()...)
 	for _, v := range s2.Members() {
 		delete(result, v)
@@ -207,7 +207,7 @@ func (s Set[E]) Difference(s2 SetI[E]) SetI[E] {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.IsSubsetOf(s2))
 //	true
-func (s Set[E]) IsSubsetOf(s2 SetI[E]) bool {
+func (s Set[E]) IsSubsetOf(s2 Interface[E]) bool {
 	for _, v := range s.Members() {
 		if !s2.Contains(v) {
 			return false
@@ -225,7 +225,7 @@ func (s Set[E]) IsSubsetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2)
 //	fmt.Println(s1.IsSupersetOf(s2))
 //	true
-func (s Set[E]) IsSupersetOf(s2 SetI[E]) bool {
+func (s Set[E]) IsSupersetOf(s2 Interface[E]) bool {
 	for _, v := range s2.Members() {
 		if !s.Contains(v) {
 			return false
@@ -242,7 +242,7 @@ func (s Set[E]) IsSupersetOf(s2 SetI[E]) bool {
 //	s2 := NewSet(1, 2, 3)
 //	fmt.Println(s1.Equal(s2))
 //	true
-func (s Set[E]) Equal(s2 SetI[E]) bool {
+func (s Set[E]) Equal(s2 Interface[E]) bool {
 	return s.IsSubsetOf(s2) && s.IsSupersetOf(s2)
 }
 

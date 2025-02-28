@@ -16,7 +16,7 @@ type HTTPOptions struct {
 }
 
 // PullHTTP downloads a compressed file from a URL and uncompresses it
-func PullHTTP(ctx context.Context, a *artifact.Artifact, opts *HTTPOptions) (*artifact.PullResult, error) {
+func PullHTTP(_ context.Context, a *artifact.Artifact, opts *HTTPOptions) (*artifact.PullResult, error) {
 	if opts == nil {
 		opts = &HTTPOptions{}
 	}

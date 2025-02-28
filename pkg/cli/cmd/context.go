@@ -67,14 +67,14 @@ type ExecutionContext struct {
 }
 
 // NewExecutionContext creates a new Context
-func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, stdout, stderr io.Writer) *ExecutionContext {
+func NewExecutionContext(appName, shortDesc, version string) *ExecutionContext {
 	ec := &ExecutionContext{
 		AppName:          appName,
 		ShortDescription: shortDesc,
 		Version:          version,
-		Stdin:            stdin,
-		Stdout:           stdout,
-		Stderr:           stderr,
+		Stdin:            os.Stdin,
+		Stdout:           os.Stdout,
+		Stderr:           os.Stderr,
 		OutputFormat:     OutputFormatPlain,
 		PFlags: PFlags{
 			LogFormat: LogFormatDefault,
@@ -93,15 +93,21 @@ func NewExecutionContext(appName, shortDesc, version string, stdin io.Reader, st
 
 // SetLogLevel sets the ec.Logger log level
 func (ec *ExecutionContext) SetLogLevel() {
-	ui.Logger.Level = ui.ParseLevel(ec.PFlags.LogLevel.String())
-	ec.LogLevel.Set(ParseLogLevel(ec.PFlags.LogLevel))
+	logLevel := ec.PFlags.LogLevel
+	if ec.PFlags.Debug {
+		logLevel = LogLevelDebug
+	}
+	ui.Logger.Level = ui.ParseLevel(logLevel.String())
+	ec.LogLevel.Set(ParseLogLevel(logLevel))
+
+	ui.Logger.ShowCaller = ec.PFlags.Debug || ui.Logger.Level == ui.ParseLevel(LogLevelDebug.String())
 }
 
 // SetColor sets weather color should be used in the output
 // If the output is not a terminal, color is disabled
 // If the --no-color flag is set, color is disabled
 // If the --no-input flag is set, color is disabled
-func (ec *ExecutionContext) SetColor(noColor bool) {
+func (ec *ExecutionContext) SetColor(noColor bool) { // nolint:revive
 	if !ec.IsTerminal || ec.PFlags.NoInput || noColor {
 		ui.DisableColor()
 	}

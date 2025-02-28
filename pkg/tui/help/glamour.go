@@ -85,13 +85,15 @@ func Gt(a, b any) bool {
 	var left, right int64
 	av := reflect.ValueOf(a)
 
+	const intBits = 64
+
 	switch av.Kind() {
 	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice:
 		left = int64(av.Len())
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		left = av.Int()
 	case reflect.String:
-		left, _ = strconv.ParseInt(av.String(), 10, 64)
+		left, _ = strconv.ParseInt(av.String(), 10, intBits)
 	}
 
 	bv := reflect.ValueOf(b)
@@ -102,7 +104,7 @@ func Gt(a, b any) bool {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		right = bv.Int()
 	case reflect.String:
-		right, _ = strconv.ParseInt(bv.String(), 10, 64)
+		right, _ = strconv.ParseInt(bv.String(), 10, intBits)
 	}
 
 	return left > right

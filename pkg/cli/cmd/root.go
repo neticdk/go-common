@@ -62,12 +62,13 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return nil
 		},
 	}
 
 	AddPersistentFlags(c, ec)
+	ec.SetLogLevel()
 
 	if err := viper.BindPFlags(c.PersistentFlags()); err != nil {
 		panic(fmt.Errorf("binding flags: %w", err))

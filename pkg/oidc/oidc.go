@@ -43,12 +43,18 @@ func NewKeyfunc(ctx context.Context, issuers ...string) (jwt.Keyfunc, error) {
 		if err != nil {
 			return nil, fmt.Errorf("unable to request OpenID configuration: %w", err)
 		}
-		defer resp.Body.Close()
 
 		var config providerConfiguration
 		err = json.NewDecoder(resp.Body).Decode(&config)
+
+		closeErr := resp.Body.Close()
+
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse OpenID configuration document: %w", err)
+		}
+
+		if closeErr != nil {
+			logger.WarnContext(ctx, "unable to close OpenID configuration response", slog.Any("error", closeErr))
 		}
 
 		jwks, err := keyfunc.NewDefault([]string{config.JWKS})

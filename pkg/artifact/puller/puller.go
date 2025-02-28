@@ -39,7 +39,7 @@ type puller struct {
 }
 
 // NewPuller creates a new puller
-func NewPuller(opts ...PullerOption) Puller {
+func NewPuller(opts ...Option) Puller {
 	p := &puller{}
 	for _, opt := range opts {
 		opt(p)

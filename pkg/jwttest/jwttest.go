@@ -13,7 +13,8 @@ var SampleSecretKey = []byte("SharedSecret")
 // GenerateJwt is a test function to generate a JWT structure similar the one received from Keycloak
 func GenerateJwt(t *testing.T, iss string, roles map[string][]string) (*jwt.Token, string) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	require.True(t, ok)
 	claims["sub"] = "aae9782e-fee4-4423-bcbd-2252397683fb"
 	claims["iss"] = iss
 	claims["exp"] = time.Now().Add(10 * time.Minute)
