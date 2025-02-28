@@ -21,9 +21,7 @@ func TestNewRootCommand(t *testing.T) {
 		NewRootCommand(&ExecutionContext{})
 	})
 
-	ec := &ExecutionContext{
-		AppName: "test",
-	}
+	ec := NewExecutionContext("test", "test", "0.0.0")
 	cmd := NewRootCommand(ec).Build()
 	assert.NotNil(t, cmd)
 	assert.Equal(t, "test", cmd.Name())
