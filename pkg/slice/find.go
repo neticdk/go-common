@@ -18,6 +18,8 @@ func FindFunc[T any](data []T, f func(T) bool) (T, bool) {
 
 // FindIFunc returns the index of the first element in the slice that satisfies
 // the predicate.
+//
+// It returns -1 and false if no element satisfies the predicate
 func FindIFunc[T any](data []T, f func(T) bool) (int, bool) {
 	for i, e := range data {
 		if f(e) {
