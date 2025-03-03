@@ -2,50 +2,33 @@
 linters:
   disable-all: true
   enable:
-    # Checks for unhandled errors.
-    - errcheck
-    # Inspects code for simplifications.
-    - gosimple
-    # Reports suspicious constructs.
-    - govet
-    # Detects ineffective assignments.
-    - ineffassign
-    # Performs static analysis checks, including those from govet.
-    - staticcheck
-    # Finds unused code.
-    - unused
-    # Formats code according to the gofumpt standard.
-    # Replaces gofmt
-    - gofumpt
-    # Checks for unused imports.
-    - goimports
-    # Performs more advanced static analysis checks.
-    - gocritic
-    # Identifies security vulnerabilities.
-    - gosec
-    # Checks for issues in slog calls.
-    - sloglint
-    # Detects common misspellings.
-    - misspell
-    # Runs additional static analysis checks.
-    # Replaces golint
-    - revive
-    # Checks for unclosed HTTP response bodies.
-    - bodyclose
-    # Checks for redundant nil error checks.
-    - nilerr
-    # Detects potential memory allocations that could be preallocated.
-    - prealloc
-    # Finds unnecessary type conversions.
-    - unconvert
-    # Detects unused function parameters.
-    - unparam
-    # Checks function and package cyclomatic complexity.
-    # - cyclop
-    # Measures cyclomatic complexity.
-    # - gocyclo
-    # Finds repeated strings that could be replaced by constants.
-    - goconst
+    # Default linters
+    - errcheck # Checks for unhandled errors.
+    - gosimple # Inspects code for simplifications.
+    - govet # Reports suspicious constructs.
+    - ineffassign # Detects ineffective assignments.
+    - staticcheck # Performs static analysis checks, including those from govet.
+    - typecheck # Checks for type errors.
+    - unused # Finds unused code.
+    # Disabled by default
+    - gofumpt # Formats code according to the gofumpt standard. Replaces gofmt.
+    - goimports # Checks for unused imports.
+    - gocritic # Performs more advanced static analysis checks.
+    - gosec # Identifies security vulnerabilities.
+    - sloglint # Checks for issues in slog calls.
+    - misspell # Detects common misspellings.
+    - revive # Runs additional static analysis checks. Replaces golint.
+    - bodyclose # Checks for unclosed HTTP response bodies.
+    - nilerr # Checks for redundant nil error checks.
+    - prealloc # Detects potential memory allocations that could be preallocated.
+    - unconvert # Finds unnecessary type conversions.
+    - unparam # Detects unused function parameters.
+    - goconst # Finds repeated strings that could be replaced by constants.
+  # disable:
+  #   - cyclop # Checks function and package cyclomatic complexity.
+  #   - gocyclo # Measures cyclomatic complexity.
+  #   - gocognit # Checks the cognitive complexity of functions
+  #   - funlen # Finds long functions
 
 run:
   timeout: 5m
@@ -56,6 +39,7 @@ issues:
     - path: _test\.go
       linters:
         - errcheck
+        - gosec
   max-issues-per-linter: 0
   max-same-issues: 0
 
@@ -63,7 +47,41 @@ output:
   # Print lines of code with issue
   print-issued-lines: true
 
+severity:
+  default-severity: error
+  rules:
+    - severity: info
+      linters:
+        - gocognit
+        - cyclop
+        - funlen
+        - gocyclo
+
 linters-settings:
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-type-assertions: true
+
+  funlen:
+    # Checks the number of lines in a function.
+    # If lower than 0, disable the check.
+    # Default: 60
+    lines: 100
+    # Checks the number of statements in a function.
+    # If lower than 0, disable the check.
+    # Default: 40
+    statements: 50
+    # Ignore comments when counting lines.
+    # Default false
+    ignore-comments: true
+
+  gocognit:
+    # Minimal code complexity to report.
+    # Default: 30 (but we recommend 10-20)
+    min-complexity: 20
+
   sloglint:
     # Enforce not mixing key-value pairs and attributes.
     # Default: true
@@ -84,7 +102,11 @@ linters-settings:
     no-global: all
     # Enforce using methods that accept a context.
     # Default: false
-    context: all
+    # Values:
+    # - "": disabled
+    # - "all": report all contextless calls
+    # - "scope": report only if a context exists in the scope of the outermost function
+    context: scope
 
   gosec:
     # Filter out the issues with a lower severity than the given value.
@@ -108,11 +130,11 @@ linters-settings:
   cyclop:
     # The maximal code complexity to report.
     # Default: 10
-    # max-complexity: 10
+    max-complexity: 30
     # The maximal average package complexity.
     # If it's higher than 0.0 (float) the check is enabled
     # Default: 0.0
-    # package-average: 0.0
+    package-average: 10.0
     # Should ignore tests.
     # Default: false
     skip-tests: true
