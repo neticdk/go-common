@@ -22,9 +22,14 @@ type Request struct {
 func NewRequest(options ...Option) *Request {
 	r := &Request{
 		client: &http.Client{
-			Transport: http.DefaultTransport.(*http.Transport).Clone(),
+			Transport: http.DefaultTransport,
 		},
 	}
+
+	if t, ok := http.DefaultTransport.(*http.Transport); ok {
+		r.client.Transport = t.Clone()
+	}
+
 	r.req, _ = http.NewRequest("", "", nil)
 	for _, option := range options {
 		option(r)
@@ -59,7 +64,21 @@ func (r *Request) SetClient(client *http.Client) {
 }
 
 func (r *Request) SetSkipTLS() {
-	r.client.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} // #nosec
+	if r.client.Transport == nil {
+		r.client.Transport = &http.Transport{}
+	}
+
+	transport, ok := r.client.Transport.(*http.Transport)
+	if !ok {
+		return
+	}
+
+	if transport.TLSClientConfig == nil {
+		transport.TLSClientConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+	}
+	transport.TLSClientConfig.InsecureSkipVerify = true // #nosec
 }
 
 func (r *Request) SetContext(ctx context.Context) {

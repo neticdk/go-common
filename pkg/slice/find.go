@@ -2,8 +2,8 @@ package slice
 
 // FindFunc returns the first element in the slice that satisfies the
 // predicate.
-// 
-// It returns the default value for the type and false if no element 
+//
+// It returns the default value for the type and false if no element
 // satisfies the predicate.
 func FindFunc[T any](data []T, f func(T) bool) (T, bool) {
 	var zero T

@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const pathSeparator = "."
+
 // GetPathValue returns the value at the given path in the data.
 //
 // It returns an error if the path is invalid or the value is not found.
@@ -52,7 +54,7 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 	}
 
 	if isNil(data) {
-		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
+		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, pathSeparator))
 	}
 
 	part := parts[0]
@@ -65,7 +67,11 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 		return nil, fmt.Errorf("cannot find field %s in struct-value %v", part, val)
 
 	case reflect.Map:
-		if v, ok := data.(map[string]any)[part]; ok {
+		d, ok := data.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("cannot get path %s from non-map value %v", strings.Join(parts, pathSeparator), data)
+		}
+		if v, ok := d[part]; ok {
 			return getPathValueRecursive(v, parts)
 		}
 		return nil, fmt.Errorf("cannot find key %s in map-value %v", part, val)
@@ -73,7 +79,7 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 	case reflect.Slice:
 		v, ok := data.([]any)
 		if !ok {
-			return nil, fmt.Errorf("cannot get path %s from non-slice value %v", strings.Join(parts, "."), data)
+			return nil, fmt.Errorf("cannot get path %s from non-slice value %v", strings.Join(parts, pathSeparator), data)
 		}
 		if i, err := strconv.Atoi(part); err == nil {
 			if i < 0 || i >= len(v) {
@@ -84,7 +90,7 @@ func getPathValueRecursive(data any, parts []string) (any, error) {
 		return nil, fmt.Errorf("invalid index %s for slice-value %v", part, val)
 
 	default:
-		return nil, fmt.Errorf("cannot get path %s from non-map non-slice value %v", strings.Join(parts, "."), data)
+		return nil, fmt.Errorf("cannot get path %s from non-map non-slice value %v", strings.Join(parts, pathSeparator), data)
 	}
 }
 
@@ -101,7 +107,7 @@ func getNonReflectPathValueRecursive(data any, parts []string) (any, error) {
 	}
 
 	if data == nil {
-		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, "."))
+		return nil, fmt.Errorf("nil value for non-empty path %s", strings.Join(parts, pathSeparator))
 	}
 
 	switch val := data.(type) {
@@ -111,7 +117,7 @@ func getNonReflectPathValueRecursive(data any, parts []string) (any, error) {
 	case []any:
 		return getSlicePathValueRecursive(val, parts)
 	default:
-		return nil, fmt.Errorf("cannot get path %s from non-map non-slice value %v", strings.Join(parts, "."), data)
+		return nil, fmt.Errorf("cannot get path %s from non-map non-slice value %v", strings.Join(parts, pathSeparator), data)
 	}
 }
 
