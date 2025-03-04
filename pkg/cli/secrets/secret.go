@@ -20,6 +20,16 @@ func (s *Secret) String() string {
 	return string(s.Value)
 }
 
+// DestroySecret destroys the secret value.
+func (s *Secret) DestroySecret() {
+	if s.Value != nil {
+		for i := range s.Value {
+			s.Value[i] = 0
+		}
+		s.Value = nil
+	}
+}
+
 // SecretOption is a function that configures a secret.
 type SecretOption func(*Secret)
 

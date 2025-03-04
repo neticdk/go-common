@@ -1,13 +1,15 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // execCommand is used for mocking in tests.
-var execCommand = exec.Command
+var execCommand = exec.CommandContext
 
 type lastPassProvider struct {
 	id string
@@ -20,12 +22,14 @@ func NewLastPassProvider(location Location) *lastPassProvider {
 	return p
 }
 
-// GetSecret retrieves the secret from LastPass using the password field.
-func (p *lastPassProvider) GetSecret() (*Secret, error) {
-	cmd := execCommand("lpass", "show", "--password", p.id)
+// RetrieveSecret retrieves the secret from LastPass using the password field.
+func (p *lastPassProvider) RetrieveSecret() (*Secret, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := execCommand(ctx, "lpass", "show", "--password", p.id)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("executing command %q: %w", cmd.String(), err)
+		return nil, fmt.Errorf("executing lpass command %q gave output %q: %w", cmd.String(), string(output), err)
 	}
 	secret := strings.Trim(string(output), "\n")
 

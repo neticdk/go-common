@@ -13,26 +13,26 @@ Each secret is identified by a URL-like string in the format "provider://locatio
 
 # Basic Usage
 
-Retrieve a secret using the Parse function:
+Retrieve a secret using the GetSecret function:
 
 	// Get a secret from an environment variable
-	secretIdentifier, err := secrets.Parse("env://API_KEY")
+	secret, err := secrets.GetSecret("env://API_KEY")
 	if err != nil {
 		return err
 	}
 
-	secret, err := secretIdentifier.GetSecret()
+Retrieve a secret value using the GetSecretValue function:
+
+	// Get a secret from an environment variable
+	apiKey, err := secrets.GetSecretValue("env://API_KEY")
 	if err != nil {
 		return err
 	}
-
-	// Use the secret value
-	apiKey := secret.Value.String()
 
 Alternatively, create the identifier directly:
 
 	identifier := secrets.NewIdentifier(secrets.ProviderFile, "/path/to/secret")
-	secret, err := identifier.GetSecret()
+	secret, err := identifier.Provider.RetrieveSecret()
 	if err != nil {
 		return err
 	}
@@ -54,13 +54,7 @@ Example of adding flags to a Cobra command that accept secrets:
 			Short: "Command that uses secrets",
 			RunE: func(cmd *cobra.Command, args []string) error {
 				// Parse the secret identifier
-				identifier, err := secrets.Parse(secretValue)
-				if err != nil {
-					return err
-				}
-
-				// Get the actual secret
-				secret, err := identifier.GetSecret()
+				value, err := secrets.GetSecretValue(secretValue)
 				if err != nil {
 					return err
 				}

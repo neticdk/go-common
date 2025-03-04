@@ -18,8 +18,8 @@ func NewFileProvider(location Location) *fileProvider {
 	return p
 }
 
-// GetSecret retrieves the secret from a file.
-func (p *fileProvider) GetSecret() (*Secret, error) {
+// RetrieveSecret retrieves the secret from a file.
+func (p *fileProvider) RetrieveSecret() (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating file %q: %w", p.path, err)
 	}
@@ -67,5 +67,10 @@ func (p *fileProvider) checkFile() error {
 		return fmt.Errorf("file %q is not a regular file", p.path)
 	}
 
+	// Check if file is world-readable
+	mode := info.Mode().Perm()
+	if mode&0o004 != 0 {
+		return fmt.Errorf("file %q has insecure permissions (world-readable): %v", p.path, mode)
+	}
 	return nil
 }

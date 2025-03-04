@@ -19,8 +19,8 @@ func NewCmdProvider(location Location) *cmdProvider {
 	return p
 }
 
-// GetSecret retrieves the secret from the command output.
-func (p *cmdProvider) GetSecret() (*Secret, error) {
+// RetrieveSecret retrieves the secret from the command output.
+func (p *cmdProvider) RetrieveSecret() (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating command %q: %w", p.command, err)
 	}

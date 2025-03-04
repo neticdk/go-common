@@ -26,8 +26,24 @@ func (i *Identifier) String() string {
 }
 
 // GetSecret retrieves the secret from the provider.
+// It's a convenience method for retrieving the secret.
 func (i *Identifier) GetSecret() (*Secret, error) {
-	return i.Provider.GetSecret()
+	if i.Provider == nil {
+		return nil, fmt.Errorf("missing provider")
+	}
+	return i.Provider.RetrieveSecret()
+}
+
+// GetSecretValue retrieves the secret value from the provider.
+func (i *Identifier) GetSecretValue() (string, error) {
+	if i.Provider == nil {
+		return "", fmt.Errorf("missing provider")
+	}
+	secret, err := i.Provider.RetrieveSecret()
+	if err != nil {
+		return "", fmt.Errorf("retrieving secret: %w", err)
+	}
+	return secret.String(), nil
 }
 
 // NewIdentifier creates a new identifier.

@@ -18,8 +18,8 @@ func NewEnvProvider(location Location) *envProvider {
 	return p
 }
 
-// GetSecret retrieves the secret from an environment variable.
-func (p *envProvider) GetSecret() (*Secret, error) {
+// RetrieveSecret retrieves the secret from an environment variable.
+func (p *envProvider) RetrieveSecret() (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating environment variable %q: %w", p.variable, err)
 	}

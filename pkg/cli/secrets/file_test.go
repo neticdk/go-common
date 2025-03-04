@@ -26,7 +26,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_Success() {
 	err := os.WriteFile(filePath, secretContent, 0o600)
 	suite.Require().NoError(err)
 
-	secret, err := provider.GetSecret()
+	secret, err := provider.RetrieveSecret()
 
 	suite.Require().NoError(err)
 	assert.Equal(suite.T(), secretContent, secret.Value)
@@ -38,7 +38,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_FileNotFound() {
 	filePath := filepath.Join(suite.testDir, "non_existent_file.txt")
 	provider := NewFileProvider(Location(filePath))
 
-	secret, err := provider.GetSecret()
+	secret, err := provider.RetrieveSecret()
 
 	suite.Require().Error(err)
 	assert.Nil(suite.T(), secret)
@@ -53,7 +53,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_FileNotRegular() {
 	err := os.Mkdir(filePath, 0o700)
 	suite.Require().NoError(err)
 
-	secret, err := provider.GetSecret()
+	secret, err := provider.RetrieveSecret()
 
 	suite.Require().Error(err)
 	assert.Nil(suite.T(), secret)
@@ -64,7 +64,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_FileNotRegular() {
 func (suite *FileProviderTestSuite) TestGetSecret_InvalidPath() {
 	provider := NewFileProvider(Location("invalid/relative/path"))
 
-	secret, err := provider.GetSecret()
+	secret, err := provider.RetrieveSecret()
 
 	assert.Nil(suite.T(), secret)
 	suite.Require().Error(err)
@@ -92,10 +92,26 @@ func (suite *FileProviderTestSuite) TestGetSecret_ErrorCheckingFileStats() {
 	err = os.Chmod(filepath.Dir(filePath), 0o000) // remove permissions to trigger an error from stat
 	suite.Require().NoError(err, "failed to set no permissions on test directory")
 
-	_, err = provider.GetSecret()
+	_, err = provider.RetrieveSecret()
 
 	assert.Error(suite.T(), err)
 	assert.Contains(suite.T(), err.Error(), "checking if file")
+}
+
+func (suite *FileProviderTestSuite) TestGetSecret_InsecurePermissions() {
+	filePath := filepath.Join(suite.testDir, "insecure_secret.txt")
+	provider := NewFileProvider(Location(filePath))
+	secretContent := []byte("test_secret_value")
+
+	err := os.WriteFile(filePath, secretContent, 0o644) // World-readable permissions
+	suite.Require().NoError(err)
+
+	secret, err := provider.RetrieveSecret()
+
+	suite.Require().Error(err)
+	assert.Nil(suite.T(), secret)
+	assert.Contains(suite.T(), err.Error(), "file \"")
+	assert.Contains(suite.T(), err.Error(), "\" has insecure permissions (world-readable)")
 }
 
 func TestFileProviderTestSuite(t *testing.T) {

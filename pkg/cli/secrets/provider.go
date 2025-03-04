@@ -29,8 +29,9 @@ func ParseProvider(v string) (ProviderID, error) {
 
 // Provider is an interface that provides a secret.
 type Provider interface {
-	// GetSecret retrieves the secret from the provider.
-	GetSecret() (*Secret, error)
+	// RetrieveSecret retrieves the secret from the provider.
+	// It does the actual work of retrieving the secret..
+	RetrieveSecret() (*Secret, error)
 
 	// String returns the string representation of the provider.
 	String() string

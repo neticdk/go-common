@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -66,14 +67,14 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			mockOutput:    "",
 			mockError:     fmt.Errorf("exit status 1"),
 			expectError:   true,
-			errorContains: "executing command",
+			errorContains: "executing lpass command",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Mock exec.Command to return our test data
-			execCommand = func(command string, args ...string) *exec.Cmd {
+			execCommand = func(ctx context.Context, command string, args ...string) *exec.Cmd {
 				cs := []string{"-test.run=TestHelperProcess", "--", command}
 				cs = append(cs, args...)
 				cmd := exec.Command(os.Args[0], cs...)
@@ -89,7 +90,7 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			}
 
 			provider := NewLastPassProvider(tt.location)
-			secret, err := provider.GetSecret()
+			secret, err := provider.RetrieveSecret()
 
 			if tt.expectError {
 				require.Error(t, err)
