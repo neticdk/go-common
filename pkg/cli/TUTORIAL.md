@@ -312,6 +312,7 @@ help        Help about any command
   -d, --debug               Debug mode
       --log-format string   Log format (plain|json) (default "plain")
       --log-level string    Log level (debug|info|warn|error) (default "info")
+  -o, --output string       Output format (default "plain")
       --no-color            Do not print color
   -h, --help                help for helloworld
   -v, --version             version for helloworld
@@ -561,14 +562,15 @@ Flags that can't be disabled:
 
 - `--log-format`
 - `--log-level`
+- `--output`, `-o`
 - `--no-color`
-- `--debug | -d`
+- `--debug`, `-d`
 
 #### Setting the output format
 
 The output format is a way to instruct the application about the format the user
 wants output in. Typically this would be plain text for humans and something
-like JSON for machines. This can be set via flags.
+like JSON for machines. This can be set the `--output` or `-o` flag.
 
 `ExecutionContext.OutputFormat` stores the output format as a string:
 
@@ -577,26 +579,6 @@ like JSON for machines. This can be set via flags.
 - `cmd.OutputFormatYAML` - `yaml`
 - `cmd.OutputFormatMarkdown` - `markdown`
 - `cmd.OutputFormatTable` - `table`
-
-To set it, enable the format flags you want to support.
-
-For now, these are:
-
-- `--plain`
-- `--json`
-- `--yaml`
-- `--markdown`
-- `--table`
-
-They are mutually exclusive. Enable them like this:
-
-```go
-ec.PFlags.PlainEnabled = true
-ec.PFlags.JSONEnabled = true
-ec.PFlags.YAMLEnabled = true
-ec.PFlags.MarkdownEnabled = true
-ec.PFlags.TableEnabled = true
-```
 
 #### Enabling flags
 

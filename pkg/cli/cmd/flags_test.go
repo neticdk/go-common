@@ -14,37 +14,31 @@ func TestAddPersistentFlags(t *testing.T) {
 		name           string
 		args           []string
 		expectedFormat string
-		expectedFlags  []string
 	}{
 		{
 			name:           "Default format",
 			args:           []string{},
 			expectedFormat: cmd.OutputFormatPlain,
-			expectedFlags:  []string{},
 		},
 		{
 			name:           "JSON format",
-			args:           []string{"--json"},
+			args:           []string{"--output", "json"},
 			expectedFormat: cmd.OutputFormatJSON,
-			expectedFlags:  []string{"json"},
 		},
 		{
 			name:           "YAML format",
-			args:           []string{"--yaml"},
+			args:           []string{"--output", "yaml"},
 			expectedFormat: cmd.OutputFormatYAML,
-			expectedFlags:  []string{"yaml"},
 		},
 		{
 			name:           "Markdown format",
-			args:           []string{"--markdown"},
+			args:           []string{"--output", "markdown"},
 			expectedFormat: cmd.OutputFormatMarkdown,
-			expectedFlags:  []string{"markdown"},
 		},
 		{
 			name:           "Table format",
-			args:           []string{"--table"},
+			args:           []string{"--output", "table"},
 			expectedFormat: cmd.OutputFormatTable,
-			expectedFlags:  []string{"table"},
 		},
 	}
 
@@ -52,10 +46,6 @@ func TestAddPersistentFlags(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &cobra.Command{}
 			ec := cmd.NewExecutionContext("test", "test", "0.0.0")
-			ec.PFlags.JSONEnabled = true
-			ec.PFlags.YAMLEnabled = true
-			ec.PFlags.MarkdownEnabled = true
-			ec.PFlags.TableEnabled = true
 
 			os.Args = append([]string{"cmd"}, tt.args...)
 			cmd.AddPersistentFlags(c, ec)
