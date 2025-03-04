@@ -53,11 +53,10 @@ func NewIdentifier(scheme string, location Location) (*Identifier, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating provider: %w", err)
 	}
-	i := &Identifier{
+	return &Identifier{
 		Location: location,
 		Provider: provider,
-	}
-	return i, nil
+	}, nil
 }
 
 // Validate validates the identifier.
