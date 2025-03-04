@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/migueleliasweb/go-github-mock v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	github.com/pterm/pterm v0.12.80
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
