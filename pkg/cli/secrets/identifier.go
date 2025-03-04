@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -27,19 +28,19 @@ func (i *Identifier) String() string {
 
 // GetSecret retrieves the secret from the provider.
 // It's a convenience method for retrieving the secret.
-func (i *Identifier) GetSecret() (*Secret, error) {
+func (i *Identifier) GetSecret(ctx context.Context) (*Secret, error) {
 	if i.Provider == nil {
 		return nil, fmt.Errorf("missing provider")
 	}
-	return i.Provider.RetrieveSecret()
+	return i.Provider.RetrieveSecret(ctx)
 }
 
 // GetSecretValue retrieves the secret value from the provider.
-func (i *Identifier) GetSecretValue() (string, error) {
+func (i *Identifier) GetSecretValue(ctx context.Context) (string, error) {
 	if i.Provider == nil {
 		return "", fmt.Errorf("missing provider")
 	}
-	secret, err := i.Provider.RetrieveSecret()
+	secret, err := i.Provider.RetrieveSecret(ctx)
 	if err != nil {
 		return "", fmt.Errorf("retrieving secret: %w", err)
 	}

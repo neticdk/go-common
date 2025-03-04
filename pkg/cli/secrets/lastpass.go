@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 // execCommand is used for mocking in tests.
@@ -23,9 +22,7 @@ func NewLastPassProvider(location Location) *lastPassProvider {
 }
 
 // RetrieveSecret retrieves the secret from LastPass using the password field.
-func (p *lastPassProvider) RetrieveSecret() (*Secret, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+func (p *lastPassProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
 	cmd := execCommand(ctx, "lpass", "show", "--password", p.id)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

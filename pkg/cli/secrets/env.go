@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
@@ -19,7 +20,7 @@ func NewEnvProvider(location Location) *envProvider {
 }
 
 // RetrieveSecret retrieves the secret from an environment variable.
-func (p *envProvider) RetrieveSecret() (*Secret, error) {
+func (p *envProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating environment variable %q: %w", p.variable, err)
 	}

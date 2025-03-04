@@ -1,6 +1,9 @@
 package secrets
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type ProviderID string
 
@@ -31,7 +34,7 @@ func ParseProvider(v string) (ProviderID, error) {
 type Provider interface {
 	// RetrieveSecret retrieves the secret from the provider.
 	// It does the actual work of retrieving the secret..
-	RetrieveSecret() (*Secret, error)
+	RetrieveSecret(context.Context) (*Secret, error)
 
 	// String returns the string representation of the provider.
 	String() string

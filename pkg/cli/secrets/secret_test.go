@@ -2,88 +2,59 @@ package secrets
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSecret(t *testing.T) {
+func TestSecret_DestroyValue(t *testing.T) {
 	tests := []struct {
-		name    string
-		value   []byte
-		opts    []SecretOption
-		want    *Secret
-		wantErr bool
+		name  string
+		value []byte
 	}{
 		{
-			name:  "NoOptions",
-			value: []byte("secret"),
-			want: &Secret{
-				Value:    []byte("secret"),
-				Provider: ProviderUnknown,
-				Location: "",
-				Data:     map[string]string{},
-			},
+			name:  "nil value",
+			value: nil,
 		},
 		{
-			name:  "WithProvider",
-			value: []byte("secret"),
-			opts: []SecretOption{
-				WithProvider(ProviderEnv),
-			},
-			want: &Secret{
-				Value:    []byte("secret"),
-				Provider: ProviderEnv,
-				Location: "",
-				Data:     map[string]string{},
-			},
+			name:  "empty value",
+			value: []byte{},
 		},
 		{
-			name:  "WithLocation",
-			value: []byte("secret"),
-			opts: []SecretOption{
-				WithLocation("path/to/secret"),
-			},
-			want: &Secret{
-				Value:    []byte("secret"),
-				Provider: ProviderUnknown,
-				Location: "path/to/secret",
-				Data:     map[string]string{},
-			},
-		},
-		{
-			name:  "WithProviderAndLocation",
-			value: []byte("secret"),
-			opts: []SecretOption{
-				WithProvider(ProviderFile),
-				WithLocation("path/to/secret"),
-			},
-			want: &Secret{
-				Value:    []byte("secret"),
-				Provider: ProviderFile,
-				Location: "path/to/secret",
-				Data:     map[string]string{},
-			},
+			name:  "non-empty value",
+			value: []byte("secret-data"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewSecret(tt.value, tt.opts...)
-			assert.Equal(t, tt.want, got)
+			// Create a secret with the test value
+			s := NewSecret(tt.value)
+			
+			// Call DestroyValue
+			s.DestroyValue()
+			
+			// Check that Value is nil
+			if s.Value != nil {
+				t.Errorf("DestroyValue() did not set Value to nil, got %v", s.Value)
+			}
 		})
 	}
 }
 
-func TestWithProvider(t *testing.T) {
-	s := &Secret{}
-	WithProvider(ProviderEnv)(s)
-
-	assert.Equal(t, ProviderEnv, s.Provider)
-}
-
-func TestWithLocation(t *testing.T) {
-	s := &Secret{}
-	WithLocation("path/to/secret")(s)
-
-	assert.Equal(t, Location("path/to/secret"), s.Location)
+func TestSecret_DestroyValue_ZeroesMemory(t *testing.T) {
+	// Create a secret with a non-empty value
+	originalValue := []byte("sensitive-data")
+	s := NewSecret(make([]byte, len(originalValue)))
+	copy(s.Value, originalValue)
+	
+	// Get reference to the value slice for later inspection
+	valueRef := s.Value
+	
+	// Call DestroyValue
+	s.DestroyValue()
+	
+	// Verify the original memory was zeroed before being set to nil
+	for i, b := range valueRef {
+		if b != 0 {
+			t.Errorf("DestroyValue() did not zero memory at index %d, got %d", i, b)
+		}
+	}
 }

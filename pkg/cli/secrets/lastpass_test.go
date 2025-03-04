@@ -90,7 +90,7 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			}
 
 			provider := NewLastPassProvider(tt.location)
-			secret, err := provider.RetrieveSecret()
+			secret, err := provider.RetrieveSecret(t.Context())
 
 			if tt.expectError {
 				require.Error(t, err)

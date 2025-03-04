@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -21,7 +22,7 @@ func NewFileProvider(location Location) *fileProvider {
 }
 
 // RetrieveSecret retrieves the secret from a file.
-func (p *fileProvider) RetrieveSecret() (*Secret, error) {
+func (p *fileProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating file %q: %w", p.path, err)
 	}

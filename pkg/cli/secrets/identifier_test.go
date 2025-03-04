@@ -122,7 +122,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 			Location: "test-location",
 		}
 
-		secret, err := identifier.GetSecret()
+		secret, err := identifier.GetSecret(t.Context())
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "missing provider")
@@ -152,7 +152,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 		}
 
 		// Test secret retrieval
-		secret, err := identifier.GetSecret()
+		secret, err := identifier.GetSecret(t.Context())
 
 		assert.NoError(t, err)
 		assert.NotNil(t, secret)
@@ -168,7 +168,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 			Location: Location(nonExistentPath),
 		}
 
-		secret, err := identifier.GetSecret()
+		secret, err := identifier.GetSecret(t.Context())
 
 		assert.Error(t, err)
 		assert.Nil(t, secret)
@@ -183,7 +183,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 			Location: "test-location",
 		}
 
-		value, err := identifier.GetSecretValue()
+		value, err := identifier.GetSecretValue(t.Context())
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "missing provider")
@@ -213,7 +213,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 		}
 
 		// Test secret value retrieval
-		value, err := identifier.GetSecretValue()
+		value, err := identifier.GetSecretValue(t.Context())
 
 		assert.NoError(t, err)
 		assert.Equal(t, testContent, value)
@@ -228,7 +228,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 			Location: Location(nonExistentPath),
 		}
 
-		value, err := identifier.GetSecretValue()
+		value, err := identifier.GetSecretValue(t.Context())
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "retrieving secret:")

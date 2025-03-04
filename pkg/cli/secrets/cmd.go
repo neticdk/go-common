@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -20,12 +21,12 @@ func NewCmdProvider(location Location) *cmdProvider {
 }
 
 // RetrieveSecret retrieves the secret from the command output.
-func (p *cmdProvider) RetrieveSecret() (*Secret, error) {
+func (p *cmdProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating command %q: %w", p.command, err)
 	}
 
-	cmd, err := splitCommandShellwords(p.command)
+	cmd, err := splitCommandShellwords(ctx, p.command)
 	if err != nil {
 		return nil, fmt.Errorf("parsing command %q: %w", p.command, err)
 	}
@@ -58,7 +59,7 @@ func (p *cmdProvider) validate() error {
 
 // splitCommandShellwords splits a command into fields using shellwords.
 // shellwords handles stuff like quotes and escapes.
-func splitCommandShellwords(command string) (*exec.Cmd, error) {
+func splitCommandShellwords(ctx context.Context, command string) (*exec.Cmd, error) {
 	p := shellwords.NewParser()
 	p.ParseEnv = true
 	fields, err := p.Parse(command)
@@ -71,6 +72,6 @@ func splitCommandShellwords(command string) (*exec.Cmd, error) {
 	// #nosec G204 - This is a deliberate design choice to allow flexible
 	// command execution. The user should be able to run whatever they want in
 	// order to retrieve the secret.
-	cmd := exec.Command(fields[0], fields[1:]...)
+	cmd := exec.CommandContext(ctx, fields[0], fields[1:]...)
 	return cmd, nil
 }

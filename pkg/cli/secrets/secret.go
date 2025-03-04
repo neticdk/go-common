@@ -21,13 +21,14 @@ func (s *Secret) String() string {
 }
 
 // DestroySecret destroys the secret value.
-func (s *Secret) DestroySecret() {
-	if s.Value != nil {
-		for i := range s.Value {
-			s.Value[i] = 0
-		}
-		s.Value = nil
+func (s *Secret) DestroyValue() {
+	if s.Value == nil {
+		return
 	}
+	for i := range s.Value {
+		s.Value[i] = 0
+	}
+	s.Value = nil
 }
 
 // SecretOption is a function that configures a secret.
