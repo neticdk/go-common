@@ -84,7 +84,7 @@ func NewContext() *Context {
 }
 ```
 
-Here we set up the Application Context . Think of it as the container for
+Here we set up the Application Context. Think of it as the container for
 application information and dependencies. It will vary from project to project.
 
 For now it just holds a pointer to the
