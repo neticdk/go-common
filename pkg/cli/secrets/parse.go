@@ -24,5 +24,13 @@ func parseSecretIdentifier(identifierString string) (string, Location, error) {
 		return "", "", errors.New("invalid identifier")
 	}
 
-	return m[1], Location(m[2]), nil
+	scheme := m[1]
+	location := Location(m[2])
+
+	// Check if the scheme is registered
+	if _, exists := providerRegistry[scheme]; !exists {
+		return "", "", fmt.Errorf("unknown provider scheme: %s", scheme)
+	}
+
+	return scheme, location, nil
 }
