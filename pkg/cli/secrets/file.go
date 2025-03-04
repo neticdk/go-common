@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+const worldReadablePerm = 0o004
+
 type fileProvider struct {
 	path string
 }
@@ -69,7 +71,7 @@ func (p *fileProvider) checkFile() error {
 
 	// Check if file is world-readable
 	mode := info.Mode().Perm()
-	if mode&0o004 != 0 {
+	if mode&worldReadablePerm != 0 {
 		return fmt.Errorf("file %q has insecure permissions (world-readable): %v", p.path, mode)
 	}
 	return nil
