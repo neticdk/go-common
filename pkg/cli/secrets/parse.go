@@ -9,17 +9,17 @@ import (
 var secretScheme = regexp.MustCompile(`^([a-z]+):\/\/(.+)$`)
 
 // Parse parses a secret identifier string into an Identifier struct.
-func Parse(identifierString string) (*Identifier, error) {
-	p, l, err := parseSecretIdentifier(identifierString)
+func Parse(identifier string) (*Identifier, error) {
+	provider, location, err := parseSecretIdentifier(identifier)
 	if err != nil {
-		return nil, fmt.Errorf("parsing secret identifier %q: %w", identifierString, err)
+		return nil, fmt.Errorf("parsing secret identifier %q: %w", identifier, err)
 	}
 
-	return NewIdentifier(p, l)
+	return NewIdentifier(provider, location)
 }
 
-func parseSecretIdentifier(identifierString string) (string, Location, error) {
-	m := secretScheme.FindStringSubmatch(identifierString)
+func parseSecretIdentifier(identifier string) (string, Location, error) {
+	m := secretScheme.FindStringSubmatch(identifier)
 	if m == nil {
 		return "", "", errors.New("invalid identifier")
 	}
