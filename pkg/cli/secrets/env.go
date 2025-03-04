@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const ProviderEnv = "env"
+
 type envProvider struct {
 	variable string
 }
@@ -36,7 +38,7 @@ func (p *envProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 
 // String returns the provider ID.
 func (p *envProvider) String() string {
-	return ProviderEnv.String()
+	return ProviderEnv
 }
 
 func (p *envProvider) clean() {

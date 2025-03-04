@@ -6,7 +6,7 @@ type Secret struct {
 	Value []byte
 
 	// Provider is the type of secret provider.
-	Provider ProviderID
+	Provider string
 
 	// Location is the location of the secret within the provider.
 	Location Location
@@ -51,9 +51,9 @@ func NewSecret(value []byte, opts ...SecretOption) *Secret {
 }
 
 // WithProvider sets the provider of the secret.
-func WithProvider(provider ProviderID) SecretOption {
+func WithProvider(scheme string) SecretOption {
 	return func(s *Secret) {
-		s.Provider = provider
+		s.Provider = scheme
 	}
 }
 

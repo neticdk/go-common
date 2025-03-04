@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const ProviderLastPass = "lp"
+
 // execCommand is used for mocking in tests.
 var execCommand = exec.CommandContext
 
@@ -37,7 +39,7 @@ func (p *lastPassProvider) RetrieveSecret(ctx context.Context) (*Secret, error) 
 
 // String returns the provider ID.
 func (p *lastPassProvider) String() string {
-	return ProviderLastPass.String()
+	return ProviderLastPass
 }
 
 func (p *lastPassProvider) clean() {

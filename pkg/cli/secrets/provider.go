@@ -5,30 +5,9 @@ import (
 	"fmt"
 )
 
-type ProviderID string
-
 const (
-	ProviderFile     ProviderID = "file"
-	ProviderEnv      ProviderID = "env"
-	ProviderCmd      ProviderID = "cmd"
-	ProviderLastPass ProviderID = "lp"
-	ProviderUnknown  ProviderID = "unknown"
+	ProviderUnknown = "unknown"
 )
-
-// String returns the string representation of the provider.
-func (p ProviderID) String() string {
-	return string(p)
-}
-
-// ParseProvider parses a provider from a string.
-func ParseProvider(v string) (ProviderID, error) {
-	switch ProviderID(v) {
-	case ProviderFile, ProviderEnv, ProviderCmd, ProviderLastPass:
-		return ProviderID(v), nil
-	default:
-		return "", fmt.Errorf("unknown provider: %s", v)
-	}
-}
 
 // Provider is an interface that provides a secret.
 type Provider interface {
@@ -40,18 +19,39 @@ type Provider interface {
 	String() string
 }
 
-// NewProvider creates a new provider.
-func NewProvider(id ProviderID, location Location) Provider {
-	switch id {
-	case ProviderFile:
-		return NewFileProvider(location)
-	case ProviderEnv:
-		return NewEnvProvider(location)
-	case ProviderCmd:
-		return NewCmdProvider(location)
-	case ProviderLastPass:
-		return NewLastPassProvider(location)
-	default:
-		return nil
+// Factory function type for creating providers
+type ProviderFactory func(location Location) Provider
+
+// Registry to store provider factories
+var providerRegistry = make(map[string]ProviderFactory)
+
+// Register a new provider type
+func RegisterProvider(scheme string, factory ProviderFactory) {
+	providerRegistry[scheme] = factory
+}
+
+func NewProvider(scheme string, location Location) (Provider, error) {
+	factory, exists := providerRegistry[scheme]
+	if !exists {
+		return nil, fmt.Errorf("unknown provider scheme: %s", scheme)
 	}
+	return factory(location), nil
+}
+
+func init() {
+	RegisterProvider("file", func(location Location) Provider {
+		return NewFileProvider(location)
+	})
+
+	RegisterProvider("env", func(location Location) Provider {
+		return NewEnvProvider(location)
+	})
+
+	RegisterProvider("cmd", func(location Location) Provider {
+		return NewCmdProvider(location)
+	})
+
+	RegisterProvider("lp", func(location Location) Provider {
+		return NewLastPassProvider(location)
+	})
 }

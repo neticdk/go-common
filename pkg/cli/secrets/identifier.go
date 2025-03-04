@@ -48,13 +48,16 @@ func (i *Identifier) GetSecretValue(ctx context.Context) (string, error) {
 }
 
 // NewIdentifier creates a new identifier.
-func NewIdentifier(providerID ProviderID, location Location) *Identifier {
-	provider := NewProvider(providerID, location)
+func NewIdentifier(scheme string, location Location) (*Identifier, error) {
+	provider, err := NewProvider(scheme, location)
+	if err != nil {
+		return nil, fmt.Errorf("creating provider: %w", err)
+	}
 	i := &Identifier{
 		Location: location,
 		Provider: provider,
 	}
-	return i
+	return i, nil
 }
 
 // Validate validates the identifier.

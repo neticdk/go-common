@@ -15,19 +15,14 @@ func Parse(identifierString string) (*Identifier, error) {
 		return nil, fmt.Errorf("parsing secret identifier %q: %w", identifierString, err)
 	}
 
-	return NewIdentifier(p, l), nil
+	return NewIdentifier(p, l)
 }
 
-func parseSecretIdentifier(identifierString string) (ProviderID, Location, error) {
+func parseSecretIdentifier(identifierString string) (string, Location, error) {
 	m := secretScheme.FindStringSubmatch(identifierString)
 	if m == nil {
 		return "", "", errors.New("invalid identifier")
 	}
 
-	provider, err := ParseProvider(m[1])
-	if err != nil {
-		return "", "", fmt.Errorf("parsing provider %q: %w", m[1], err)
-	}
-
-	return provider, Location(m[2]), nil
+	return m[1], Location(m[2]), nil
 }

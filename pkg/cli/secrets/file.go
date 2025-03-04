@@ -8,7 +8,10 @@ import (
 	"path/filepath"
 )
 
-const worldReadablePerm = 0o004
+const (
+	ProviderFile      = "file"
+	worldReadablePerm = 0o004
+)
 
 type fileProvider struct {
 	path string
@@ -43,7 +46,7 @@ func (p *fileProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 
 // String returns the provider ID.
 func (p *fileProvider) String() string {
-	return ProviderFile.String()
+	return ProviderFile
 }
 
 func (p *fileProvider) clean() {

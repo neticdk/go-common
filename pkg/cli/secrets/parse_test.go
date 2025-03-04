@@ -107,10 +107,12 @@ func TestParse(t *testing.T) {
 			assert.Equal(t, c.expect.Location, actual.Location)
 
 			if c.expect != nil {
-				providerID, err := ParseProvider(secretScheme.FindStringSubmatch(c.raw)[1])
+				scheme := secretScheme.FindStringSubmatch(c.raw)[1]
 
 				assert.NoError(t, err)
-				expectedProvider := NewProvider(providerID, actual.Location)
+
+				expectedProvider, err := NewProvider(scheme, actual.Location)
+				assert.NoError(t, err)
 				assert.Equal(t, expectedProvider, actual.Provider)
 
 			}

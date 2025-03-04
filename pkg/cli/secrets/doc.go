@@ -2,15 +2,17 @@
 Package secrets provides a flexible way to retrieve secrets from various
 providers with context-aware functionality for timeout and cancellation support.
 
-The package supports retrieving secrets from:
+The package includes built-in providers for retrieving secrets from:
   - Environment variables (env://)
   - Files (file://)
   - Command output (cmd://)
   - LastPass password manager (lp://)
 
+The package also supports custom provider registration.
+
 Each secret is identified by a URL-like string in the format "provider://location" where:
 
-  - provider: is one of "env", "file", "cmd", or "lp"
+  - provider: is the scheme for a registered provider (built-in providers include "env", "file", "cmd", and "lp")
 
   - location: is specific to the provider (environment variable name, file path, command, or LastPass ID)
 
@@ -98,7 +100,7 @@ Cancel the operation based on external events:
 	secret, err := secrets.GetSecretWithContext(ctx, "cmd://aws secretsmanager get-secret-value")
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			log.Println("Secret retrieval was cancelled")
+			log.Println("Secret retrieval was canceled")
 		}
 		// Handle other errors
 	}
@@ -122,6 +124,62 @@ Propagate context from parent operations:
 	if err != nil {
 		return err
 	}
+
+# Provider Factory System
+
+The package uses a factory pattern to create provider instances:
+
+1. Providers are registered with a scheme and a factory function
+2. The factory function creates a provider instance for a given location
+3. When GetSecret is called with a URL, the system:
+  - Parses the URL to extract the scheme and location
+  - Looks up the provider factory for the scheme
+  - Creates a provider instance using the factory
+  - Retrieves the secret using the provider
+
+This extensible design allows for seamless integration of custom secret providers
+without modifying the core package code.
+
+# Creating Custom Providers
+
+You can extend the secret provider system by implementing the Provider interface
+and registering your custom provider:
+
+	// Implement the Provider interface
+	type customProvider struct {
+		location string
+	}
+
+	func (p *customProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
+		// Custom implementation to retrieve the secret
+		// ...
+		secret := getMySecret(p.location)
+
+		return secrets.NewSecret([]byte(secret),
+			secrets.WithProvider(p.String()),
+			secrets.WithLocation(Location(p.location))), nil
+	}
+
+	func (p *customProvider) String() string {
+		return "custom"
+	}
+
+	// NewCustomProvider creates a new custom provider.
+	func NewCustomProvider(location Location) *customProvider {
+		p := &customProvider{location: string(location)}
+		return p
+	}
+
+	// Register the custom provider during initialization
+	func init() {
+		secrets.RegisterProvider("custom", func(location Location) Provider {
+			return NewCustomProvider(location)
+		})
+	}
+
+After registration, your custom provider can be used with the same API:
+
+	secret, err := secrets.GetSecret("custom://some-location")
 
 # Integration with Cobra CLI
 
@@ -174,7 +232,7 @@ Example of adding flags to a Cobra command that accept secrets:
 		// Add flags that accept secrets
 		cmd.Flags().StringVar(&secretValue, "api-key", "",
 			`API key (supports secret references like "env://API_KEY", "file:///path/to/secret",
-			"cmd://command to execute", or "lp://lastpass-id")`)
+			"cmd://command to execute", "lp://lastpass-id", or any custom registered provider)`)
 
 		return cmd
 	}

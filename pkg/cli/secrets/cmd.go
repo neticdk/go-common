@@ -9,6 +9,8 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
+const ProviderCmd = "cmd"
+
 type cmdProvider struct {
 	command string
 }
@@ -43,7 +45,7 @@ func (p *cmdProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
 
 // String returns the provider ID.
 func (p *cmdProvider) String() string {
-	return ProviderCmd.String()
+	return ProviderCmd
 }
 
 func (p *cmdProvider) clean() {
