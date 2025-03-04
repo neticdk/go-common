@@ -59,13 +59,6 @@ type PFlags struct {
 	// Flags: --debug, -d
 	Debug bool
 
-	// OutputFormatEnabled is used to enable the OutputFormat flag
-	PlainEnabled    bool
-	JSONEnabled     bool
-	YAMLEnabled     bool
-	MarkdownEnabled bool
-	TableEnabled    bool
-
 	// NoHeaders is used to control whether headers are printed
 	// Flag: --no-headers
 	NoHeaders bool
@@ -76,8 +69,6 @@ type PFlags struct {
 
 // AddPersistentFlags adds global flags to the command and does some initialization
 func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet {
-	var plain, json, yaml, markdown, table bool
-
 	f := cmd.PersistentFlags()
 
 	logFormats := NewEnum(AllLogFormatsStr(), LogFormatDefault.String())
@@ -85,6 +76,8 @@ func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet
 
 	logLevels := NewEnum(AllLogLevelsStr(), LogLevelDefault.String())
 	f.Var(logLevels, "log-level", fmt.Sprintf("Log level (%s)", AllLogLevelsJoined()))
+
+	f.StringVarP(&ec.OutputFormat, "output", "o", OutputFormatPlain, "Output format")
 
 	if ec.PFlags.ForceEnabled {
 		f.BoolVarP(&ec.PFlags.Force, "force", "f", false, "Force actions")
@@ -101,23 +94,6 @@ func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet
 	f.BoolVar(&ec.PFlags.NoColor, "no-color", false, "Do not print color")
 	f.BoolVarP(&ec.PFlags.Debug, "debug", "d", false, "Debug mode")
 
-	outputFlags := []string{}
-	if ec.PFlags.PlainEnabled {
-		f.BoolVar(&plain, "plain", false, "Output in plain format")
-	}
-	if ec.PFlags.JSONEnabled {
-		f.BoolVar(&json, "json", false, "Output in JSON format")
-	}
-	if ec.PFlags.YAMLEnabled {
-		f.BoolVar(&yaml, "yaml", false, "Output in YAML format")
-	}
-	if ec.PFlags.MarkdownEnabled {
-		f.BoolVar(&markdown, "markdown", false, "Output in Markdown format")
-	}
-	if ec.PFlags.TableEnabled {
-		f.BoolVar(&table, "table", false, "Output in table format")
-	}
-
 	_ = cmd.PersistentFlags().Parse(os.Args[1:])
 
 	if logFormat, err := cmd.PersistentFlags().GetString("log-format"); err == nil {
@@ -126,33 +102,6 @@ func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet
 	if logLevel, err := cmd.PersistentFlags().GetString("log-level"); err == nil {
 		ec.PFlags.LogLevel = LogLevel(logLevel)
 	}
-
-	if plainArg, err := cmd.PersistentFlags().GetBool("plain"); err == nil && plainArg {
-		ec.OutputFormat = OutputFormatPlain
-		outputFlags = append(outputFlags, "plain")
-	}
-
-	if jsonArg, err := cmd.PersistentFlags().GetBool("json"); err == nil && jsonArg {
-		ec.OutputFormat = OutputFormatJSON
-		outputFlags = append(outputFlags, "json")
-	}
-
-	if yamlArg, err := cmd.PersistentFlags().GetBool("yaml"); err == nil && yamlArg {
-		ec.OutputFormat = OutputFormatYAML
-		outputFlags = append(outputFlags, "yaml")
-	}
-
-	if markdownArg, err := cmd.PersistentFlags().GetBool("markdown"); err == nil && markdownArg {
-		ec.OutputFormat = OutputFormatMarkdown
-		outputFlags = append(outputFlags, "markdown")
-	}
-
-	if tableArg, err := cmd.PersistentFlags().GetBool("table"); err == nil && tableArg {
-		ec.OutputFormat = OutputFormatTable
-		outputFlags = append(outputFlags, "table")
-	}
-
-	cmd.MarkFlagsMutuallyExclusive(outputFlags...)
 
 	if noColor, err := cmd.PersistentFlags().GetBool("no-color"); err == nil {
 		ec.SetColor(noColor)

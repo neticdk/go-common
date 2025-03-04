@@ -59,7 +59,7 @@ type ExecutionContext struct {
 	PFlags PFlags
 
 	// OutputFormat is the format used for outputting data
-	// Flags: --plain, --json, --yaml, --markdown, --table
+	// Examples: plain, json, yaml, markdown, table
 	OutputFormat string
 
 	// for changing log level
