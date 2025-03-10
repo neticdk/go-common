@@ -1,7 +1,5 @@
 package secrets
 
-import "sync"
-
 // Secret stores a secret value along with some data about the secret.
 type Secret struct {
 	// Value is the secret value.
@@ -9,10 +7,6 @@ type Secret struct {
 
 	// locator is a reference to the secret locator this this secret
 	locator *SecretLocator
-
-	// Data is additional data about the secret.
-	dataMu sync.Mutex
-	Data   map[string]string
 }
 
 // String returns a string representation of the secret.
@@ -29,13 +23,6 @@ func (s *Secret) DestroyValue() {
 		s.Value[i] = 0
 	}
 	s.Value = nil
-}
-
-// SetData sets a key-value pair in the secret's data.
-func (s *Secret) SetData(key, value string) {
-	s.dataMu.Lock()
-	defer s.dataMu.Unlock()
-	s.Data[key] = value
 }
 
 // GetScheme returns the scheme of the secret locator.
@@ -61,7 +48,6 @@ type SecretOption func(*Secret)
 func NewSecret(value []byte, opts ...SecretOption) *Secret {
 	s := &Secret{
 		Value: value,
-		Data:  make(map[string]string),
 	}
 
 	for _, opt := range opts {

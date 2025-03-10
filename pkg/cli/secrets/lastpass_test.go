@@ -43,7 +43,6 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			expectedSecret: &Secret{
 				Value:   []byte("secretvalue"),
 				locator: &SecretLocator{Scheme: SchemeLastPass, Location: "test/entry"},
-				Data:    make(map[string]string),
 			},
 			expectError: false,
 		},
@@ -55,7 +54,6 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			expectedSecret: &Secret{
 				Value:   []byte("another-secret"),
 				locator: &SecretLocator{Scheme: SchemeLastPass, Location: "  entry with spaces  "},
-				Data:    make(map[string]string),
 			},
 			expectError: false,
 		},

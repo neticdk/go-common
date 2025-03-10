@@ -41,31 +41,6 @@ func TestSecret_DestroyValue(t *testing.T) {
 	}
 }
 
-func TestSecret_SetData(t *testing.T) {
-	tests := []struct {
-		name         string
-		key          string
-		val          string
-		extectedData map[string]string
-	}{
-		{
-			name: "with data",
-			key:  "test",
-			val:  "data",
-			extectedData: map[string]string{
-				"test": "data",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := NewSecret([]byte("test"))
-			s.SetData(tt.key, tt.val)
-			assert.Equal(t, tt.extectedData, s.Data)
-		})
-	}
-}
-
 func TestSecret_GetScheme(t *testing.T) {
 	sl, _ := NewSecretLocator("env", "TEST")
 	s := NewSecret([]byte("test"), WithLocator(sl))
