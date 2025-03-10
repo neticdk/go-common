@@ -6,20 +6,20 @@ import (
 	"regexp"
 )
 
-var secretScheme = regexp.MustCompile(`^([a-z]+):\/\/(.+)$`)
+var slRe = regexp.MustCompile(`^([a-z]+):\/\/(.+)$`)
 
-// Parse parses a secret identifier string into an Identifier struct.
-func Parse(identifier string) (*Identifier, error) {
-	provider, location, err := parseSecretIdentifier(identifier)
+// Parse parses a secret locator string into a SecretLocator struct.
+func Parse(rawSL string) (*SecretLocator, error) {
+	scheme, location, err := parseSecretLocator(rawSL)
 	if err != nil {
-		return nil, fmt.Errorf("parsing secret identifier %q: %w", identifier, err)
+		return nil, fmt.Errorf("parsing secret identifier %q: %w", rawSL, err)
 	}
 
-	return NewIdentifier(provider, location)
+	return NewSecretLocator(scheme, location)
 }
 
-func parseSecretIdentifier(identifier string) (string, Location, error) {
-	m := secretScheme.FindStringSubmatch(identifier)
+func parseSecretLocator(rawSL string) (string, Location, error) {
+	m := slRe.FindStringSubmatch(rawSL)
 	if m == nil {
 		return "", "", errors.New("invalid identifier")
 	}

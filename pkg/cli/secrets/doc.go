@@ -10,7 +10,8 @@ The package includes built-in providers for retrieving secrets from:
 
 The package also supports custom provider registration.
 
-Each secret is identified by a URL-like string in the format "provider://location" where:
+Each secret is identified by a URL-like string namec the Secret Locator (SL).
+The format is "provider://location" where:
 
   - provider: is the scheme for a registered provider (built-in providers include "env", "file", "cmd", and "lp")
 
@@ -56,15 +57,15 @@ For more control over timeouts and cancellation, use the WithContext variants:
 Note: The non-context functions use a default timeout of 10 seconds. The default
 timeout can be changed by setting the `DefaultTimeout` variable.
 
-# Direct Identifier Usage
+# Direct SecretLocator Usage
 
-Alternatively, create the identifier directly:
+Alternatively, create the secret locator directly:
 
-	identifier := secrets.NewIdentifier(secrets.ProviderFile, "/path/to/secret")
+	sl := secrets.NewSecretLocator(secrets.ProviderFile, "/path/to/secret")
 
 	// Use with context
 	ctx := context.Background()
-	secret, err := identifier.Provider.RetrieveSecret(ctx)
+	secret, err := sl.Provider.RetrieveSecret(ctx, sl.Location)
 	if err != nil {
 		return err
 	}
@@ -120,11 +121,6 @@ Propagate context from parent operations:
 		return callExternalAPI(ctx, apiKey)
 	}
 
-	secret, err := identifier.Provider.RetrieveSecret()
-	if err != nil {
-		return err
-	}
-
 # Provider Factory System
 
 The package uses a factory pattern to create provider instances:
@@ -150,14 +146,15 @@ and registering your custom provider:
 		location string
 	}
 
-	func (p *customProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
+	func (p *customProvider) RetrieveSecret(ctx context.Context, loc secrets.Location) (*secrets.Secret, error) {
+		p.location = string(loc)
 		// Custom implementation to retrieve the secret
 		// ...
 		secret := getMySecret(p.location)
 
 		return secrets.NewSecret([]byte(secret),
 			secrets.WithProvider(p.String()),
-			secrets.WithLocation(Location(p.location))), nil
+			secrets.WithLocation(p.location)), nil
 	}
 
 	func (p *customProvider) String() string {
@@ -165,15 +162,14 @@ and registering your custom provider:
 	}
 
 	// NewCustomProvider creates a new custom provider.
-	func NewCustomProvider(location Location) *customProvider {
-		p := &customProvider{location: string(location)}
-		return p
+	func NewCustomProvider(location secrets.Location) *customProvider {
+		return &customProvider{}
 	}
 
 	// Register the custom provider during initialization
 	func init() {
-		secrets.RegisterProvider("custom", func(location Location) Provider {
-			return NewCustomProvider(location)
+		secrets.RegisterProvider("custom", func(location secrets.Location) Provider {
+			return NewCustomProvider()
 		})
 	}
 

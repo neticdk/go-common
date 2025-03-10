@@ -8,59 +8,59 @@ import (
 // Location is a string that represents the location of a secret.
 type Location string
 
-// Identifier is a reference to a secret.
-type Identifier struct {
-	// Provider implements the provider for the identifier.
+// SecretLocator is a reference to a secret.
+type SecretLocator struct {
+	// Provider implements the provider for the secret.
 	Provider Provider
 
 	// Location is the location of the secret within the provider.
 	Location Location
 }
 
-// String returns the string representation of the identifier.
-func (i *Identifier) String() string {
+// String returns the string representation of the secret locator.
+func (sl *SecretLocator) String() string {
 	var provider string
-	if i.Provider != nil {
-		provider = i.Provider.String()
+	if sl.Provider != nil {
+		provider = sl.Provider.String()
 	}
-	return fmt.Sprintf("%s://%s", provider, i.Location)
+	return fmt.Sprintf("%s://%s", provider, sl.Location)
 }
 
 // GetSecret retrieves the secret from the provider.
 // It's a convenience method for retrieving the secret.
-func (i *Identifier) GetSecret(ctx context.Context) (*Secret, error) {
-	if i.Provider == nil {
+func (sl *SecretLocator) GetSecret(ctx context.Context) (*Secret, error) {
+	if sl.Provider == nil {
 		return nil, fmt.Errorf("missing provider")
 	}
-	return i.Provider.RetrieveSecret(ctx)
+	return sl.Provider.RetrieveSecret(ctx, sl.Location)
 }
 
 // GetSecretValue retrieves the secret value from the provider.
-func (i *Identifier) GetSecretValue(ctx context.Context) (string, error) {
-	if i.Provider == nil {
+func (sl *SecretLocator) GetSecretValue(ctx context.Context) (string, error) {
+	if sl.Provider == nil {
 		return "", fmt.Errorf("missing provider")
 	}
-	secret, err := i.Provider.RetrieveSecret(ctx)
+	secret, err := sl.Provider.RetrieveSecret(ctx, sl.Location)
 	if err != nil {
 		return "", fmt.Errorf("retrieving secret: %w", err)
 	}
 	return secret.String(), nil
 }
 
-// NewIdentifier creates a new identifier.
-func NewIdentifier(scheme string, location Location) (*Identifier, error) {
+// NewSecretLocator creates a new secret locator.
+func NewSecretLocator(scheme string, location Location) (*SecretLocator, error) {
 	provider, err := NewProvider(scheme, location)
 	if err != nil {
 		return nil, fmt.Errorf("creating provider: %w", err)
 	}
-	return &Identifier{
+	return &SecretLocator{
 		Location: location,
 		Provider: provider,
 	}, nil
 }
 
-// Validate validates the identifier.
-func (i *Identifier) Validate() error {
+// Validate validates the secret locator.
+func (i *SecretLocator) Validate() error {
 	if i.Provider == nil {
 		return fmt.Errorf("missing provider")
 	}

@@ -16,14 +16,15 @@ type cmdProvider struct {
 }
 
 // NewCmdProvider creates a new command provider.
-func NewCmdProvider(location Location) *cmdProvider {
-	p := &cmdProvider{command: string(location)}
-	p.clean()
-	return p
+func NewCmdProvider() *cmdProvider {
+	return &cmdProvider{}
 }
 
-// RetrieveSecret retrieves the secret from the command output.
-func (p *cmdProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
+// RetrieveSecret retrieves a secret from the command output.
+func (p *cmdProvider) RetrieveSecret(ctx context.Context, loc Location) (*Secret, error) {
+	p.command = string(loc)
+	p.clean()
+
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating command %q: %w", p.command, err)
 	}
@@ -40,7 +41,7 @@ func (p *cmdProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
 
 	return NewSecret([]byte(secret),
 		WithProvider(ProviderCmd),
-		WithLocation(Location(p.command))), nil
+		WithLocation(p.command)), nil
 }
 
 // String returns the provider ID.

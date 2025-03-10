@@ -55,7 +55,7 @@ func TestIdentifierString(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
-		identifier := &Identifier{Provider: provider, Location: tt.location}
+		identifier := &SecretLocator{Provider: provider, Location: tt.location}
 		assert.Equal(t, tt.expected, identifier.String())
 	}
 }
@@ -99,7 +99,7 @@ func TestNewIdentifier(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		identifier, err := NewIdentifier(tt.scheme, tt.location)
+		identifier, err := NewSecretLocator(tt.scheme, tt.location)
 
 		if tt.expectedError != nil {
 			assert.EqualError(t, err, tt.expectedError.Error())
@@ -138,7 +138,7 @@ func TestIdentifierValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		provider, _ := NewProvider(tt.scheme, tt.location)
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: provider,
 			Location: tt.location,
 		}
@@ -150,7 +150,7 @@ func TestIdentifierValidate(t *testing.T) {
 func TestIdentifierGetSecret(t *testing.T) {
 	// Test for nil provider
 	t.Run("nil provider", func(t *testing.T) {
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: nil,
 			Location: "test-location",
 		}
@@ -182,7 +182,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Create identifier with file provider
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: provider,
 			Location: Location(tempFile.Name()),
 		}
@@ -202,7 +202,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 		provider, err := NewProvider(ProviderFile, Location(nonExistentPath))
 		assert.NoError(t, err)
 
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: provider,
 			Location: Location(nonExistentPath),
 		}
@@ -217,7 +217,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 func TestIdentifierGetSecretValue(t *testing.T) {
 	// Test for nil provider
 	t.Run("nil provider", func(t *testing.T) {
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: nil,
 			Location: "test-location",
 		}
@@ -249,7 +249,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Create identifier with file provider
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: provider,
 			Location: Location(tempFile.Name()),
 		}
@@ -268,7 +268,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 		provider, err := NewProvider(ProviderFile, Location(nonExistentPath))
 		assert.NoError(t, err)
 
-		identifier := &Identifier{
+		identifier := &SecretLocator{
 			Provider: provider,
 			Location: Location(nonExistentPath),
 		}

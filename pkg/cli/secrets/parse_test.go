@@ -12,7 +12,7 @@ func TestParse(t *testing.T) {
 	cases := []struct {
 		desc           string
 		raw            string
-		expect         *Identifier
+		expect         *SecretLocator
 		expectProvider Provider
 		expectError    bool
 	}{
@@ -54,37 +54,37 @@ func TestParse(t *testing.T) {
 		{
 			desc: "valid uri with env provider",
 			raw:  "env://GITHUB_TOKEN",
-			expect: &Identifier{
+			expect: &SecretLocator{
 				Location: "GITHUB_TOKEN",
 			},
-			expectProvider: NewEnvProvider(Location("GITHUB_TOKEN")),
+			expectProvider: NewEnvProvider(),
 			expectError:    false,
 		},
 		{
 			desc: "valid uri with file provider",
 			raw:  "file:///path/to/secret.txt",
-			expect: &Identifier{
+			expect: &SecretLocator{
 				Location: "/path/to/secret.txt",
 			},
-			expectProvider: NewFileProvider(Location("/path/to/secret.txt")),
+			expectProvider: NewFileProvider(),
 			expectError:    false,
 		},
 		{
 			desc: "valid uri with cmd provider",
 			raw:  `cmd://gh auth token`,
-			expect: &Identifier{
+			expect: &SecretLocator{
 				Location: "gh auth token",
 			},
-			expectProvider: NewLastPassProvider(Location("gh auth token")),
+			expectProvider: NewLastPassProvider(),
 			expectError:    false,
 		},
 		{
 			desc: "valid uri with lp provider",
 			raw:  `lp://123456`,
-			expect: &Identifier{
+			expect: &SecretLocator{
 				Location: "123456",
 			},
-			expectProvider: NewLastPassProvider(Location("123456")),
+			expectProvider: NewLastPassProvider(),
 			expectError:    false,
 		},
 		{
@@ -107,7 +107,7 @@ func TestParse(t *testing.T) {
 			assert.Equal(t, c.expect.Location, actual.Location)
 
 			if c.expect != nil {
-				scheme := secretScheme.FindStringSubmatch(c.raw)[1]
+				scheme := slRe.FindStringSubmatch(c.raw)[1]
 
 				assert.NoError(t, err)
 

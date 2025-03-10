@@ -65,8 +65,8 @@ func TestCmdProvider_GetSecret(t *testing.T) {
 				os.Setenv(k, v)
 			}
 		}
-		p := NewCmdProvider(tc.location)
-		secret, err := p.RetrieveSecret(t.Context())
+		p := NewCmdProvider()
+		secret, err := p.RetrieveSecret(t.Context(), tc.location)
 
 		if tc.expectedErr != nil {
 			assert.EqualError(t, err, tc.expectedErr.Error())

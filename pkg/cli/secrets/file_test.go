@@ -20,25 +20,25 @@ func (suite *FileProviderTestSuite) SetupSuite() {
 
 func (suite *FileProviderTestSuite) TestGetSecret_Success() {
 	filePath := filepath.Join(suite.testDir, "test_secret.txt")
-	provider := NewFileProvider(Location(filePath))
+	provider := NewFileProvider()
 	secretContent := []byte("test_secret_value")
 
 	err := os.WriteFile(filePath, secretContent, 0o600)
 	suite.Require().NoError(err)
 
-	secret, err := provider.RetrieveSecret(suite.T().Context())
+	secret, err := provider.RetrieveSecret(suite.T().Context(), Location(filePath))
 
 	suite.Require().NoError(err)
 	assert.Equal(suite.T(), secretContent, secret.Value)
 	assert.Equal(suite.T(), ProviderFile, secret.Provider)
-	assert.Equal(suite.T(), Location(filePath), secret.Location)
+	assert.Equal(suite.T(), filePath, secret.Location)
 }
 
 func (suite *FileProviderTestSuite) TestGetSecret_FileNotFound() {
 	filePath := filepath.Join(suite.testDir, "non_existent_file.txt")
-	provider := NewFileProvider(Location(filePath))
+	provider := NewFileProvider()
 
-	secret, err := provider.RetrieveSecret(suite.T().Context())
+	secret, err := provider.RetrieveSecret(suite.T().Context(), Location(filePath))
 
 	suite.Require().Error(err)
 	assert.Nil(suite.T(), secret)
@@ -48,12 +48,12 @@ func (suite *FileProviderTestSuite) TestGetSecret_FileNotFound() {
 
 func (suite *FileProviderTestSuite) TestGetSecret_FileNotRegular() {
 	filePath := filepath.Join(suite.testDir, "test_dir")
-	provider := NewFileProvider(Location(filePath))
+	provider := NewFileProvider()
 
 	err := os.Mkdir(filePath, 0o700)
 	suite.Require().NoError(err)
 
-	secret, err := provider.RetrieveSecret(suite.T().Context())
+	secret, err := provider.RetrieveSecret(suite.T().Context(), Location(filePath))
 
 	suite.Require().Error(err)
 	assert.Nil(suite.T(), secret)
@@ -62,9 +62,9 @@ func (suite *FileProviderTestSuite) TestGetSecret_FileNotRegular() {
 }
 
 func (suite *FileProviderTestSuite) TestGetSecret_InvalidPath() {
-	provider := NewFileProvider(Location("invalid/relative/path"))
+	provider := NewFileProvider()
 
-	secret, err := provider.RetrieveSecret(suite.T().Context())
+	secret, err := provider.RetrieveSecret(suite.T().Context(), Location("invalid/relative/path"))
 
 	assert.Nil(suite.T(), secret)
 	suite.Require().Error(err)
@@ -73,7 +73,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_InvalidPath() {
 
 func (suite *FileProviderTestSuite) TestGetSecret_ErrorCheckingFileStats() {
 	filePath := filepath.Join(suite.testDir, "secret.txt")
-	provider := NewFileProvider(Location(filePath))
+	provider := NewFileProvider()
 
 	// Create a directory with restricted permissions.
 	err := os.MkdirAll(filepath.Dir(filePath), 0o700)
@@ -92,7 +92,7 @@ func (suite *FileProviderTestSuite) TestGetSecret_ErrorCheckingFileStats() {
 	err = os.Chmod(filepath.Dir(filePath), 0o000) // remove permissions to trigger an error from stat
 	suite.Require().NoError(err, "failed to set no permissions on test directory")
 
-	_, err = provider.RetrieveSecret(suite.T().Context())
+	_, err = provider.RetrieveSecret(suite.T().Context(), Location(filePath))
 
 	assert.Error(suite.T(), err)
 	assert.Contains(suite.T(), err.Error(), "checking if file")
@@ -100,13 +100,13 @@ func (suite *FileProviderTestSuite) TestGetSecret_ErrorCheckingFileStats() {
 
 func (suite *FileProviderTestSuite) TestGetSecret_InsecurePermissions() {
 	filePath := filepath.Join(suite.testDir, "insecure_secret.txt")
-	provider := NewFileProvider(Location(filePath))
+	provider := NewFileProvider()
 	secretContent := []byte("test_secret_value")
 
 	err := os.WriteFile(filePath, secretContent, 0o644) // World-readable permissions
 	suite.Require().NoError(err)
 
-	secret, err := provider.RetrieveSecret(suite.T().Context())
+	secret, err := provider.RetrieveSecret(suite.T().Context(), Location(filePath))
 
 	suite.Require().Error(err)
 	assert.Nil(suite.T(), secret)

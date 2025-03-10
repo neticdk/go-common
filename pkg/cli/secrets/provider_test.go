@@ -18,25 +18,25 @@ func TestNewProvider(t *testing.T) {
 	}{
 		{
 			scheme:        ProviderEnv,
-			expected:      NewEnvProvider(Location("MY_SECRET")),
+			expected:      NewEnvProvider(),
 			location:      Location("MY_SECRET"),
 			expectedError: nil,
 		},
 		{
 			scheme:        ProviderFile,
-			expected:      NewFileProvider(Location("/path/to/secret.txt")),
+			expected:      NewFileProvider(),
 			location:      Location("/path/to/secret.txt"),
 			expectedError: nil,
 		},
 		{
 			scheme:        ProviderCmd,
-			expected:      NewCmdProvider(Location("get secret")),
+			expected:      NewCmdProvider(),
 			location:      Location("get secret"),
 			expectedError: nil,
 		},
 		{
 			scheme:        ProviderLastPass,
-			expected:      NewLastPassProvider(Location("123456")),
+			expected:      NewLastPassProvider(),
 			location:      Location("123456"),
 			expectedError: nil,
 		},
@@ -73,8 +73,8 @@ func TestRegisterProvider(t *testing.T) {
 	// Verify registry is empty
 	assert.Empty(t, providerRegistry)
 
-	mockFactory := func(location Location) Provider {
-		return &mockProvider{loc: string(location)}
+	mockFactory := func(loc Location) Provider {
+		return &mockProvider{loc: string(loc)}
 	}
 
 	// Register the mock provider
@@ -99,12 +99,12 @@ type mockProvider struct {
 	loc string
 }
 
-func (p *mockProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
+func (p *mockProvider) RetrieveSecret(ctx context.Context, loc Location) (*Secret, error) {
 	p.loc = "test"
 	secret := "test"
 	return NewSecret([]byte(secret),
 		WithProvider(ProviderCmd),
-		WithLocation(Location(p.loc))), nil
+		WithLocation(p.loc)), nil
 }
 
 func (p *mockProvider) String() string {

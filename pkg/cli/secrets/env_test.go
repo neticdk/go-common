@@ -50,8 +50,8 @@ func TestEnvProvider_GetSecret(t *testing.T) {
 				setEnv(string(test.location), string(test.expected.Value))
 			}
 
-			p := NewEnvProvider(test.location)
-			secret, err := p.RetrieveSecret(t.Context())
+			p := NewEnvProvider()
+			secret, err := p.RetrieveSecret(t.Context(), test.location)
 
 			if test.expectedErr != nil {
 				assert.Error(t, err)

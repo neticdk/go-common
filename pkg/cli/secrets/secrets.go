@@ -8,58 +8,52 @@ import (
 
 var DefaultTimeout = 10 * time.Second
 
-// GetSecret retrieves a secret using a provider.
+// GetSecret retrieves a secret.
+// The secret locator is in the form: provider://location
 // It sets a default timeout for the operation. See DefaultTimeout.
-// The identifier is given as an url-like string in the form of:
-// PROVIDER://LOCATION
-func GetSecret(identifierString string) (*Secret, error) {
+func GetSecret(rawSL string) (*Secret, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
 
-	return fetchSecretWithContext(ctx, identifierString)
+	return fetchSecretWithContext(ctx, rawSL)
 }
 
-// GetSecretWithContext retrieves a secret using a provider.
-// It uses the provided context.
-// The identifier is given as an url-like string in the form of:
-// PROVIDER://LOCATION
-func GetSecretWithContext(ctx context.Context, identifierString string) (*Secret, error) {
-	return fetchSecretWithContext(ctx, identifierString)
+// GetSecretWithContext retrieves a secret.
+// The secret locator is in the form: provider://location
+func GetSecretWithContext(ctx context.Context, rawSL string) (*Secret, error) {
+	return fetchSecretWithContext(ctx, rawSL)
 }
 
-// GetSecretValue retrieves the value of a secret using a provider.
+// GetSecretValue retrieves the value of a secret.
+// The secret locator is in the form: provider://location
 // It sets a default timeout for the operation. See DefaultTimeout.
-// The identifier is given as an url-like string in the form of:
-// PROVIDER://LOCATION
-func GetSecretValue(identifierString string) (string, error) {
+func GetSecretValue(rawSL string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
 
-	return fetchSecretValueWithContext(ctx, identifierString)
+	return fetchSecretValueWithContext(ctx, rawSL)
 }
 
-// GetSecretValueWithContext retrieves the value of a secret using a provider.
-// It uses the provided context.
-// The identifier is given as an url-like string in the form of:
-// PROVIDER://LOCATION
-func GetSecretValueWithContext(ctx context.Context, identifierString string) (string, error) {
-	return fetchSecretValueWithContext(ctx, identifierString)
+// GetSecretValueWithContext retrieves the value of a secret.
+// The secret locator is in the form: provider://location
+func GetSecretValueWithContext(ctx context.Context, rawSL string) (string, error) {
+	return fetchSecretValueWithContext(ctx, rawSL)
 }
 
-func fetchSecretWithContext(ctx context.Context, identifierString string) (*Secret, error) {
-	identifier, err := Parse(identifierString)
+func fetchSecretWithContext(ctx context.Context, rawSL string) (*Secret, error) {
+	sl, err := Parse(rawSL)
 	if err != nil {
 		return nil, err
 	}
-	return identifier.Provider.RetrieveSecret(ctx)
+	return sl.Provider.RetrieveSecret(ctx, sl.Location)
 }
 
-func fetchSecretValueWithContext(ctx context.Context, identifierString string) (string, error) {
-	identifier, err := Parse(identifierString)
+func fetchSecretValueWithContext(ctx context.Context, rawSL string) (string, error) {
+	sl, err := Parse(rawSL)
 	if err != nil {
 		return "", err
 	}
-	secret, err := identifier.Provider.RetrieveSecret(ctx)
+	secret, err := sl.Provider.RetrieveSecret(ctx, sl.Location)
 	if err != nil {
 		return "", fmt.Errorf("retrieving secret: %w", err)
 	}

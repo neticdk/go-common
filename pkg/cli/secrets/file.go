@@ -18,14 +18,15 @@ type fileProvider struct {
 }
 
 // NewFileProvider creates a new file provider.
-func NewFileProvider(location Location) *fileProvider {
-	p := &fileProvider{path: string(location)}
-	p.clean()
-	return p
+func NewFileProvider() *fileProvider {
+	return &fileProvider{}
 }
 
-// RetrieveSecret retrieves the secret from a file.
-func (p *fileProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
+// RetrieveSecret retrieves a secret from a file.
+func (p *fileProvider) RetrieveSecret(_ context.Context, loc Location) (*Secret, error) {
+	p.path = string(loc)
+	p.clean()
+
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating file %q: %w", p.path, err)
 	}
@@ -41,7 +42,7 @@ func (p *fileProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 
 	return NewSecret(content,
 		WithProvider(ProviderFile),
-		WithLocation(Location(p.path))), nil
+		WithLocation(p.path)), nil
 }
 
 // String returns the provider ID.

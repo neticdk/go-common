@@ -9,7 +9,7 @@ type Secret struct {
 	Provider string
 
 	// Location is the location of the secret within the provider.
-	Location Location
+	Location string
 
 	// Data is additional data about the secret.
 	Data map[string]string
@@ -58,7 +58,7 @@ func WithProvider(scheme string) SecretOption {
 }
 
 // WithLocation sets the location of the secret.
-func WithLocation(location Location) SecretOption {
+func WithLocation(location string) SecretOption {
 	return func(s *Secret) {
 		s.Location = location
 	}

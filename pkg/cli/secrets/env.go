@@ -15,14 +15,15 @@ type envProvider struct {
 }
 
 // NewEnvProvider creates a new environment variable provider.
-func NewEnvProvider(location Location) *envProvider {
-	p := &envProvider{variable: string(location)}
-	p.clean()
-	return p
+func NewEnvProvider() *envProvider {
+	return &envProvider{}
 }
 
-// RetrieveSecret retrieves the secret from an environment variable.
-func (p *envProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
+// RetrieveSecret retrieves a secret from an environment variable.
+func (p *envProvider) RetrieveSecret(_ context.Context, loc Location) (*Secret, error) {
+	p.variable = string(loc)
+	p.clean()
+
 	if err := p.validate(); err != nil {
 		return nil, fmt.Errorf("validating environment variable %q: %w", p.variable, err)
 	}
@@ -33,7 +34,7 @@ func (p *envProvider) RetrieveSecret(_ context.Context) (*Secret, error) {
 	}
 	return NewSecret([]byte(v),
 		WithProvider(ProviderEnv),
-		WithLocation(Location(p.variable))), nil
+		WithLocation(p.variable)), nil
 }
 
 // String returns the provider ID.

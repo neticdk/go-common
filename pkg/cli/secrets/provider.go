@@ -11,9 +11,9 @@ const (
 
 // Provider is an interface that provides a secret.
 type Provider interface {
-	// RetrieveSecret retrieves the secret from the provider.
+	// RetrieveSecret retrieves a secret from the provider.
 	// It does the actual work of retrieving the secret..
-	RetrieveSecret(context.Context) (*Secret, error)
+	RetrieveSecret(context.Context, Location) (*Secret, error)
 
 	// String returns the string representation of the provider.
 	String() string
@@ -30,6 +30,7 @@ func RegisterProvider(scheme string, factory ProviderFactory) {
 	providerRegistry[scheme] = factory
 }
 
+// NewProvider creates a new provider instance
 func NewProvider(scheme string, location Location) (Provider, error) {
 	factory, exists := providerRegistry[scheme]
 	if !exists {
@@ -39,19 +40,19 @@ func NewProvider(scheme string, location Location) (Provider, error) {
 }
 
 func init() {
-	RegisterProvider("file", func(location Location) Provider {
-		return NewFileProvider(location)
+	RegisterProvider("file", func(_ Location) Provider {
+		return NewFileProvider()
 	})
 
-	RegisterProvider("env", func(location Location) Provider {
-		return NewEnvProvider(location)
+	RegisterProvider("env", func(_ Location) Provider {
+		return NewEnvProvider()
 	})
 
-	RegisterProvider("cmd", func(location Location) Provider {
-		return NewCmdProvider(location)
+	RegisterProvider("cmd", func(_ Location) Provider {
+		return NewCmdProvider()
 	})
 
-	RegisterProvider("lp", func(location Location) Provider {
-		return NewLastPassProvider(location)
+	RegisterProvider("lp", func(_ Location) Provider {
+		return NewLastPassProvider()
 	})
 }

@@ -17,14 +17,15 @@ type lastPassProvider struct {
 }
 
 // NewLastPassProvider creates a new LastPass provider.
-func NewLastPassProvider(location Location) *lastPassProvider {
-	p := &lastPassProvider{id: string(location)}
-	p.clean()
-	return p
+func NewLastPassProvider() *lastPassProvider {
+	return &lastPassProvider{}
 }
 
-// RetrieveSecret retrieves the secret from LastPass using the password field.
-func (p *lastPassProvider) RetrieveSecret(ctx context.Context) (*Secret, error) {
+// RetrieveSecret retrieves a secret from LastPass using the password field.
+func (p *lastPassProvider) RetrieveSecret(ctx context.Context, loc Location) (*Secret, error) {
+	p.id = string(loc)
+	p.clean()
+
 	cmd := execCommand(ctx, "lpass", "show", "--password", p.id)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,7 +35,7 @@ func (p *lastPassProvider) RetrieveSecret(ctx context.Context) (*Secret, error) 
 
 	return NewSecret([]byte(secret),
 		WithProvider(ProviderLastPass),
-		WithLocation(Location(p.id))), nil
+		WithLocation(p.id)), nil
 }
 
 // String returns the provider ID.
