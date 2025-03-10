@@ -50,6 +50,14 @@ func TestUnfold(t *testing.T) {
 			p:        func(acc any) bool { return len(acc.(string)) < 5 },
 			expected: []any{"a", "aa", "aaa", "aaaa"},
 		},
+		{
+			name:     "with step",
+			acc:      1,
+			f:        func(acc any) any { return acc.(int) * 2 },
+			p:        func(acc any) bool { return acc.(int) < 100 },
+			opts:     []UnfoldOption{WithStep(2)},
+			expected: []any{1, 4, 16, 64},
+		},
 	}
 
 	for _, tt := range tests {
@@ -100,6 +108,16 @@ func TestUnfoldI(t *testing.T) {
 			opts: []UnfoldOption{WithMax(5)},
 			expected: []any{
 				1, 2, 4, 8, 16, 32,
+			},
+		},
+		{
+			name: "with step",
+			acc:  1,
+			f:    func(acc any) any { return acc.(int) * 2 },
+			i:    7,
+			opts: []UnfoldOption{WithStep(2)},
+			expected: []any{
+				1, 4, 16, 64,
 			},
 		},
 	}

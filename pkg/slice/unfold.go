@@ -16,6 +16,15 @@ func WithMax(max int) UnfoldOption {
 	}
 }
 
+// WithStep sets the step of the unfold.
+// This does not include the first step.
+// If step is 2, the result will include every second value.
+func WithStep(step int) UnfoldOption {
+	return func(c *UnfoldConfig) {
+		c.Step = step
+	}
+}
+
 // Unfold generates a slice by repeatedly applying a function to an accumulator.
 // It includes the accumulator in the result as the first value.
 // If the predicate is always false, it returns nil.
@@ -66,9 +75,15 @@ func UnfoldI[T any](acc T, f func(T) T, n int, opts ...UnfoldOption) []T {
 	n = min(n, config.Max)
 
 	res := make([]T, 0, n)
-	for i := 0; i <= n; i = i + config.Step {
-		res = append(res, acc)
+	res = append(res, acc)
+	for i := 1; i <= n; i++ {
 		acc = f(acc)
+		if i%config.Step == 0 {
+			res = append(res, acc)
+		}
+		if i >= config.Max {
+			return res
+		}
 	}
 
 	return res
