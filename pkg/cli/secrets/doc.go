@@ -126,20 +126,20 @@ Propagate context from parent operations:
 The package uses a factory pattern to create provider instances:
 
 1. Providers are registered with a scheme and a factory function
-2. The factory function creates a provider instance for a given location
+2. The factory function creates a provider instance
 3. When GetSecret is called with a URL, the system:
-  - Parses the URL to extract the scheme and location
+  - Parses the SL to extract the scheme and location
   - Looks up the provider factory for the scheme
   - Creates a provider instance using the factory
   - Retrieves the secret using the provider
 
-This extensible design allows for seamless integration of custom secret providers
-without modifying the core package code.
+This extensible design allows for seamless integration of custom secret
+providers without modifying the core package code.
 
 # Creating Custom Providers
 
-You can extend the secret provider system by implementing the Provider interface
-and registering your custom provider:
+You can extend the secret provider system by implementing the Provider
+interface and registering your custom provider:
 
 	// Implement the Provider interface
 	type customProvider struct {
@@ -162,13 +162,13 @@ and registering your custom provider:
 	}
 
 	// NewCustomProvider creates a new custom provider.
-	func NewCustomProvider(location secrets.Location) *customProvider {
+	func NewCustomProvider() *customProvider {
 		return &customProvider{}
 	}
 
 	// Register the custom provider during initialization
 	func init() {
-		secrets.RegisterProvider("custom", func(location secrets.Location) Provider {
+		secrets.RegisterProvider("custom", func() Provider {
 			return NewCustomProvider()
 		})
 	}
