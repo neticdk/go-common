@@ -11,45 +11,45 @@ import (
 
 func TestNewProvider(t *testing.T) {
 	tests := []struct {
-		scheme        string
+		scheme        Scheme
 		expected      Provider
 		location      Location
 		expectedError error
 	}{
 		{
-			scheme:        ProviderEnv,
+			scheme:        SchemeEnv,
 			expected:      NewEnvProvider(),
 			location:      Location("MY_SECRET"),
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderFile,
+			scheme:        SchemeFile,
 			expected:      NewFileProvider(),
 			location:      Location("/path/to/secret.txt"),
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderCmd,
+			scheme:        SchemeCmd,
 			expected:      NewCmdProvider(),
 			location:      Location("get secret"),
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderLastPass,
+			scheme:        SchemeLastPass,
 			expected:      NewLastPassProvider(),
 			location:      Location("123456"),
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderUnknown,
+			scheme:        SchemeUnknown,
 			expected:      nil,
 			location:      Location(""),
-			expectedError: fmt.Errorf("unknown provider scheme: %s", ProviderUnknown),
+			expectedError: fmt.Errorf("unknown provider scheme: %s", SchemeUnknown),
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.scheme, func(t *testing.T) {
-			got, err := NewProvider(tt.scheme, tt.location)
+		t.Run(string(tt.scheme), func(t *testing.T) {
+			got, err := NewProvider(tt.scheme)
 			if tt.expectedError != nil {
 				assert.EqualError(t, err, tt.expectedError.Error())
 			} else {
@@ -62,7 +62,7 @@ func TestNewProvider(t *testing.T) {
 
 func TestRegisterProvider(t *testing.T) {
 	// Save the original registry to restore it later
-	originalRegistry := make(map[string]ProviderFactory)
+	originalRegistry := make(map[Scheme]ProviderFactory)
 	maps.Copy(originalRegistry, providerRegistry)
 
 	// Clear the registry for this test
@@ -73,22 +73,22 @@ func TestRegisterProvider(t *testing.T) {
 	// Verify registry is empty
 	assert.Empty(t, providerRegistry)
 
-	mockFactory := func(loc Location) Provider {
-		return &mockProvider{loc: string(loc)}
+	mockFactory := func() Provider {
+		return &mockProvider{}
 	}
 
 	// Register the mock provider
 	RegisterProvider("mock", mockFactory)
 
 	// Verify the provider was registered
-	assert.Contains(t, providerRegistry, "mock")
+	assert.Contains(t, providerRegistry, Scheme("mock"))
 	assert.NotNil(t, providerRegistry["mock"])
 
 	// Create a provider using the factory
-	provider, err := NewProvider("mock", Location("test"))
+	provider, err := NewProvider("mock")
 	assert.NoError(t, err)
 	assert.IsType(t, &mockProvider{}, provider)
-	assert.Equal(t, "test", provider.(*mockProvider).loc)
+	assert.Equal(t, Scheme("mock"), provider.(*mockProvider).Scheme())
 
 	// Restore the original registry
 	providerRegistry = originalRegistry
@@ -103,10 +103,9 @@ func (p *mockProvider) RetrieveSecret(ctx context.Context, loc Location) (*Secre
 	p.loc = "test"
 	secret := "test"
 	return NewSecret([]byte(secret),
-		WithProvider(ProviderCmd),
-		WithLocation(p.loc)), nil
+		WithLocator(&SecretLocator{Scheme: SchemeCmd, Location: Location(p.loc)})), nil
 }
 
-func (p *mockProvider) String() string {
+func (p *mockProvider) Scheme() Scheme {
 	return "mock"
 }

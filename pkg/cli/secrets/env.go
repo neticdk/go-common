@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const ProviderEnv = "env"
+const SchemeEnv = "env"
 
 type envProvider struct {
 	variable string
@@ -32,14 +32,18 @@ func (p *envProvider) RetrieveSecret(_ context.Context, loc Location) (*Secret, 
 	if v == "" {
 		return nil, fmt.Errorf("missing environment variable %q", p.variable)
 	}
-	return NewSecret([]byte(v),
-		WithProvider(ProviderEnv),
-		WithLocation(p.variable)), nil
+
+	sl, err := NewSecretLocator(SchemeEnv, loc)
+	if err != nil {
+		return nil, fmt.Errorf("creating secret locator: %w", err)
+	}
+
+	return NewSecret([]byte(v), WithLocator(sl)), nil
 }
 
-// String returns the provider ID.
-func (p *envProvider) String() string {
-	return ProviderEnv
+// String returns the scheme for the provider.
+func (p *envProvider) Scheme() Scheme {
+	return SchemeEnv
 }
 
 func (p *envProvider) clean() {

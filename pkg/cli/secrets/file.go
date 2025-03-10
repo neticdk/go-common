@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ProviderFile      = "file"
+	SchemeFile        = "file"
 	worldReadablePerm = 0o004
 )
 
@@ -40,14 +40,17 @@ func (p *fileProvider) RetrieveSecret(_ context.Context, loc Location) (*Secret,
 		return nil, fmt.Errorf("reading file %q: %w", p.path, err)
 	}
 
-	return NewSecret(content,
-		WithProvider(ProviderFile),
-		WithLocation(p.path)), nil
+	sl, err := NewSecretLocator(SchemeFile, loc)
+	if err != nil {
+		return nil, fmt.Errorf("creating secret locator: %w", err)
+	}
+
+	return NewSecret(content, WithLocator(sl)), nil
 }
 
-// String returns the provider ID.
-func (p *fileProvider) String() string {
-	return ProviderFile
+// Scheme returns the scheme for the provider.
+func (p *fileProvider) Scheme() Scheme {
+	return SchemeFile
 }
 
 func (p *fileProvider) clean() {

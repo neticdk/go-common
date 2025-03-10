@@ -18,13 +18,13 @@ func Parse(rawSL string) (*SecretLocator, error) {
 	return NewSecretLocator(scheme, location)
 }
 
-func parseSecretLocator(rawSL string) (string, Location, error) {
+func parseSecretLocator(rawSL string) (Scheme, Location, error) {
 	m := slRe.FindStringSubmatch(rawSL)
 	if m == nil {
 		return "", "", errors.New("invalid identifier")
 	}
 
-	scheme := m[1]
+	scheme := Scheme(m[1])
 	location := Location(m[2])
 
 	// Check if the scheme is registered

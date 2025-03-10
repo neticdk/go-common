@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ProviderUnknown = "unknown"
+	SchemeUnknown = "unknown"
 )
 
 // Provider is an interface that provides a secret.
@@ -15,44 +15,44 @@ type Provider interface {
 	// It does the actual work of retrieving the secret..
 	RetrieveSecret(context.Context, Location) (*Secret, error)
 
-	// String returns the string representation of the provider.
-	String() string
+	// Scheme returns the scheme for the provider.
+	Scheme() Scheme
 }
 
 // Factory function type for creating providers
-type ProviderFactory func(location Location) Provider
+type ProviderFactory func() Provider
 
 // Registry to store provider factories
-var providerRegistry = make(map[string]ProviderFactory)
+var providerRegistry = make(map[Scheme]ProviderFactory)
 
 // Register a new provider type
-func RegisterProvider(scheme string, factory ProviderFactory) {
+func RegisterProvider(scheme Scheme, factory ProviderFactory) {
 	providerRegistry[scheme] = factory
 }
 
 // NewProvider creates a new provider instance
-func NewProvider(scheme string, location Location) (Provider, error) {
+func NewProvider(scheme Scheme) (Provider, error) {
 	factory, exists := providerRegistry[scheme]
 	if !exists {
 		return nil, fmt.Errorf("unknown provider scheme: %s", scheme)
 	}
-	return factory(location), nil
+	return factory(), nil
 }
 
 func init() {
-	RegisterProvider("file", func(_ Location) Provider {
+	RegisterProvider(SchemeFile, func() Provider {
 		return NewFileProvider()
 	})
 
-	RegisterProvider("env", func(_ Location) Provider {
+	RegisterProvider(SchemeEnv, func() Provider {
 		return NewEnvProvider()
 	})
 
-	RegisterProvider("cmd", func(_ Location) Provider {
+	RegisterProvider(SchemeCmd, func() Provider {
 		return NewCmdProvider()
 	})
 
-	RegisterProvider("lp", func(_ Location) Provider {
+	RegisterProvider(SchemeLastPass, func() Provider {
 		return NewLastPassProvider()
 	})
 }

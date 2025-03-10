@@ -30,8 +30,8 @@ func (suite *FileProviderTestSuite) TestGetSecret_Success() {
 
 	suite.Require().NoError(err)
 	assert.Equal(suite.T(), secretContent, secret.Value)
-	assert.Equal(suite.T(), ProviderFile, secret.Provider)
-	assert.Equal(suite.T(), filePath, secret.Location)
+	assert.Equal(suite.T(), Scheme(SchemeFile), secret.GetScheme())
+	assert.Equal(suite.T(), Location(filePath), secret.GetLocation())
 }
 
 func (suite *FileProviderTestSuite) TestGetSecret_FileNotFound() {

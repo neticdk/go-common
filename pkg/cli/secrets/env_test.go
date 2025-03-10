@@ -26,8 +26,7 @@ func TestEnvProvider_GetSecret(t *testing.T) {
 			name:     "Valid environment variable",
 			location: "TEST_SECRET",
 			expected: NewSecret([]byte("test_value"),
-				WithProvider(ProviderEnv),
-				WithLocation("TEST_SECRET")),
+				WithLocator(&SecretLocator{Scheme: SchemeEnv, Location: "TEST_SECRET"})),
 			expectedErr: nil,
 		},
 		{
@@ -60,7 +59,9 @@ func TestEnvProvider_GetSecret(t *testing.T) {
 				}
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, test.expected, secret)
+				assert.Equal(t, test.expected.GetLocation(), secret.GetLocation())
+				assert.Equal(t, test.expected.GetScheme(), secret.GetScheme())
+				assert.Equal(t, test.expected.Value, secret.Value)
 			}
 		})
 	}

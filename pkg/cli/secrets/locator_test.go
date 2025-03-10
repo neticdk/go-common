@@ -10,92 +10,92 @@ import (
 
 func TestIdentifierString(t *testing.T) {
 	tests := []struct {
-		scheme        string
+		scheme        Scheme
 		location      Location
 		expected      string
 		expectedError error
 	}{
 		{
-			scheme:        ProviderEnv,
+			scheme:        SchemeEnv,
 			location:      Location("MY_SECRET"),
 			expected:      "env://MY_SECRET",
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderFile,
+			scheme:        SchemeFile,
 			location:      Location("/path/to/secret.txt"),
 			expected:      "file:///path/to/secret.txt",
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderCmd,
+			scheme:        SchemeCmd,
 			location:      Location("get secret"),
 			expected:      "cmd://get secret",
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderLastPass,
+			scheme:        SchemeLastPass,
 			location:      Location("12345"),
 			expected:      "lp://12345",
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderUnknown,
+			scheme:        SchemeUnknown,
 			location:      Location(""),
-			expected:      "://",
-			expectedError: fmt.Errorf("unknown provider scheme: %s", ProviderUnknown),
+			expected:      "unknown://",
+			expectedError: fmt.Errorf("unknown provider scheme: %s", SchemeUnknown),
 		},
 	}
 
 	for _, tt := range tests {
-		provider, err := NewProvider(tt.scheme, tt.location)
+		provider, err := NewProvider(tt.scheme)
 		if tt.expectedError != nil {
 			assert.Error(t, err)
 			assert.Equal(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 		}
-		identifier := &SecretLocator{Provider: provider, Location: tt.location}
+		identifier := &SecretLocator{Provider: provider, Scheme: tt.scheme, Location: tt.location}
 		assert.Equal(t, tt.expected, identifier.String())
 	}
 }
 
 func TestNewIdentifier(t *testing.T) {
 	tests := []struct {
-		scheme        string
+		scheme        Scheme
 		location      Location
 		isValid       bool
 		expectedError error
 	}{
 		{
-			scheme:        ProviderEnv,
+			scheme:        SchemeEnv,
 			location:      Location("MY_SECRET"),
 			isValid:       true,
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderFile,
+			scheme:        SchemeFile,
 			location:      Location("/path/to/secret.txt"),
 			isValid:       true,
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderCmd,
+			scheme:        SchemeCmd,
 			location:      Location("get secret"),
 			isValid:       true,
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderLastPass,
+			scheme:        SchemeLastPass,
 			location:      Location("12345"),
 			isValid:       true,
 			expectedError: nil,
 		},
 		{
-			scheme:        ProviderUnknown,
+			scheme:        SchemeUnknown,
 			location:      Location("another-secret"),
 			isValid:       false,
-			expectedError: fmt.Errorf("creating provider: unknown provider scheme: %s", ProviderUnknown),
+			expectedError: fmt.Errorf("creating provider: unknown provider scheme: %s", SchemeUnknown),
 		},
 	}
 	for _, tt := range tests {
@@ -116,34 +116,47 @@ func TestNewIdentifier(t *testing.T) {
 
 func TestIdentifierValidate(t *testing.T) {
 	tests := []struct {
-		scheme   string
+		name     string
+		scheme   Scheme
 		location Location
 		expected error
 	}{
 		{
-			scheme:   ProviderUnknown,
-			location: Location(""),
+			name:     "unknown scheme",
+			scheme:   SchemeUnknown,
+			location: Location("TEST"),
 			expected: fmt.Errorf("missing provider"),
 		},
 		{
-			scheme:   ProviderEnv,
+			name:     "missing scheme",
+			scheme:   Scheme(""),
+			location: Location("MY_SECRET"),
+			expected: fmt.Errorf("missing scheme"),
+		},
+		{
+			name:     "missing location",
+			scheme:   SchemeEnv,
 			location: Location(""),
 			expected: fmt.Errorf("missing location"),
 		},
 		{
-			scheme:   ProviderEnv,
+			name:     "good",
+			scheme:   SchemeEnv,
 			location: Location("MY_SECRET"),
 			expected: nil,
 		},
 	}
 	for _, tt := range tests {
-		provider, _ := NewProvider(tt.scheme, tt.location)
-		identifier := &SecretLocator{
-			Provider: provider,
-			Location: tt.location,
-		}
-		err := identifier.Validate()
-		assert.Equal(t, tt.expected, err)
+		t.Run(tt.name, func(t *testing.T) {
+			provider, _ := NewProvider(tt.scheme)
+			identifier := &SecretLocator{
+				Provider: provider,
+				Scheme:   tt.scheme,
+				Location: tt.location,
+			}
+			err := identifier.Validate()
+			assert.Equal(t, tt.expected, err)
+		})
 	}
 }
 
@@ -178,7 +191,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 		}
 		tempFile.Close()
 
-		provider, err := NewProvider(ProviderFile, Location(tempFile.Name()))
+		provider, err := NewProvider(SchemeFile)
 		assert.NoError(t, err)
 
 		// Create identifier with file provider
@@ -199,7 +212,7 @@ func TestIdentifierGetSecret(t *testing.T) {
 	t.Run("file provider with non-existent file", func(t *testing.T) {
 		nonExistentPath := "/path/to/nonexistent/file"
 
-		provider, err := NewProvider(ProviderFile, Location(nonExistentPath))
+		provider, err := NewProvider(SchemeFile)
 		assert.NoError(t, err)
 
 		identifier := &SecretLocator{
@@ -245,7 +258,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 		}
 		tempFile.Close()
 
-		provider, err := NewProvider(ProviderFile, Location(tempFile.Name()))
+		provider, err := NewProvider(SchemeFile)
 		assert.NoError(t, err)
 
 		// Create identifier with file provider
@@ -265,7 +278,7 @@ func TestIdentifierGetSecretValue(t *testing.T) {
 	t.Run("file provider with non-existent file", func(t *testing.T) {
 		nonExistentPath := "/path/to/nonexistent/file"
 
-		provider, err := NewProvider(ProviderFile, Location(nonExistentPath))
+		provider, err := NewProvider(SchemeFile)
 		assert.NoError(t, err)
 
 		identifier := &SecretLocator{

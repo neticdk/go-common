@@ -41,10 +41,9 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			mockOutput: "secretvalue\n",
 			mockError:  nil,
 			expectedSecret: &Secret{
-				Value:    []byte("secretvalue"),
-				Provider: ProviderLastPass,
-				Location: "test/entry",
-				Data:     make(map[string]string),
+				Value:   []byte("secretvalue"),
+				locator: &SecretLocator{Scheme: SchemeLastPass, Location: "test/entry"},
+				Data:    make(map[string]string),
 			},
 			expectError: false,
 		},
@@ -54,10 +53,9 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 			mockOutput: "another-secret\n",
 			mockError:  nil,
 			expectedSecret: &Secret{
-				Value:    []byte("another-secret"),
-				Provider: ProviderLastPass,
-				Location: "entry with spaces",
-				Data:     make(map[string]string),
+				Value:   []byte("another-secret"),
+				locator: &SecretLocator{Scheme: SchemeLastPass, Location: "  entry with spaces  "},
+				Data:    make(map[string]string),
 			},
 			expectError: false,
 		},
@@ -100,8 +98,8 @@ func TestLastPassProvider_GetSecret(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, secret)
 				assert.Equal(t, tt.expectedSecret.Value, secret.Value)
-				assert.Equal(t, tt.expectedSecret.Provider, secret.Provider)
-				assert.Equal(t, tt.expectedSecret.Location, secret.Location)
+				assert.Equal(t, tt.expectedSecret.GetScheme(), secret.GetScheme())
+				assert.Equal(t, tt.expectedSecret.GetLocation(), secret.GetLocation())
 			}
 		})
 	}

@@ -5,25 +5,29 @@ import (
 	"fmt"
 )
 
-// Location is a string that represents the location of a secret.
-type Location string
+type (
+	// Scheme is a string that represents the scheme of a secret provider.
+	Scheme string
 
-// SecretLocator is a reference to a secret.
-type SecretLocator struct {
-	// Provider implements the provider for the secret.
-	Provider Provider
+	// Location is a string that represents the location of a secret.
+	Location string
 
-	// Location is the location of the secret within the provider.
-	Location Location
-}
+	// SecretLocator is a reference to a secret.
+	SecretLocator struct {
+		// Provider implements the provider for the secret.
+		Provider Provider
+
+		// Scheme is the scheme of the secret provider.
+		Scheme Scheme
+
+		// Location is the location of the secret within the provider.
+		Location Location
+	}
+)
 
 // String returns the string representation of the secret locator.
 func (sl *SecretLocator) String() string {
-	var provider string
-	if sl.Provider != nil {
-		provider = sl.Provider.String()
-	}
-	return fmt.Sprintf("%s://%s", provider, sl.Location)
+	return fmt.Sprintf("%s://%s", sl.Scheme, sl.Location)
 }
 
 // GetSecret retrieves the secret from the provider.
@@ -48,12 +52,13 @@ func (sl *SecretLocator) GetSecretValue(ctx context.Context) (string, error) {
 }
 
 // NewSecretLocator creates a new secret locator.
-func NewSecretLocator(scheme string, location Location) (*SecretLocator, error) {
-	provider, err := NewProvider(scheme, location)
+func NewSecretLocator(scheme Scheme, location Location) (*SecretLocator, error) {
+	provider, err := NewProvider(scheme)
 	if err != nil {
 		return nil, fmt.Errorf("creating provider: %w", err)
 	}
 	return &SecretLocator{
+		Scheme:   scheme,
 		Location: location,
 		Provider: provider,
 	}, nil
@@ -61,12 +66,17 @@ func NewSecretLocator(scheme string, location Location) (*SecretLocator, error) 
 
 // Validate validates the secret locator.
 func (i *SecretLocator) Validate() error {
-	if i.Provider == nil {
-		return fmt.Errorf("missing provider")
+	if i.Scheme == "" {
+		return fmt.Errorf("missing scheme")
 	}
 
 	if i.Location == "" {
 		return fmt.Errorf("missing location")
 	}
+
+	if i.Provider == nil {
+		return fmt.Errorf("missing provider")
+	}
+
 	return nil
 }

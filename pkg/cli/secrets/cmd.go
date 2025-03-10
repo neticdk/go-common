@@ -9,7 +9,7 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
-const ProviderCmd = "cmd"
+const SchemeCmd = "cmd"
 
 type cmdProvider struct {
 	command string
@@ -39,14 +39,17 @@ func (p *cmdProvider) RetrieveSecret(ctx context.Context, loc Location) (*Secret
 	}
 	secret := strings.Trim(string(output), "\n")
 
-	return NewSecret([]byte(secret),
-		WithProvider(ProviderCmd),
-		WithLocation(p.command)), nil
+	sl, err := NewSecretLocator(SchemeCmd, loc)
+	if err != nil {
+		return nil, fmt.Errorf("creating secret locator: %w", err)
+	}
+
+	return NewSecret([]byte(secret), WithLocator(sl)), nil
 }
 
-// String returns the provider ID.
-func (p *cmdProvider) String() string {
-	return ProviderCmd
+// String returns the scheme for the provider.
+func (p *cmdProvider) Scheme() Scheme {
+	return SchemeCmd
 }
 
 func (p *cmdProvider) clean() {

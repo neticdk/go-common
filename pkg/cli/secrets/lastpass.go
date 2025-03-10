@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const ProviderLastPass = "lp"
+const SchemeLastPass = "lp"
 
 // execCommand is used for mocking in tests.
 var execCommand = exec.CommandContext
@@ -33,14 +33,17 @@ func (p *lastPassProvider) RetrieveSecret(ctx context.Context, loc Location) (*S
 	}
 	secret := strings.Trim(string(output), "\n")
 
-	return NewSecret([]byte(secret),
-		WithProvider(ProviderLastPass),
-		WithLocation(p.id)), nil
+	sl, err := NewSecretLocator(SchemeLastPass, loc)
+	if err != nil {
+		return nil, fmt.Errorf("creating secret locator: %w", err)
+	}
+
+	return NewSecret([]byte(secret), WithLocator(sl)), nil
 }
 
-// String returns the provider ID.
-func (p *lastPassProvider) String() string {
-	return ProviderLastPass
+// String returns the scheme for the provider.
+func (p *lastPassProvider) Scheme() Scheme {
+	return SchemeLastPass
 }
 
 func (p *lastPassProvider) clean() {
