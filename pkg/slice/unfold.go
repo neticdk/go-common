@@ -1,5 +1,10 @@
 package slice
 
+const (
+	DefaultMaxIterations = 100000
+	DefaultStep          = 1
+)
+
 type UnfoldConfig struct {
 	Max  int
 	Step int
@@ -9,10 +14,10 @@ type UnfoldOption func(*UnfoldConfig)
 
 // WithStep sets the step of the unfold.
 // This does not include the first step.
-// If max is 5, the length of the result is <= 6.
-func WithMax(max int) UnfoldOption {
+// If n is 5, the length of the result is <= 6.
+func WithMax(n int) UnfoldOption {
 	return func(c *UnfoldConfig) {
-		c.Max = max
+		c.Max = n
 	}
 }
 
@@ -31,8 +36,8 @@ func WithStep(step int) UnfoldOption {
 // It stops when the predicate returns false.
 func Unfold[T any](acc T, f func(T) T, p func(T) bool, opts ...UnfoldOption) []T {
 	config := &UnfoldConfig{
-		Max:  100000,
-		Step: 1,
+		Max:  DefaultMaxIterations,
+		Step: DefaultStep,
 	}
 
 	for _, opt := range opts {
@@ -60,8 +65,8 @@ func Unfold[T any](acc T, f func(T) T, p func(T) bool, opts ...UnfoldOption) []T
 // It stops after i iterations.
 func UnfoldI[T any](acc T, f func(T) T, n int, opts ...UnfoldOption) []T {
 	config := &UnfoldConfig{
-		Max:  100000,
-		Step: 1,
+		Max:  DefaultMaxIterations,
+		Step: DefaultStep,
 	}
 
 	for _, opt := range opts {
