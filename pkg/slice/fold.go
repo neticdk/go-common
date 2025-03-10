@@ -3,7 +3,7 @@ package slice
 // Fold applies a function to each element of the slice,
 // storing the result in an accumulator.
 // It applies the function from left to right.
-func Fold[T any](acc T, data []T, f func(T, T) T) T {
+func Fold[T any, S any](acc T, data []S, f func(T, S) T) T {
 	res := acc
 	for _, e := range data {
 		res = f(res, e)
@@ -15,7 +15,7 @@ func Fold[T any](acc T, data []T, f func(T, T) T) T {
 // Fold applies a function to each element of the slice,
 // storing the result in an accumulator.
 // It applies the function from right to left.
-func FoldR[T any](acc T, data []T, f func(T, T) T) T {
+func FoldR[T any, S any](acc T, data []S, f func(T, S) T) T {
 	res := acc
 	for i := len(data) - 1; i >= 0; i-- {
 		res = f(res, data[i])
