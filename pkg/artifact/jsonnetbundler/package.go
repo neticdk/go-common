@@ -34,14 +34,9 @@ func Install(_ context.Context, a *artifact.Artifact, opts *PackageOptions) (*ar
 		opts.JsonnetHome = "vendor"
 	}
 
-	jbfilebytes, err := os.ReadFile(filepath.Join(a.BaseDir, jsonnetfile.File))
+	jsonnetFile, err := jsonnetfile.Load(filepath.Join(a.BaseDir, jsonnetfile.File))
 	if err != nil {
-		return nil, fmt.Errorf("reading %q: %w", jsonnetfile.File, err)
-	}
-
-	jsonnetFile, err := jsonnetfile.Unmarshal(jbfilebytes)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshalling %q: %w", jsonnetfile.File, err)
+		return nil, fmt.Errorf("loading %q: %w", jsonnetfile.File, err)
 	}
 
 	jblockfilebytes, err := os.ReadFile(filepath.Join(a.BaseDir, jsonnetfile.LockFile))
