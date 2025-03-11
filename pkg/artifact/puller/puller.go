@@ -11,6 +11,7 @@ import (
 	"github.com/neticdk/go-common/pkg/artifact/git"
 	"github.com/neticdk/go-common/pkg/artifact/github"
 	"github.com/neticdk/go-common/pkg/artifact/helm"
+	"github.com/neticdk/go-common/pkg/artifact/jsonnetbundler"
 )
 
 // PullMethod is the method used to pull an artifact
@@ -22,6 +23,7 @@ const (
 	PullMethodGithubRelease
 	PullMethodHTTPArchive
 	PullMethodGit
+	PullMethodJsonnetBundler
 )
 
 // Puller is the interface for pulling artifacts
@@ -31,11 +33,12 @@ type Puller interface {
 }
 
 type puller struct {
-	logger               *slog.Logger
-	helmChartOptions     *helm.ChartOptions
-	githubReleaseOptions *github.ReleaseOptions
-	archiveHTTPOptions   *archive.HTTPOptions
-	gitRepositoryOptions *git.RepositoryOptions
+	logger                *slog.Logger
+	helmChartOptions      *helm.ChartOptions
+	githubReleaseOptions  *github.ReleaseOptions
+	archiveHTTPOptions    *archive.HTTPOptions
+	gitRepositoryOptions  *git.RepositoryOptions
+	jsonnetBundlerOptions *jsonnetbundler.PackageOptions
 }
 
 // NewPuller creates a new puller
@@ -70,6 +73,8 @@ func (p *puller) Pull(ctx context.Context, m PullMethod, a *artifact.Artifact, o
 		return archive.PullHTTP(ctx, a, p.archiveHTTPOptions)
 	case PullMethodGit:
 		return git.PullRepository(ctx, a, p.gitRepositoryOptions)
+	case PullMethodJsonnetBundler:
+		return jsonnetbundler.Install(a, p.jsonnetBundlerOptions)
 	default:
 		return nil, fmt.Errorf("uknown pull method: %d", m)
 	}

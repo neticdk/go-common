@@ -8,6 +8,7 @@ import (
 	agit "github.com/neticdk/go-common/pkg/artifact/git"
 	"github.com/neticdk/go-common/pkg/artifact/github"
 	"github.com/neticdk/go-common/pkg/artifact/helm"
+	"github.com/neticdk/go-common/pkg/artifact/jsonnetbundler"
 	"github.com/neticdk/go-common/pkg/git"
 )
 
@@ -57,5 +58,12 @@ func WithRepositoryAuth(a transport.AuthMethod) PullOption {
 func WithGithubReleaseOptions(o *github.ReleaseOptions) PullOption {
 	return func(p *puller) {
 		p.githubReleaseOptions = o
+	}
+}
+
+// WithJsonnetBundlerOptions sets the jsonnet bundler options for the puller
+func WithJsonnetBundlerOptions(o *jsonnetbundler.PackageOptions) PullOption {
+	return func(p *puller) {
+		p.jsonnetBundlerOptions = o
 	}
 }
