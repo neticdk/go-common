@@ -1,7 +1,6 @@
 package jsonnetbundler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -25,7 +24,7 @@ type PackageOptions struct {
 
 // Install installs a package and its dependencies in the vendor directory.
 // It mimics https://github.com/jsonnet-bundler/jsonnet-bundler/blob/master/cmd/jb/install.go
-func Install(_ context.Context, a *artifact.Artifact, opts *PackageOptions) (*artifact.PullResult, error) {
+func Install(a *artifact.Artifact, opts *PackageOptions) (*artifact.PullResult, error) {
 	if opts == nil {
 		opts = &PackageOptions{}
 	}

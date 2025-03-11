@@ -74,7 +74,7 @@ func (p *puller) Pull(ctx context.Context, m PullMethod, a *artifact.Artifact, o
 	case PullMethodGit:
 		return git.PullRepository(ctx, a, p.gitRepositoryOptions)
 	case PullMethodJsonnetBundler:
-		return jsonnetbundler.Install(ctx, a, p.jsonnetBundlerOptions)
+		return jsonnetbundler.Install(a, p.jsonnetBundlerOptions)
 	default:
 		return nil, fmt.Errorf("uknown pull method: %d", m)
 	}
