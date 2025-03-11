@@ -9,6 +9,7 @@ Supported types:
 - git repository
 - Github release
 - helm chart
+- json-bundler
 
 First create an Artifact instance describing the artifact to download.
 
