@@ -9,12 +9,22 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/anchore/go-version"
 	"github.com/anchore/grype/grype"
-	"github.com/anchore/grype/grype/db/legacy/distribution"
-	grypeDb "github.com/anchore/grype/grype/db/v5"
+	"github.com/anchore/grype/grype/db/v6/distribution"
+	"github.com/anchore/grype/grype/db/v6/installation"
 	grypeMatch "github.com/anchore/grype/grype/match"
+	"github.com/anchore/grype/grype/matcher"
+	"github.com/anchore/grype/grype/matcher/dotnet"
+	"github.com/anchore/grype/grype/matcher/golang"
+	"github.com/anchore/grype/grype/matcher/java"
+	"github.com/anchore/grype/grype/matcher/javascript"
+	"github.com/anchore/grype/grype/matcher/python"
+	"github.com/anchore/grype/grype/matcher/ruby"
+	"github.com/anchore/grype/grype/matcher/rust"
+	"github.com/anchore/grype/grype/matcher/stock"
 	grypePkg "github.com/anchore/grype/grype/pkg"
 	grypeVulnerability "github.com/anchore/grype/grype/vulnerability"
 	syftSbom "github.com/anchore/syft/syft/sbom"
@@ -27,6 +37,8 @@ const (
 
 	// Number of scanner workers
 	scannerWorkers = 10
+
+	mavenSearchBaseURL = "https://search.maven.org/solrsearch/select"
 )
 
 // GrypeScanner is a scanner that uses Grype to find vulnerabilities in a
@@ -132,12 +144,18 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	logger := slog.Default()
 	vulns := []types.Vulnerability{}
 
-	dbConfig := distribution.Config{
-		DBRootDir:  s.dbRootDir,
-		ListingURL: "https://toolbox-data.anchore.io/grype/databases/listing.json",
+	distConfig := distribution.Config{
+		LatestURL: "https://grype.anchore.io/databases/v6/latest.json",
+	}
+	installCfg := installation.Config{
+		DBRootDir: s.dbRootDir,
+	}
+	client, err := distribution.NewClient(distConfig)
+	if err != nil {
+		return nil, fmt.Errorf("creating distribution client: %w", err)
 	}
 	if s.cleanupDBAfterScan {
-		dbCurator, err := distribution.NewCurator(dbConfig)
+		dbCurator, err := installation.NewCurator(installCfg, client)
 		if err != nil {
 			return nil, fmt.Errorf("creating database curator: %w", err)
 		}
@@ -148,12 +166,15 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 		}()
 	}
 
-	datastore, _, err := grype.LoadVulnerabilityDB(dbConfig, true)
+	datastore, _, err := grype.LoadVulnerabilityDB(distConfig, installCfg, true)
 	if err != nil {
 		return nil, fmt.Errorf("loading vulnerability database: %w", err)
 	}
 
-	matcher := grype.DefaultVulnerabilityMatcher(*datastore)
+	matcher := grype.VulnerabilityMatcher{
+		VulnerabilityProvider: datastore,
+		Matchers:              createMatchers(true),
+	}
 
 	syftPkgs := sbm.Artifacts.Packages.Sorted()
 	grypePkgs := grypePkg.FromPackages(syftPkgs, grypePkg.SynthesisConfig{GenerateMissingCPEs: false})
@@ -202,9 +223,9 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	return vulns, nil
 }
 
-func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore *grypeDb.ProviderStore, resultChan chan<- types.Vulnerability) {
+func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore grypeVulnerability.Provider, resultChan chan<- types.Vulnerability) {
 	logger := slog.Default()
-	metadata, err := datastore.GetMetadata(match.Vulnerability.ID, match.Vulnerability.Namespace)
+	metadata, err := datastore.VulnerabilityMetadata(match.Vulnerability.Reference)
 	if err != nil {
 		logger.WarnContext(ctx, "getting metadata for vulnerability", slog.String("ID", match.Vulnerability.ID), slog.Any("error", err))
 		return
@@ -252,4 +273,30 @@ func (s grypeByCVSSVersion) Less(i, j int) bool {
 	}
 
 	return v1.LessThan(v2)
+}
+
+func createMatchers(useCPEs bool) []grypeMatch.Matcher {
+	return matcher.NewDefaultMatchers(
+		matcher.Config{
+			Dotnet: dotnet.MatcherConfig{UseCPEs: useCPEs},
+			Golang: golang.MatcherConfig{
+				UseCPEs:                                true,
+				AlwaysUseCPEForStdlib:                  true,
+				AllowMainModulePseudoVersionComparison: false,
+			},
+			Java: java.MatcherConfig{
+				ExternalSearchConfig: java.ExternalSearchConfig{
+					SearchMavenUpstream: true,
+					MavenBaseURL:        mavenSearchBaseURL,
+					MavenRateLimit:      400 * time.Millisecond, // increased from the default of 300ms to avoid rate limiting with extremely large set of java packages such as druid
+				},
+				UseCPEs: useCPEs,
+			},
+			Javascript: javascript.MatcherConfig{UseCPEs: useCPEs},
+			Python:     python.MatcherConfig{UseCPEs: useCPEs},
+			Ruby:       ruby.MatcherConfig{UseCPEs: useCPEs},
+			Rust:       rust.MatcherConfig{UseCPEs: useCPEs},
+			Stock:      stock.MatcherConfig{UseCPEs: true},
+		},
+	)
 }
