@@ -132,7 +132,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 		t.Run(tc.input, func(t *testing.T) {
 			actual := Slugify(
 				tc.input,
-				WithKebabCase(tc.decamelize),
+				WithDecamelize(tc.decamelize),
 				WithLowercase(tc.lowercase),
 				WithTransliterate(tc.transliterate),
 			)

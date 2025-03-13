@@ -8,7 +8,7 @@ import (
 
 // Slugify converts a string to a slug.
 // By default, it converts the string to lowercase, transliterates it, and
-// converts it to kebab case.
+// removes camel case.
 func Slugify(s string, options ...TransformOption) string {
 	opts := TransformOptions{
 		lowercase:     true,

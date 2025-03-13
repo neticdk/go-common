@@ -30,10 +30,10 @@ func WithLowercase(lowercase bool) TransformOption {
 	}
 }
 
-// WithKebabCase sets the kebabcase option.
-func WithKebabCase(kebabcase bool) TransformOption {
+// WithDecamelize sets the decamelize option.
+func WithDecamelize(decamelize bool) TransformOption {
 	return func(o *TransformOptions) {
-		o.decamelize = kebabcase
+		o.decamelize = decamelize
 	}
 }
 
