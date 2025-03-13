@@ -11,7 +11,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 		input         string
 		expected      string
 		lowercase     bool
-		kebabcase     bool
+		decamelize    bool
 		transliterate bool
 	}{
 		{"", "", true, true, true},
@@ -132,7 +132,7 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 		t.Run(tc.input, func(t *testing.T) {
 			actual := Slugify(
 				tc.input,
-				WithKebabCase(tc.kebabcase),
+				WithKebabCase(tc.decamelize),
 				WithLowercase(tc.lowercase),
 				WithTransliterate(tc.transliterate),
 			)
