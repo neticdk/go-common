@@ -171,7 +171,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 		return nil, fmt.Errorf("loading vulnerability database: %w", err)
 	}
 
-	matcher := grype.VulnerabilityMatcher{
+	vulnMatcher := grype.VulnerabilityMatcher{
 		VulnerabilityProvider: datastore,
 		Matchers:              createMatchers(true),
 	}
@@ -179,7 +179,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	syftPkgs := sbm.Artifacts.Packages.Sorted()
 	grypePkgs := grypePkg.FromPackages(syftPkgs, grypePkg.SynthesisConfig{GenerateMissingCPEs: false})
 
-	matches, _, err := matcher.FindMatches(grypePkgs, grypePkg.Context{
+	matches, _, err := vulnMatcher.FindMatches(grypePkgs, grypePkg.Context{
 		Source: &sbm.Source,
 	})
 	if err != nil {
