@@ -20,12 +20,25 @@ type PFlags struct {
 	// Flag: --log-level [debug|info|warn|error]
 	LogLevel LogLevel
 
-	// ForceEnabled is used to enable the Force flag
-	ForceEnabled bool
+	// Debug is used for debugging
+	// Usually this implies verbose output
+	// The Debug flag is always enabled
+	// Flags: --debug, -d
+	Debug bool
+
+	// OutputFormat is the format used for outputting data
+	// Examples: plain, json, yaml, markdown, table
+	OutputFormat string
+
+	// OutputFormat is used to enable the OutputFormat flag
+	OutputFormatEnabled bool
 
 	// Force is used to force actions
 	// Flags: --force, -f
 	Force bool
+
+	// ForceEnabled is used to enable the Force flag
+	ForceEnabled bool
 
 	// DryRun is used to simulate actions
 	// Flags: --dry-run
@@ -53,12 +66,6 @@ type PFlags struct {
 	// QuietEnabled is used to enable the Quiet flag
 	QuietEnabled bool
 
-	// Debug is used for debugging
-	// Usually this implies verbose output
-	// The Debug flag is always enabled
-	// Flags: --debug, -d
-	Debug bool
-
 	// NoHeaders is used to control whether headers are printed
 	// Flag: --no-headers
 	NoHeaders bool
@@ -77,7 +84,9 @@ func AddPersistentFlags(cmd *cobra.Command, ec *ExecutionContext) *pflag.FlagSet
 	logLevels := NewEnum(AllLogLevelsStr(), LogLevelDefault.String())
 	f.Var(logLevels, "log-level", fmt.Sprintf("Log level (%s)", AllLogLevelsJoined()))
 
-	f.StringVarP(&ec.OutputFormat, "output", "o", OutputFormatPlain, "Output format")
+	if ec.PFlags.OutputFormatEnabled {
+		f.StringVarP(&ec.PFlags.OutputFormat, "output", "o", OutputFormatPlain, "Output format")
+	}
 
 	if ec.PFlags.ForceEnabled {
 		f.BoolVarP(&ec.PFlags.Force, "force", "f", false, "Force actions")

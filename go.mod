@@ -30,7 +30,7 @@ require (
 	github.com/pterm/pterm v0.12.80
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.35.0
@@ -89,7 +89,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/anchore/archiver/v3 v3.5.3-0.20241210171143-5b1d8d1c7c51 // indirect
 	github.com/anchore/clio v0.0.0-20250211213408-22007329dafa // indirect
-	github.com/anchore/fangs v0.0.0-20250211213340-d26e9357aff0 // indirect
+	github.com/anchore/fangs v0.0.0-20250221225445-5916388ccbc9 // indirect
 	github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46 // indirect
 	github.com/anchore/go-logger v0.0.0-20250211213027-778b61f36378 // indirect
 	github.com/anchore/go-macholibre v0.0.0-20250211213245-0aec544d18a1 // indirect
@@ -177,7 +177,6 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-restruct/restruct v1.2.0-alpha // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect

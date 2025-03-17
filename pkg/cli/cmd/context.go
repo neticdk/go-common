@@ -58,10 +58,6 @@ type ExecutionContext struct {
 	// PFlags are the persistent flag configuration
 	PFlags PFlags
 
-	// OutputFormat is the format used for outputting data
-	// Examples: plain, json, yaml, markdown, table
-	OutputFormat string
-
 	// for changing log level
 	LogLevel *slog.LevelVar
 }
@@ -75,10 +71,11 @@ func NewExecutionContext(appName, shortDesc, version string) *ExecutionContext {
 		Stdin:            os.Stdin,
 		Stdout:           os.Stdout,
 		Stderr:           os.Stderr,
-		OutputFormat:     OutputFormatPlain,
 		PFlags: PFlags{
-			LogFormat: LogFormatDefault,
-			LogLevel:  LogLevelDefault,
+			LogFormat:           LogFormatDefault,
+			LogLevel:            LogLevelDefault,
+			OutputFormat:        OutputFormatPlain,
+			OutputFormatEnabled: true,
 		},
 		LogLevel: new(slog.LevelVar),
 	}
