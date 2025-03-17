@@ -28,7 +28,7 @@ func TestNewExecutionContext(t *testing.T) {
 	assert.Equal(t, stdin, ec.Stdin)
 	assert.Equal(t, stdout, ec.Stdout)
 	assert.Equal(t, stderr, ec.Stderr)
-	assert.Equal(t, OutputFormatPlain, ec.OutputFormat)
+	assert.Equal(t, OutputFormatPlain, ec.PFlags.OutputFormat)
 	assert.NotNil(t, ec.Logger)
 	assert.NotNil(t, ec.ErrorHandler)
 	assert.NotNil(t, ec.Spinner)

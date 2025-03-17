@@ -719,6 +719,8 @@ github.com/anchore/clio v0.0.0-20250211213408-22007329dafa h1:IB/20Ph3kl/kMV45Au
 github.com/anchore/clio v0.0.0-20250211213408-22007329dafa/go.mod h1:H15LWYoPB8ODE9kDw/Ftun0e/3j0pmeI6M0gxGLd3lQ=
 github.com/anchore/fangs v0.0.0-20250211213340-d26e9357aff0 h1:JL0eZGCi5qVw5t3oqZsWOHE/tZ2kFzsvPS5WX+OUC1s=
 github.com/anchore/fangs v0.0.0-20250211213340-d26e9357aff0/go.mod h1:8quC2RY8b66jLO5SjsRHI9BTDcDFSwHaagSIzkgcwcI=
+github.com/anchore/fangs v0.0.0-20250221225445-5916388ccbc9 h1:nh7YgIuqYvkkuVuDxmQL3DG0pBzJEP2ZzZLmD7DpKdc=
+github.com/anchore/fangs v0.0.0-20250221225445-5916388ccbc9/go.mod h1:sVia3EujsKw9rmfNwWW9A62Y+34UmvAN9yPsoLgijcQ=
 github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46 h1:huvprHsfzhrIIkk7kja1Fm5Wn3mnwPv4CeHrGlGD3ds=
 github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46/go.mod h1:1aiktV46ATCkuVg0O573ZrH56BUawTECPETbZyBcqT8=
 github.com/anchore/go-logger v0.0.0-20250211213027-778b61f36378 h1:29tc/gFpgZcUZlEffP/ArtkaJSbcxBlTUSZNiQEVWaI=

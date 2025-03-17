@@ -50,7 +50,7 @@ func TestAddPersistentFlags(t *testing.T) {
 			os.Args = append([]string{"cmd"}, tt.args...)
 			cmd.AddPersistentFlags(c, ec)
 
-			assert.Equal(t, tt.expectedFormat, ec.OutputFormat)
+			assert.Equal(t, tt.expectedFormat, ec.PFlags.OutputFormat)
 		})
 	}
 }
