@@ -47,7 +47,7 @@ type PFlags struct {
 	// DryRunEnabled is used to enable the DryRun flag
 	DryRunEnabled bool
 
-	// NoINput can be used to disable interactive mode
+	// NoInput can be used to disable interactive mode
 	// Flags: --no-input
 	NoInput bool
 
