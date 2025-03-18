@@ -739,6 +739,17 @@ return ac.EC.ErrorHandler.NewGeneralError(
     0)
 ```
 
+You can also use the `NewGeneralError` function to create a new `GeneralError`.
+The helper function allows you to set formatted message and help message.
+
+```go
+return cmd.NewGeneralError(err).
+        WithMessage("Could not parse %s", filename).
+        WithHelp("This happens...").
+        WithCode(0).
+        Build()
+```
+
 Using error codes is optional.
 
 Use `InvalidArgumentError` like this:
