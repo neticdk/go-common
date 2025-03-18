@@ -158,3 +158,32 @@ func TestToPascalCase(t *testing.T) {
 		})
 	}
 }
+
+func TestToDelimited(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		delimiter string
+		expected  string
+	}{
+		{"empty delimiter", "Hello World", "", "helloworld"},
+		{"empty string", "", "_", ""},
+		{"already snake case", "hello_world", "_", "hello_world"},
+		{"already kebab case", "hello-world", "_", "hello_world"},
+		{"already dot case", "hello.world", "_", "hello_world"},
+		{"already space separated", "hello world", "_", "hello_world"},
+		{"camel case", "helloWorld", "_", "hello_world"},
+		{"pascal case", "HelloWorld", "_", "hello_world"},
+		{"uppercase", "HELLO_WORLD", "-", "hello-world"},
+		{"acronyms", "APIRequest", "-", "api-request"},
+		{"with numbers", "user123Name", "-", "user-123-name"},
+		{"starting with number", "123Test", "-", "123-test"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ToDelimited(tt.input, tt.delimiter)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
