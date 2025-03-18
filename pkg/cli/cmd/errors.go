@@ -1,9 +1,4 @@
-// Deprecated: errors is deprecated and has been moved to github.com/go-common/pkg/cli/cmd
-//
-// It has been deprecated due to the fact that it conflicts with the standard library errors package.
-// Please use directly from cmd package instead.
-// Expect the errors package to be removed in later versions.
-package errors
+package cmd
 
 import (
 	"fmt"
@@ -11,8 +6,6 @@ import (
 )
 
 // InvalidArgumentError is returned when an argument is invalid
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
 type InvalidArgumentError struct {
 	Flag     string
 	Val      string
@@ -21,18 +14,11 @@ type InvalidArgumentError struct {
 	Context  string
 }
 
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
 func (e *InvalidArgumentError) Error() string { return "Invalid argument" }
-
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
 func (e *InvalidArgumentError) Unwrap() error { return nil }
-
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (e *InvalidArgumentError) Code() int { return 0 }
+func (e *InvalidArgumentError) Code() int     { return 0 }
 
 // Help returns the error message
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
 func (e *InvalidArgumentError) Help() string {
 	var msg strings.Builder
 
@@ -50,4 +36,30 @@ func (e *InvalidArgumentError) Help() string {
 		msg.WriteString(fmt.Sprintf("\n\nSee also: %q", e.SeeOther))
 	}
 	return msg.String()
+}
+
+type GeneralError struct {
+	Message string
+	HelpMsg string
+	CodeVal int
+	Err     error
+}
+
+func (e *GeneralError) Error() string { return e.Message }
+func (e *GeneralError) Help() string  { return e.HelpMsg }
+func (e *GeneralError) Unwrap() error { return e.Err }
+func (e *GeneralError) Code() int     { return e.CodeVal }
+
+// ErrorWithHelp interface is used for errors that can provide help
+type ErrorWithHelp interface {
+	error
+
+	// Help returns a help message for the error
+	Help() string
+
+	// Unwrap returns the underlying error
+	Unwrap() error // Optional: for wrapped errors
+
+	// Code returns the error code
+	Code() int // Optional: for error codes
 }

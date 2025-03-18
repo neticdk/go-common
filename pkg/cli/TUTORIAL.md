@@ -23,8 +23,8 @@ The packages are:
 - [`cmd`](cmd/) — provides helpers for building the root command and
   sub-commands. It sets sensible defaults, global flags, configuration
   files, etc. It also adds an interface to sub-commands that makes
-  completing, validating and running commands more predictable.
-- [`errors`](errors/) — provides error handling and error types.
+  completing, validating and running commands more predictable, and
+  it provides a way to handle errors in a consistent way.
 - [`ui`](ui/) — provides UI elements such as tables, spinners, select
   boxes, prompts, etc.
 
@@ -616,7 +616,7 @@ func Execute(version string) int {
 The package uses `log/slog` for logging and places the logger on
 `ExecutionContext.Logger`.
 
-#### Default Handler
+#### Default ErrorHandler
 
 The default handler uses the `pterm` package which adds a bit of color to the
 log messages. The default format depends on whether there is a TTY attached. If
@@ -656,11 +656,11 @@ func (o *options) Run(ctx context.Context, ac *myapp.Context) error {
 ### Error Handling
 
 The `ExecutionContext` comes with a default error handler
-(`errors.DefaultHandler`) that implements this interface:
+(`errors.DefaultErrorHandler`) that implements this interface:
 
 ```go
-// Handler is an interface for handling errors.
-type Handler interface {
+// ErrorHandler is an interface for handling errors.
+type ErrorHandler interface {
     // HandleError handles the given error.
     HandleError(err error)
     // NewGeneralError creates a new GeneralError with the specified message, help message, error, and code.
@@ -687,7 +687,7 @@ func Execute(...) int {
 }
 ```
 
-The `DefaultHandler` handles two types of errors:
+The `DefaultErrorHandler` handles two types of errors:
 
 - `ErrorWithHelp` is used for printing user friendly errors with context
 - The built in `error` handling all other errors
@@ -714,13 +714,13 @@ There are two error types included that implements this interface:
 Use `GeneralError` like this:
 
 ```go
-import "github.com/neticdk/go-common/pkg/cli/errors"
+import "github.com/neticdk/go-common/pkg/cli/cmd"
 
 const ErrorCodeParsingError = 42
 
 func myFunc() error {
     // ...
-    return &errors.GeneralError{
+    return &cmd.GeneralError{
         Message: "Could not parse config.json",
         HelpMsg: "This happens when the file format is invalid. See details for more.",
         Err:     err,
@@ -744,10 +744,10 @@ Using error codes is optional.
 Use `InvalidArgumentError` like this:
 
 ```go
-import "github.com/neticdk/go-common/pkg/cli/errors"
+import "github.com/neticdk/go-common/pkg/cli/cmd"
 
 func (o *options) Validate(ctx context.Context, ac *myapp.Context) {
-    return &errors.InvalidArgumentError{
+    return &cmd.InvalidArgumentError{
         Flag:    "name",
         Val:     o.Name,
         Context: "It must be an ASCII string of minimum 3 characters length.",

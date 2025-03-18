@@ -60,7 +60,7 @@ func (l LogLevel) String() string {
 	return string(l)
 }
 
-// LogLevelsAll returns all levels
+// AllLogLevels returns all levels
 func AllLogLevels() []LogLevel {
 	return []LogLevel{
 		LogLevelDebug,
@@ -70,14 +70,14 @@ func AllLogLevels() []LogLevel {
 	}
 }
 
-// LogLevelsAllStr returns all levels as strings
+// AllLogLevelsStr returns all levels as strings
 func AllLogLevelsStr() []string {
 	return slice.Map(AllLogLevels(), func(l LogLevel) string {
 		return l.String()
 	})
 }
 
-// LogLevelsAllJoined returns all levels joined by "|"
+// AllLogLevelsJoined returns all levels joined by "|"
 func AllLogLevelsJoined() string {
 	return strings.Join([]string{
 		LogLevelDebug.String(),

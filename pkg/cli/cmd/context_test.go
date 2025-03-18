@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/neticdk/go-common/pkg/cli/errors"
 	"github.com/neticdk/go-common/pkg/cli/ui"
 	"github.com/neticdk/go-common/pkg/tui/term"
 	"github.com/stretchr/testify/assert"
@@ -174,7 +173,7 @@ func TestInitErrorHandler(t *testing.T) {
 	ec.initErrorHandler()
 
 	assert.NotNil(t, ec.ErrorHandler)
-	assert.IsType(t, &errors.DefaultHandler{}, ec.ErrorHandler)
+	assert.IsType(t, &DefaultErrorHandler{}, ec.ErrorHandler)
 }
 
 func TestInitSpinner(t *testing.T) {

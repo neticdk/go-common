@@ -1,9 +1,4 @@
-// Deprecated: errors is deprecated and has been moved to github.com/go-common/pkg/cli/cmd
-//
-// It has been deprecated due to the fact that it conflicts with the standard library errors package.
-// Please use directly from cmd package instead.
-// Expect the errors package to be removed in later versions.
-package errors
+package cmd
 
 import (
 	"fmt"
@@ -16,10 +11,8 @@ import (
 
 const DefaultWrapWidth = 80
 
-// Handler is an interface for handling errors.
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-type Handler interface {
+// ErrorHandler is an interface for handling errors.
+type ErrorHandler interface {
 	// HandleError handles the given error.
 	HandleError(err error)
 	// NewGeneralError creates a new GeneralError with the specified message, help message, error, and code.
@@ -30,11 +23,9 @@ type Handler interface {
 	SetWrapWidth(width int)
 }
 
-// Handler handles errors providing colored output to a specified writer
+// DefaultErrorHandler handles errors providing colored output to a specified writer
 // (defaults to stderr).
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-type DefaultHandler struct {
+type DefaultErrorHandler struct {
 	Output    io.Writer
 	wrap      bool
 	wrapWidth int
@@ -42,17 +33,14 @@ type DefaultHandler struct {
 
 // NewDefaultHandler creates a new DefaultErrorHandler with the specified output writer.
 // If no writer is provided, it defaults to stderr.
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func NewDefaultHandler(output io.Writer) *DefaultHandler {
+func NewDefaultHandler(output io.Writer) *DefaultErrorHandler {
 	if output == nil {
 		output = os.Stderr
 	}
-	return &DefaultHandler{Output: output, wrap: true, wrapWidth: DefaultWrapWidth}
+	return &DefaultErrorHandler{Output: output, wrap: true, wrapWidth: DefaultWrapWidth}
 }
 
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) NewGeneralError(message, helpMsg string, err error, code int) *GeneralError {
+func (h *DefaultErrorHandler) NewGeneralError(message, helpMsg string, err error, code int) *GeneralError {
 	return &GeneralError{
 		Message: message,
 		HelpMsg: helpMsg,
@@ -64,9 +52,7 @@ func (h *DefaultHandler) NewGeneralError(message, helpMsg string, err error, cod
 // HandleError checks if the given error implements the ErrorWithHelp interface.
 // If it does, it prints the error message and help message in a colored format
 // to the configured output writer.  Otherwise, it prints a generic error message.
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) HandleError(err error) {
+func (h *DefaultErrorHandler) HandleError(err error) {
 	if userErr, ok := err.(ErrorWithHelp); ok {
 		h.printErrorWithHelp(userErr)
 	} else {
@@ -74,20 +60,16 @@ func (h *DefaultHandler) HandleError(err error) {
 	}
 }
 
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) SetWrap(wrap bool) {
+func (h *DefaultErrorHandler) SetWrap(wrap bool) {
 	h.wrap = wrap
 }
 
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) SetWrapWidth(width int) {
+func (h *DefaultErrorHandler) SetWrapWidth(width int) {
 	h.wrapWidth = width
 }
 
 // printUserFriendlyError prints the error and help messages in a colored format.
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) printErrorWithHelp(err ErrorWithHelp) {
+func (h *DefaultErrorHandler) printErrorWithHelp(err ErrorWithHelp) {
 	var (
 		errorText     string
 		errorCode     int
@@ -143,9 +125,7 @@ func (h *DefaultHandler) printErrorWithHelp(err ErrorWithHelp) {
 }
 
 // printGenericError prints a generic error message in red.
-//
-// Deprecated: use github.com/neticdk/go-common/pkg/cli/cmd instead.
-func (h *DefaultHandler) printGenericError(err error) {
+func (h *DefaultErrorHandler) printGenericError(err error) {
 	maxWidth := uint(min(h.wrapWidth, pterm.GetTerminalWidth())) //nolint:gosec  // if you have a terminal width larger than uint, you have other problems
 	paragraph := pterm.DefaultBasicText.WithWriter(h.Output)
 

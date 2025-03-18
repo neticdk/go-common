@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/neticdk/go-common/pkg/cli/errors"
 	"github.com/neticdk/go-common/pkg/cli/ui"
 	"github.com/neticdk/go-common/pkg/tui/term"
 	"github.com/spf13/cobra"
@@ -43,7 +42,7 @@ type ExecutionContext struct {
 	Logger *slog.Logger
 
 	// ErrorHandler
-	ErrorHandler errors.Handler
+	ErrorHandler ErrorHandler
 
 	// Spinner is the global spinner object used to show progress across the cli
 	Spinner ui.Spinner
@@ -146,7 +145,7 @@ func (ec *ExecutionContext) initLogger() {
 }
 
 func (ec *ExecutionContext) initErrorHandler() {
-	ec.ErrorHandler = errors.NewDefaultHandler(ec.Stderr)
+	ec.ErrorHandler = NewDefaultHandler(ec.Stderr)
 }
 
 func (ec *ExecutionContext) initSpinner() {
