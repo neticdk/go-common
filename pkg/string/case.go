@@ -132,8 +132,10 @@ func ToDelimited(s string, delimiter string) string {
 	result = strings.Trim(result, delimiter)
 
 	// Clean up any consecutive delimiters
-	for strings.Contains(result, delimiter+delimiter) {
-		result = strings.ReplaceAll(result, delimiter+delimiter, delimiter)
+	if delimiter != "" {
+		for strings.Contains(result, delimiter+delimiter) {
+			result = strings.ReplaceAll(result, delimiter+delimiter, delimiter)
+		}
 	}
 
 	return result
