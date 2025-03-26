@@ -182,12 +182,29 @@ func ParseJSONPointer(path string) ([]string, error) {
 // ParseAnyToDottedPath parses any to dotted path.
 //
 // It returns a list of paths found in the given data, sorted by "path length" and lexical order.
-func ParseAnyToDottedPath(data any, prefix string) []string {
-	allPaths := extractPathsRecursively(data, []string{prefix})
+func ParseAnyToDottedPath(data any) []string {
+	allPaths := extractPathsRecursively(data, []string{})
 
 	if len(allPaths) == 0 {
 		return []string{} // Handle empty paths gracefully
 	}
+
+	sort.Slice(allPaths, func(i, j int) bool {
+		if len(allPaths[i]) != len(allPaths[j]) {
+			return len(allPaths[i]) < len(allPaths[j])
+		}
+		for k := range allPaths[i] {
+			if allPaths[i][k] != allPaths[j][k] {
+				if l, err := strconv.Atoi(allPaths[i][k]); err == nil {
+					if r, err := strconv.Atoi(allPaths[j][k]); err == nil {
+						return l < r
+					}
+				}
+				return allPaths[i][k] < allPaths[j][k]
+			}
+		}
+		return false
+	})
 
 	parsedPaths := make([]string, 0, len(allPaths))
 
@@ -195,21 +212,6 @@ func ParseAnyToDottedPath(data any, prefix string) []string {
 		dottedPath := PartsToDottedPath(parts)
 		parsedPaths = append(parsedPaths, dottedPath)
 	}
-
-	// Sort paths by length and lexical order
-	sort.Slice(parsedPaths, func(i, j int) bool {
-		partsI, partsJ := strings.Split(parsedPaths[i], "."), strings.Split(parsedPaths[j], ".")
-		lenI, lenJ := len(partsI), len(partsJ)
-		if lenI != lenJ {
-			return lenI < lenJ
-		}
-		for k := 0; k < lenI; k++ {
-			if partsI[k] != partsJ[k] {
-				return partsI[k] < partsJ[k]
-			}
-		}
-		return parsedPaths[i] < parsedPaths[j]
-	})
 
 	return parsedPaths
 }
