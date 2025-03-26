@@ -2,6 +2,8 @@ package path
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -175,4 +177,66 @@ func ParseJSONPointer(path string) ([]string, error) {
 	}
 
 	return segments, nil
+}
+
+// ParseAnyToDottedPath parses any to dotted path.
+//
+// It returns a list of paths found in the given data, sorted by "path length" and lexical order.
+func ParseAnyToDottedPath(data any, prefix string) []string {
+	allPaths := extractPathsRecursively(data, []string{prefix})
+
+	if len(allPaths) == 0 {
+		return []string{} // Handle empty paths gracefully
+	}
+
+	parsedPaths := make([]string, 0, len(allPaths))
+
+	for _, parts := range allPaths {
+		dottedPath := PartsToDottedPath(parts)
+		parsedPaths = append(parsedPaths, dottedPath)
+	}
+
+	// Sort paths by length and lexical order
+	sort.Slice(parsedPaths, func(i, j int) bool {
+		partsI, partsJ := strings.Split(parsedPaths[i], "."), strings.Split(parsedPaths[j], ".")
+		lenI, lenJ := len(partsI), len(partsJ)
+		if lenI != lenJ {
+			return lenI < lenJ
+		}
+		for k := 0; k < lenI; k++ {
+			if partsI[k] != partsJ[k] {
+				return partsI[k] < partsJ[k]
+			}
+		}
+		return parsedPaths[i] < parsedPaths[j]
+	})
+
+	return parsedPaths
+}
+
+func extractPathsRecursively(data any, path []string) [][]string {
+	var allPaths [][]string
+	extractPaths(data, path, &allPaths)
+	return allPaths
+}
+
+func extractPaths(data any, path []string, allPaths *[][]string) {
+	switch value := data.(type) {
+	case map[string]any:
+		for k, v := range value {
+			newPath := make([]string, len(path), len(path)+1)
+			copy(newPath, path)
+			newPath = append(newPath, k)
+			extractPaths(v, newPath, allPaths)
+		}
+	case []any:
+		for i, item := range value {
+			newPath := make([]string, len(path), len(path)+1)
+			copy(newPath, path)
+			newPath = append(newPath, strconv.Itoa(i))
+			extractPaths(item, newPath, allPaths)
+		}
+	default:
+		*allPaths = append(*allPaths, path)
+	}
 }

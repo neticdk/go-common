@@ -3,6 +3,8 @@ package path
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseDottedPath(t *testing.T) {
@@ -140,6 +142,132 @@ func TestParseJSONPointer(t *testing.T) {
 			if !tt.wantErr && !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("ParseJSONPointer() = %v, want %v", got, tt.expected)
 			}
+		})
+	}
+}
+
+func TestParseAnyToDottedPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    any
+		expected []string
+	}{
+		{
+			name: "simple map",
+			input: map[string]interface{}{
+				"a": map[string]interface{}{
+					"b": map[string]interface{}{
+						"c": "value",
+					},
+				},
+			},
+			expected: []string{".a.b.c"},
+		},
+		{
+			name: "simple map with multiple maps",
+			input: map[string]interface{}{
+				"a": map[string]interface{}{
+					"b": map[string]interface{}{
+						"c": "value",
+					},
+				},
+				"c": map[string]interface{}{
+					"b": map[string]interface{}{
+						"a": "value",
+					},
+				},
+			},
+			expected: []string{".a.b.c", ".c.b.a"},
+		},
+		{
+			name: "map with simple slice",
+			input: map[string]interface{}{
+				"a": map[string]interface{}{
+					"b": map[string]interface{}{
+						"c": []interface{}{
+							"value1",
+							"value2",
+							"value2",
+						},
+					},
+				},
+			},
+			expected: []string{".a.b.c[0]", ".a.b.c[1]", ".a.b.c[2]"},
+		},
+		{
+			name: "map with slice of maps",
+			input: map[string]interface{}{
+				"a": map[string]interface{}{
+					"b": map[string]interface{}{
+						"c": []interface{}{
+							map[string]interface{}{
+								"a": map[string]interface{}{
+									"c": "value",
+								},
+								"b": map[string]interface{}{
+									"c": "value",
+								},
+							},
+							map[string]interface{}{
+								"a": map[string]interface{}{
+									"c": "value",
+								},
+								"b": map[string]interface{}{
+									"c": "value",
+								},
+							},
+							map[string]interface{}{
+								"a": map[string]interface{}{
+									"c": "value",
+								},
+								"b": map[string]interface{}{
+									"c": "value",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: []string{".a.b.c[0].a.c", ".a.b.c[0].b.c", ".a.b.c[1].a.c", ".a.b.c[1].b.c", ".a.b.c[2].a.c", ".a.b.c[2].b.c"},
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: []string{""},
+		},
+		{
+			name:     "nil input",
+			input:    nil,
+			expected: []string{""},
+		},
+		{
+			name: "sort order",
+			input: map[string]interface{}{
+				"some": map[string]interface{}{
+					"test": map[string]interface{}{
+						"key": "value",
+					},
+				},
+				"aSome": map[string]interface{}{
+					"test": map[string]interface{}{
+						"key": "value",
+					},
+				},
+				"bSome": map[string]interface{}{
+					"key": "value",
+				},
+				"c": map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{".bSome.key", ".aSome.test.key", ".some.test.key"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			paths := ParseAnyToDottedPath(tt.input, "")
+			assert.Equal(t, tt.expected, paths)
 		})
 	}
 }
