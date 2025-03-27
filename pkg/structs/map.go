@@ -37,6 +37,10 @@ func handle(obj any) any {
 	}
 
 	val := reflect.ValueOf(obj)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
 	switch val.Kind() {
 	case reflect.Map:
 		return handleMap(obj)

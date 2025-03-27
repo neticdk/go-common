@@ -42,6 +42,35 @@ func TestToMap(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "simple struct",
+			data: &struct {
+				A int    `json:"a"`
+				B string `json:"b"`
+				C struct {
+					D int `json:"d"`
+				} `json:"c"`
+				E []string `json:"e,omitempty"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"d"`
+				}{
+					D: 2,
+				},
+				E: []string{"one", "two"},
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": "test",
+				"c": map[string]any{
+					"d": 2,
+				},
+				"e": []any{"one", "two"},
+			},
+			wantErr: false,
+		},
+		{
 			name: "nested struct",
 			data: struct {
 				A struct {
