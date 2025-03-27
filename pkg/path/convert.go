@@ -14,7 +14,7 @@ func JSONPointerPathToDottedPath(path string) (string, error) {
 		return "", err
 	}
 
-	return PartsToDottedPath(parts)
+	return PartsToDottedPath(parts), nil
 }
 
 // DottedPathToJSONPointerPath converts a dotted path to a JSON Pointer path.
@@ -32,7 +32,7 @@ func DottedPathToJSONPointerPath(path string) (string, error) {
 // PartsToDottedPath converts path parts to a dotted path.
 //
 // It returns an error if the parts constitute an invalid path.
-func PartsToDottedPath(parts []string) (string, error) {
+func PartsToDottedPath(parts []string) string {
 	var res strings.Builder
 	var nextIsIndex bool
 
@@ -62,7 +62,7 @@ func PartsToDottedPath(parts []string) (string, error) {
 			res.WriteString(".")
 		}
 	}
-	return res.String(), nil
+	return res.String()
 }
 
 // PartsToJSONPointerPath converts path parts to a JSON Pointer path.
