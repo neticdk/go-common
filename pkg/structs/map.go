@@ -15,6 +15,7 @@ var tagCategories = []string{"json", "yaml"}
 // It handles nested structs, maps, and slices.
 // It uses the "json" and "yaml" tags to determine the key names.
 // It also respects the "omitempty" tag for fields.
+// It also respects the "inline" tag for nested structs.
 //
 // If the input is nil, it returns nil.
 // If the input is not a struct or map, it returns an error.
@@ -96,13 +97,14 @@ func handleStruct(obj any) any {
 			if _, ok := slice.FindFunc(tagOpts, func(s string) bool {
 				return s == "inline"
 			}); ok {
-				v := handle(value.Interface())
-				for k, v := range v.(map[string]any) {
-					if _, ok := res[k]; !ok {
-						res[k] = v
+				if nestedValues, ok := handle(value.Interface()).(map[string]any); ok {
+					for k, v := range nestedValues {
+						if _, ok := res[k]; !ok {
+							res[k] = v
+						}
 					}
+					continue
 				}
-				continue
 			}
 		}
 
