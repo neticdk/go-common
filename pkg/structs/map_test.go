@@ -42,7 +42,7 @@ func TestToMap(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "simple struct",
+			name: "simple struct as pointer",
 			data: &struct {
 				A int    `json:"a"`
 				B string `json:"b"`
@@ -67,6 +67,30 @@ func TestToMap(t *testing.T) {
 					"d": 2,
 				},
 				"e": []any{"one", "two"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with inline",
+			data: &struct {
+				A int    `json:"a"`
+				B string `json:"b"`
+				C struct {
+					D int `json:"d"`
+				} `json:",inline"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"d"`
+				}{
+					D: 2,
+				},
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": "test",
+				"d": 2,
 			},
 			wantErr: false,
 		},

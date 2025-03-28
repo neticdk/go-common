@@ -85,6 +85,27 @@ func handleStruct(obj any) any {
 			}
 		}
 
+		// Handle nested structs with inline tag
+		if value.Kind() == reflect.Ptr {
+			if value.IsNil() {
+				continue
+			}
+			value = value.Elem()
+		}
+		if value.Kind() == reflect.Struct {
+			if _, ok := slice.FindFunc(tagOpts, func(s string) bool {
+				return s == "inline"
+			}); ok {
+				v := handle(value.Interface())
+				for k, v := range v.(map[string]any) {
+					if _, ok := res[k]; !ok {
+						res[k] = v
+					}
+				}
+				continue
+			}
+		}
+
 		res[name] = handle(value.Interface())
 	}
 
