@@ -14,8 +14,9 @@ var tagCategories = []string{"json", "yaml"}
 // ToMap converts a struct or map to a map[string]any.
 // It handles nested structs, maps, and slices.
 // It uses the "json" and "yaml" tags to determine the key names.
-// It also respects the "omitempty" tag for fields.
-// It also respects the "inline" tag for nested structs.
+// It respects the "omitempty" tag for fields.
+// It respects the "inline" tag for nested structs.
+// It respects the "-" tag to omit fields.
 //
 // If the input is nil, it returns nil.
 // If the input is not a struct or map, it returns an error.
@@ -76,6 +77,13 @@ func handleStruct(obj any) any {
 		tagName, tagOpts := getTag(field)
 		if tagName != "" {
 			name = tagName
+		}
+
+		// Omit struct tag "-""
+		if _, ok := slice.FindFunc(tagOpts, func(s string) bool {
+			return s == "-"
+		}); ok || (name == "-" && len(tagOpts) == 0) {
+			continue
 		}
 
 		if _, ok := slice.FindFunc(tagOpts, func(s string) bool {

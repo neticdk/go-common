@@ -95,6 +95,54 @@ func TestToMap(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "with omit '-'",
+			data: &struct {
+				A int    `json:"a"`
+				B string `json:",-"`
+				C struct {
+					D int `json:"d"`
+				} `json:"-"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"d"`
+				}{
+					D: 2,
+				},
+			},
+			expected: map[string]any{
+				"a": 1,
+			},
+			wantErr: false,
+		},
+		{
+			name: "with omit '-' as name",
+			data: &struct {
+				A int    `json:"a"`
+				B string `json:"b"`
+				C struct {
+					D int `json:"d"`
+				} `json:"-,"`
+			}{
+				A: 1,
+				B: "test",
+				C: struct {
+					D int `json:"d"`
+				}{
+					D: 2,
+				},
+			},
+			expected: map[string]any{
+				"a": 1,
+				"b": "test",
+				"-": map[string]any{
+					"d": 2,
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "nested struct",
 			data: struct {
 				A struct {
