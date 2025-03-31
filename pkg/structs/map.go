@@ -79,7 +79,7 @@ func handleStruct(obj any) any {
 			name = tagName
 		}
 
-		// Omit struct tag "-""
+		// Omit struct tag "-"
 		if _, ok := slice.FindFunc(tagOpts, func(s string) bool {
 			return s == "-"
 		}); ok || (name == "-" && len(tagOpts) == 0) {
