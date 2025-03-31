@@ -1,52 +1,11 @@
 package string
 
-import (
-	"fmt"
-	"regexp"
-	"strings"
-)
+import "github.com/neticdk/go-stdlib/xstrings"
 
 // Slugify converts a string to a slug.
 // By default, it converts the string to lowercase, transliterates it, and
 // removes camel case.
-func Slugify(s string, options ...TransformOption) string {
-	opts := TransformOptions{
-		lowercase:     true,
-		transliterate: true,
-		decamelize:    true,
-		delimiter:     DefaultDelimiter,
-	}
-
-	for _, option := range options {
-		option(&opts)
-	}
-
-	if opts.transliterate {
-		s = Transliterate(s)
-	}
-
-	if opts.decamelize {
-		s = ToDelimited(s, opts.delimiter)
-	}
-
-	var (
-		reLowerCaseSeparator   = regexp.MustCompile(fmt.Sprintf(`[^a-z\d%s]+`, opts.delimiter))
-		reMixedCaseSeparator   = regexp.MustCompile(fmt.Sprintf(`[^a-zA-Z\d%s]+`, opts.delimiter))
-		reConsecutiveSeparator = regexp.MustCompile(fmt.Sprintf(`%s+`, opts.delimiter))
-	)
-
-	if opts.lowercase {
-		s = strings.ToLower(s)
-		s = reLowerCaseSeparator.ReplaceAllString(s, opts.delimiter)
-	} else {
-		s = reMixedCaseSeparator.ReplaceAllString(s, opts.delimiter)
-	}
-
-	// Replace multiple consecutive separators with a single separator.
-	s = reConsecutiveSeparator.ReplaceAllString(s, opts.delimiter)
-
-	// Remove leading and trailing hyphens.
-	s = strings.Trim(s, "-")
-
-	return s
+// Deprecated: Slugify is deprecated and has been moved to github.com/neticdk/go-stdlib/xstrings.Slugify
+func Slugify(s string, options ...xstrings.TransformOption) string {
+	return xstrings.Slugify(s, options...)
 }

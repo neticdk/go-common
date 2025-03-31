@@ -11,8 +11,8 @@ import (
 	gh "github.com/google/go-github/v70/github"
 	"github.com/neticdk/go-common/pkg/artifact"
 	"github.com/neticdk/go-common/pkg/artifact/archive"
-	"github.com/neticdk/go-common/pkg/file"
 	"github.com/neticdk/go-common/pkg/github"
+	"github.com/neticdk/go-stdlib/file"
 )
 
 type ReleaseOptions struct {

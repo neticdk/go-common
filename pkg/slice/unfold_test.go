@@ -3,6 +3,8 @@ package slice
 import (
 	"reflect"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/xslices"
 )
 
 func TestUnfold(t *testing.T) {
@@ -11,7 +13,7 @@ func TestUnfold(t *testing.T) {
 		acc      any
 		f        func(any) any
 		p        func(any) bool
-		opts     []UnfoldOption
+		opts     []xslices.UnfoldOption
 		expected []any
 	}{
 		{
@@ -33,7 +35,7 @@ func TestUnfold(t *testing.T) {
 			acc:      1,
 			f:        func(acc any) any { return acc.(int) * 2 },
 			p:        func(acc any) bool { return true },
-			opts:     []UnfoldOption{WithMax(5)},
+			opts:     []xslices.UnfoldOption{xslices.WithMax(5)},
 			expected: []any{1, 2, 4, 8, 16, 32},
 		},
 		{
@@ -55,7 +57,7 @@ func TestUnfold(t *testing.T) {
 			acc:      1,
 			f:        func(acc any) any { return acc.(int) * 2 },
 			p:        func(acc any) bool { return acc.(int) < 100 },
-			opts:     []UnfoldOption{WithStep(2)},
+			opts:     []xslices.UnfoldOption{xslices.WithStep(2)},
 			expected: []any{1, 4, 16, 64},
 		},
 	}
@@ -76,7 +78,7 @@ func TestUnfoldI(t *testing.T) {
 		acc      any
 		f        func(any) any
 		i        int
-		opts     []UnfoldOption
+		opts     []xslices.UnfoldOption
 		expected []any
 	}{
 		{
@@ -105,7 +107,7 @@ func TestUnfoldI(t *testing.T) {
 			acc:  1,
 			f:    func(acc any) any { return acc.(int) * 2 },
 			i:    7,
-			opts: []UnfoldOption{WithMax(5)},
+			opts: []xslices.UnfoldOption{xslices.WithMax(5)},
 			expected: []any{
 				1, 2, 4, 8, 16, 32,
 			},
@@ -115,7 +117,7 @@ func TestUnfoldI(t *testing.T) {
 			acc:  1,
 			f:    func(acc any) any { return acc.(int) * 2 },
 			i:    7,
-			opts: []UnfoldOption{WithStep(2)},
+			opts: []xslices.UnfoldOption{xslices.WithStep(2)},
 			expected: []any{
 				1, 4, 16, 64,
 			},

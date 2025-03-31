@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/neticdk/go-stdlib/file"
 )
 
 func TestSafePath(t *testing.T) {
@@ -46,42 +48,42 @@ func TestSafePath(t *testing.T) {
 			root:      "/safe/base/directory",
 			path:      "../example.txt",
 			want:      "",
-			expectErr: ErrTraversal,
+			expectErr: file.ErrTraversal,
 		},
 		{
 			name:      "Path traversal attack with absolute path",
 			root:      "/safe/base/directory",
 			path:      "/safe/base/directory/../../example.txt",
 			want:      "",
-			expectErr: ErrTraversal,
+			expectErr: file.ErrTraversal,
 		},
 		{
 			name:      "Empty root",
 			root:      "",
 			path:      "example.txt",
 			want:      "",
-			expectErr: ErrEmptyPath,
+			expectErr: file.ErrEmptyPath,
 		},
 		{
 			name:      "Empty path",
 			root:      "/safe/base/directory",
 			path:      "",
 			want:      "",
-			expectErr: ErrEmptyPath,
+			expectErr: file.ErrEmptyPath,
 		},
 		{
 			name:      "Null byte in root",
 			root:      "/safe/base/directory\x00",
 			path:      "example.txt",
 			want:      "",
-			expectErr: ErrNullByte,
+			expectErr: file.ErrNullByte,
 		},
 		{
 			name:      "Null byte in path",
 			root:      "/safe/base/directory",
 			path:      "example.txt\x00",
 			want:      "",
-			expectErr: ErrNullByte,
+			expectErr: file.ErrNullByte,
 		},
 		{
 			name: "Symlink resolution within base directory",
@@ -113,7 +115,7 @@ func TestSafePath(t *testing.T) {
 				return nil
 			},
 			want:      "",
-			expectErr: ErrTraversal,
+			expectErr: file.ErrTraversal,
 		},
 		{
 			name: "Symlink to sibling directory",
@@ -145,7 +147,7 @@ func TestSafePath(t *testing.T) {
 				return nil
 			},
 			want:      "",
-			expectErr: ErrTraversal,
+			expectErr: file.ErrTraversal,
 		},
 		{
 			name: "Symlink to parent directory",
@@ -158,7 +160,7 @@ func TestSafePath(t *testing.T) {
 				return os.Symlink("../..", filepath.Join(tmpDir, "dir", "symlink"))
 			},
 			want:      "",
-			expectErr: ErrTraversal,
+			expectErr: file.ErrTraversal,
 		},
 	}
 
