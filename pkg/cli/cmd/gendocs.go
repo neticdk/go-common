@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/neticdk/go-common/pkg/cli/ui"
-	"github.com/neticdk/go-common/pkg/file"
+	"github.com/neticdk/go-stdlib/file"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )

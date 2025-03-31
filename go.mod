@@ -89,9 +89,10 @@ require (
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/anchore/archiver/v3 v3.5.3-0.20241210171143-5b1d8d1c7c51 // indirect
 	github.com/anchore/clio v0.0.0-20250211213408-22007329dafa // indirect
-	github.com/anchore/fangs v0.0.0-20250221225445-5916388ccbc9 // indirect
+	github.com/anchore/fangs v0.0.0-20250326231402-da263204d38e // indirect
 	github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46 // indirect
-	github.com/anchore/go-logger v0.0.0-20250211213027-778b61f36378 // indirect
+	github.com/anchore/go-homedir v0.0.0-20250319154043-c29668562e4d // indirect
+	github.com/anchore/go-logger v0.0.0-20250318195838-07ae343dd722 // indirect
 	github.com/anchore/go-macholibre v0.0.0-20250211213245-0aec544d18a1 // indirect
 	github.com/anchore/go-struct-converter v0.0.0-20250211213226-cce56d595160 // indirect
 	github.com/anchore/packageurl-go v0.1.1-0.20250220190351-d62adb6e1115 // indirect
@@ -272,6 +273,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
+	github.com/neticdk/go-stdlib v0.1.3 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect

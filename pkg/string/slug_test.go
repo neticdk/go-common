@@ -3,6 +3,7 @@ package string
 import (
 	"testing"
 
+	"github.com/neticdk/go-stdlib/xstrings"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -132,9 +133,9 @@ func TestSlugifyDefaultOptions(t *testing.T) {
 		t.Run(tc.input, func(t *testing.T) {
 			actual := Slugify(
 				tc.input,
-				WithDecamelize(tc.decamelize),
-				WithLowercase(tc.lowercase),
-				WithTransliterate(tc.transliterate),
+				xstrings.WithDecamelize(tc.decamelize),
+				xstrings.WithLowercase(tc.lowercase),
+				xstrings.WithTransliterate(tc.transliterate),
 			)
 			assert.Equal(t, tc.expected, actual)
 		})

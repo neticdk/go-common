@@ -135,6 +135,18 @@ func (b *RootCommandBuilder) WithExample(example string) *RootCommandBuilder {
 	return b
 }
 
+func (b *RootCommandBuilder) WithNoSubCommands() *RootCommandBuilder {
+	b.cmd.Use = fmt.Sprintf("%s [flags]", b.ec.AppName)
+	b.cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			os.Exit(0)
+		}
+		return nil
+	}
+	return b
+}
+
 // initConfig ensures that precedence of configuration setting is correct
 // precedence:
 // flag -> environment -> configuration file value -> flag default

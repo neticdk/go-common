@@ -10,8 +10,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/neticdk/go-common/pkg/artifact"
-	"github.com/neticdk/go-common/pkg/file"
 	"github.com/neticdk/go-common/pkg/git"
+	"github.com/neticdk/go-stdlib/file"
 )
 
 type RepositoryOptions struct {

@@ -1,5 +1,7 @@
+// Deprecated: unit is deprecated - use github.com/neticdk/go-stdlib/unit
 package unit
 
+// Deprecated: BytesToBinarySI is deprecated - use github.com/neticdk/go-stdlib/unit.FormatBinary
 // BytesToBinarySI converts bytes to human readable string using binary SI units
 func BytesToBinarySI(bytes int64) (float64, string) {
 	const (
