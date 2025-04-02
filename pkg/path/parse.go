@@ -180,10 +180,18 @@ func ParseJSONPointer(path string) ([]string, error) {
 }
 
 // ParseAnyToDottedPath parses any to dotted path.
+// includes any key-value/index-element pairs from the data for which the inc function returns true.
+// if inc is nil, default to always include.
 //
 // It returns a list of paths found in the given data, sorted by "path length" and lexical order.
-func ParseAnyToDottedPath(data any) []string {
-	allPaths := extractPathsRecursively(data, []string{})
+func ParseAnyToDottedPath(data any, inc func(key, value any) bool) []string {
+	if inc == nil {
+		inc = func(key, value any) bool {
+			return true
+		}
+	}
+
+	allPaths := extractPathsRecursively(data, []string{}, inc)
 
 	if len(allPaths) == 0 {
 		return []string{} // Handle empty paths gracefully
@@ -207,7 +215,6 @@ func ParseAnyToDottedPath(data any) []string {
 	})
 
 	parsedPaths := make([]string, 0, len(allPaths))
-
 	for _, parts := range allPaths {
 		dottedPath := PartsToDottedPath(parts)
 		parsedPaths = append(parsedPaths, dottedPath)
@@ -216,27 +223,35 @@ func ParseAnyToDottedPath(data any) []string {
 	return parsedPaths
 }
 
-func extractPathsRecursively(data any, path []string) [][]string {
+func extractPathsRecursively(data any, path []string, inc func(key, value any) bool) [][]string {
 	var allPaths [][]string
-	extractPaths(data, path, &allPaths)
+	extractPaths(data, path, &allPaths, inc)
 	return allPaths
 }
 
-func extractPaths(data any, path []string, allPaths *[][]string) {
+func extractPaths(data any, path []string, allPaths *[][]string, inc func(key, value any) bool) {
 	switch value := data.(type) {
 	case map[string]any:
 		for k, v := range value {
-			newPath := make([]string, len(path), len(path)+1)
-			copy(newPath, path)
-			newPath = append(newPath, k)
-			extractPaths(v, newPath, allPaths)
+			if inc(k, v) {
+				newPath := make([]string, len(path), len(path)+1)
+				copy(newPath, path)
+				newPath = append(newPath, k)
+				extractPaths(v, newPath, allPaths, inc)
+			}
 		}
 	case []any:
 		for i, item := range value {
-			newPath := make([]string, len(path), len(path)+1)
-			copy(newPath, path)
-			newPath = append(newPath, strconv.Itoa(i))
-			extractPaths(item, newPath, allPaths)
+			if inc(i, item) {
+				newPath := make([]string, len(path), len(path)+1)
+				copy(newPath, path)
+				newPath = append(newPath, strconv.Itoa(i))
+				extractPaths(item, newPath, allPaths, inc)
+			}
+		}
+		// If the slice is empty, add the path as a valid path
+		if len(value) == 0 {
+			*allPaths = append(*allPaths, path)
 		}
 	default:
 		*allPaths = append(*allPaths, path)
