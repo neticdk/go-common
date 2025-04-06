@@ -25,6 +25,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/migueleliasweb/go-github-mock v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
+	github.com/neticdk/go-stdlib v0.1.3
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.21.1
 	github.com/pterm/pterm v0.12.80
@@ -38,11 +39,11 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.opentelemetry.io/otel/sdk/metric v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
-	golang.org/x/crypto v0.36.0
+	golang.org/x/crypto v0.37.0
 	golang.org/x/mod v0.24.0
 	golang.org/x/oauth2 v0.28.0
-	golang.org/x/sys v0.31.0
-	golang.org/x/term v0.30.0
+	golang.org/x/sys v0.32.0
+	golang.org/x/term v0.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
@@ -273,7 +274,6 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/neticdk/go-stdlib v0.1.3 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -351,8 +351,8 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f // indirect
 	golang.org/x/net v0.37.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
