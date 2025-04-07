@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/neticdk/go-common/pkg/version"
+	"github.com/neticdk/go-stdlib/version"
 	"helm.sh/helm/v3/pkg/action"
 	helmChart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"

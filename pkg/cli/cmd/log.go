@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/neticdk/go-common/pkg/slice"
+	"github.com/neticdk/go-stdlib/xslices"
 )
 
 type LogFormat string
@@ -31,7 +31,7 @@ func AllLogFormats() []LogFormat {
 
 // AllLogFormatsStr returns all formats as strings
 func AllLogFormatsStr() []string {
-	return slice.Map(AllLogFormats(), func(f LogFormat) string {
+	return xslices.Map(AllLogFormats(), func(f LogFormat) string {
 		return f.String()
 	})
 }
@@ -72,7 +72,7 @@ func AllLogLevels() []LogLevel {
 
 // AllLogLevelsStr returns all levels as strings
 func AllLogLevelsStr() []string {
-	return slice.Map(AllLogLevels(), func(l LogLevel) string {
+	return xslices.Map(AllLogLevels(), func(l LogLevel) string {
 		return l.String()
 	})
 }
