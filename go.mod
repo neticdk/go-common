@@ -18,6 +18,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/go-github/v70 v70.0.0
+	github.com/google/go-github/v71 v71.0.0
 	github.com/gosimple/unidecode v1.0.1
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
 	github.com/labstack/echo/v4 v4.13.3
@@ -25,6 +26,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/migueleliasweb/go-github-mock v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
+	github.com/neticdk/go-stdlib v0.1.3
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.21.1
 	github.com/pterm/pterm v0.12.80
@@ -273,7 +275,6 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/neticdk/go-stdlib v0.1.3 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
