@@ -9,6 +9,12 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-    uses: neticdk/shared-github-actions/.github/workflows/go-ci.yaml@main
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: neticdk/shared-github-actions/.github/workflows/go-ci.yaml@main
