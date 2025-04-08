@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Go
         if: inputs.go-version == ''
@@ -29,6 +27,7 @@ jobs:
       - name: Check go mod tidy
         run: |
           go mod tidy
+          echo $(git diff go.mod go.sum)
           if git diff --exit-code go.mod go.sum; then
             echo "go.mod and go.sum are tidy."
           else
