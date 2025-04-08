@@ -186,7 +186,7 @@ func ParseJSONPointer(path string) ([]string, error) {
 // It returns a list of paths found in the given data, sorted by "path length" and lexical order.
 func ParseAnyToDottedPath(data any, inc func(key, value any) bool) []string {
 	if inc == nil {
-		inc = func(key, value any) bool {
+		inc = func(_, _ any) bool {
 			return true
 		}
 	}
