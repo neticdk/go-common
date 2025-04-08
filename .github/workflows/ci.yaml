@@ -15,7 +15,21 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        if: inputs.go-version == ''
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Check go mod tidy
+        run: |
+          go mod tidy
+          if git diff --exit-code go.mod go.sum; then
+            echo "go.mod and go.sum are tidy."
+          else
+            echo "::error go.mod or go.sum are not tidy. Please run 'go mod tidy'."
+            exit 1
+          fi
