@@ -1,19 +1,14 @@
+// Deprecated: json is deprecated - use github.com/neticdk/go-stdlib/xjson
 package json
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"io"
+
+	"github.com/neticdk/go-stdlib/xjson"
 )
 
 // PrettyPrintJSON pretty prints JSON
+// Deprecated: json is deprecated - use github.com/neticdk/go-stdlib/xjson.PrettyPrintJSON
 func PrettyPrintJSON(body []byte, writer io.Writer) error {
-	var prettyJSON bytes.Buffer
-	err := json.Indent(&prettyJSON, body, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Fprintln(writer, prettyJSON.String())
-	return nil
+	return xjson.PrettyPrintJSON(body, writer)
 }

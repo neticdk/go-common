@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/neticdk/go-common/pkg/file"
+	"github.com/neticdk/go-stdlib/file"
 )
 
 type Request struct {

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/neticdk/go-common/pkg/file"
+	"github.com/neticdk/go-stdlib/file"
 )
 
 const (
