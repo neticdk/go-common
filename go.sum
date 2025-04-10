@@ -1548,6 +1548,8 @@ github.com/ncruces/go-strftime v0.1.9 h1:bY0MQC28UADQmHmaF5dgpLmImcShSi2kHU9XLdh
 github.com/ncruces/go-strftime v0.1.9/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
 github.com/neticdk/go-stdlib v0.1.4 h1:1MrLzgI77tig92waSRIYbo4F6QxX/+SmuMG3covJ5yQ=
 github.com/neticdk/go-stdlib v0.1.4/go.mod h1:vQg+TbFoNu57o4gPe5xwLhT8dgNq9hFwsR9Oy5QsuIk=
+github.com/neticdk/go-stdlib v1.0.0 h1:9QCpoMpO5dBJGHJhumZrHzfJyvpVBd2Gc7ODJujfpXY=
+github.com/neticdk/go-stdlib v1.0.0/go.mod h1:rch+DEB6VtR972ZPTY6A5OyLmCrp2YlXP0WGjuDDdcw=
 github.com/nwaples/rardecode v1.1.3 h1:cWCaZwfM5H7nAD6PyEdcVnczzV8i/JtotnyW/dD9lEc=
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.4.0.20241112120701-034e449c6e78 h1:MYzLheyVx1tJVDqfu3YnN4jtnyALNzLvwl+f58TcvQY=
