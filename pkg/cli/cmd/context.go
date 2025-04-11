@@ -93,8 +93,11 @@ func (ec *ExecutionContext) SetLogLevel() {
 	if ec.PFlags.Debug {
 		logLevel = LogLevelDebug
 	}
-	ui.Logger.Level = ui.ParseLevel(logLevel.String())
 	ec.LogLevel.Set(ParseLogLevel(logLevel))
+	if !ec.IsTerminal {
+		return
+	}
+	ui.Logger.Level = ui.ParseLevel(logLevel.String())
 
 	ui.Logger.ShowCaller = ec.PFlags.Debug || ui.Logger.Level == ui.ParseLevel(LogLevelDebug.String())
 }
@@ -139,7 +142,14 @@ func (ec *ExecutionContext) initLogger() {
 	if !ec.IsTerminal {
 		ec.PFlags.LogFormat = LogFormatJSON
 	}
-	ec.LogLevel.Set(ParseLogLevel(LogLevelDefault))
+	ec.LogLevel.Set(ParseLogLevel(ec.PFlags.LogLevel))
+	if ec.PFlags.LogFormat == LogFormatJSON {
+		handler := slog.NewJSONHandler(ec.Stderr, &slog.HandlerOptions{
+			Level: ec.LogLevel,
+		})
+		ec.Logger = slog.New(handler)
+		return
+	}
 	handler := ui.NewHandler(ec.Stderr, ec.PFlags.LogFormat.String(), LogLevelDefault.String())
 	ec.Logger = slog.New(handler)
 }
