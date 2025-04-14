@@ -17,11 +17,13 @@ type Scanner interface {
 func (m *Metrics) ScanVulnerabilities(ctx context.Context, s Scanner) error {
 	var err error
 
-	vulns, err := s.Scan(ctx)
+	vulnerabilities, err := s.Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("scanning vulnerabilities: %w", err)
 	}
-	m.Vulnerabilities = vulns
-
+	//m.Vulnerabilities = vulnerabilities
+	// produce a cycloneDX file from scanning, whether it is done by SBOM or image or File
+	fmt.Println("Vulnerabilities should be produced in CycloneDX format")
+	fmt.Println(vulnerabilities)
 	return nil
 }
