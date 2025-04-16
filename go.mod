@@ -17,6 +17,7 @@ require (
 	github.com/go-git/go-git/v5 v5.15.0
 	github.com/go-jose/go-jose/v4 v4.1.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/google/go-github/v69 v69.2.0
 	github.com/google/go-github/v71 v71.0.0
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
 	github.com/labstack/echo/v4 v4.13.3
@@ -49,6 +50,7 @@ require (
 	helm.sh/helm/v3 v3.17.3
 	k8s.io/apimachinery v0.32.3
 )
+
 
 require (
 	atomicgo.dev/cursor v0.2.0 // indirect
@@ -194,7 +196,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.3 // indirect
 	github.com/google/go-github/v64 v64.0.0 // indirect
-	github.com/google/go-github/v69 v69.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/licensecheck v0.3.1 // indirect

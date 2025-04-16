@@ -229,7 +229,7 @@ func (l *CharmLogger) Debugf(format string, keyvals ...any) {
 }
 
 // SetInteractive sets the logger to use fancy styles if isTerminal is true
-func (l *CharmLogger) SetInteractive(interactive string, isTerminal bool) { // nolint:revive
+func (l *CharmLogger) SetInteractive(interactive string, isTerminal bool) { //nolint:revive
 	switch interactive {
 	case "auto":
 		if isTerminal {
