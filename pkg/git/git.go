@@ -188,7 +188,7 @@ func (g *gitRepository) Config() (*config.Config, error) {
 	return cfg, nil
 }
 
-func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.AuthMethod, error) { // nolint:revive
+func SSHKeyAuth(privateKey []byte, user string, ignoreHostKeys bool) (transport.AuthMethod, error) { //nolint:revive
 	if user == "" {
 		user = "git"
 	}

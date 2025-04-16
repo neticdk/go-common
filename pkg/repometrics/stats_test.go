@@ -83,3 +83,221 @@ func TestCalculateReleaseMetrics(t *testing.T) {
 		})
 	}
 }
+func TestSortContributors(t *testing.T) {
+	tests := []struct {
+		name         string
+		contributors []Contributor
+		want         []Contributor
+	}{
+		{
+			name:         "empty list",
+			contributors: []Contributor{},
+			want:         []Contributor{},
+		},
+		{
+			name: "single contributor",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+			},
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+			},
+		},
+		{
+			name: "already sorted",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+		},
+		{
+			name: "unsorted list",
+			contributors: []Contributor{
+				{Name: "Raffo", Commits: 5},
+				{Name: "Abbey", Commits: 10},
+			},
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+		},
+		{
+			name: "contributors with equal commits",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 10},
+			},
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 10},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sortContributors(tt.contributors)
+
+			if len(tt.contributors) != len(tt.want) {
+				t.Fatalf("got %v contributors, want %v", len(tt.contributors), len(tt.want))
+			}
+
+			for i := range tt.contributors {
+				if tt.contributors[i] != tt.want[i] {
+					t.Errorf("at index %d, got %v, want %v", i, tt.contributors[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+func TestGetTopContributors(t *testing.T) {
+	tests := []struct {
+		name         string
+		contributors []Contributor
+		limit        int
+		want         []Contributor
+	}{
+		{
+			name:         "empty list",
+			contributors: []Contributor{},
+			limit:        5,
+			want:         []Contributor{},
+		},
+		{
+			name: "limit greater than contributors",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+			limit: 5,
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+		},
+		{
+			name: "limit less than contributors",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+				{Name: "Tziki", Commits: 3},
+			},
+			limit: 2,
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+		},
+		{
+			name: "limit equal to contributors",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+			limit: 2,
+			want: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+		},
+		{
+			name: "zero limit",
+			contributors: []Contributor{
+				{Name: "Abbey", Commits: 10},
+				{Name: "Raffo", Commits: 5},
+			},
+			limit: 0,
+			want:  []Contributor{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := getTopContributors(tt.contributors, tt.limit)
+
+			if len(got) != len(tt.want) {
+				t.Fatalf("got %v contributors, want %v", len(got), len(tt.want))
+			}
+
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("at index %d, got %v, want %v", i, got[i], tt.want[i])
+				}
+			}
+		})
+	}
+
+}
+
+func TestIsBot(t *testing.T) {
+	tests := []struct {
+		name  string
+		login string
+		want  bool
+	}{
+		{
+			name:  "login contains [bot]",
+			login: "example[bot]",
+			want:  true,
+		},
+		{
+			name:  "login contains bot",
+			login: "examplebot",
+			want:  true,
+		},
+		{
+			name:  "login contains istio-testing",
+			login: "istio-testing",
+			want:  true,
+		},
+		{
+			name:  "login contains fluxcdbot",
+			login: "fluxcdbot",
+			want:  true,
+		},
+		{
+			name:  "login contains dependabot",
+			login: "dependabot",
+			want:  true,
+		},
+		{
+			name:  "login contains renovate-bot",
+			login: "renovate-bot",
+			want:  true,
+		},
+		{
+			name:  "login contains renovate[bot]",
+			login: "renovate[bot]",
+			want:  true,
+		},
+		{
+			name:  "login contains action",
+			login: "github-action",
+			want:  true,
+		},
+		{
+			name:  "login does not contain bot-related keywords",
+			login: "regular-user",
+			want:  false,
+		},
+		{
+			name:  "empty login",
+			login: "",
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isBot(tt.login)
+			if got != tt.want {
+				t.Errorf("isBot(%q) = %v, want %v", tt.login, got, tt.want)
+			}
+		})
+	}
+}
