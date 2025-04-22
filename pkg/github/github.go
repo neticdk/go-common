@@ -42,3 +42,11 @@ func GetReleaseByTagOrLatest(ctx context.Context, client *github.Client, owner, 
 	}
 	return GetReleaseByTag(ctx, client, owner, repo, tag)
 }
+
+func GetOrganizationTeams(ctx context.Context, client *github.Client, org string) ([]*github.Team, *github.Response, error) {
+	teams, res, err := client.Teams.ListTeams(ctx, org, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("getting teams: %w", err)
+	}
+	return teams, res, nil
+}
