@@ -12,19 +12,19 @@ const perPage = 1000
 
 // Metrics represents the metrics of a repository
 type Metrics struct {
-	Name                string     `json,yaml:"name"`                 // Name of the repository
-	Type                RepoType   `json,yaml:"type"`                 // Type of the repository
-	URL                 string     `json,yaml:"url"`                  // URL of the repository
-	CreatedAt           *time.Time `json,yaml:"created_at`            // Creation timestamp of the repository
-	IsCNCF              bool       `json,yaml:"is_cncf"`              // True if the repository is part of CNCF
-	CNCFStatus          string     `json,yaml:"cncf_status"`          // CNCF status of the repository
-	IsKubernetesSIG     bool       `json,yaml:"is_kubernetes_sig"`    // True if the repository is a Kubernetes SIG project
-	IsApache            bool       `json,yaml:"is_apache"`            // True if the repository is an Apache project
-	BackingOrganization string     `json,yaml:"backing_organization"` // Organization backing the repository
-	License             string     `json,yaml:"license"`              // License of the repository
+	Name                string     `json:"name"`                 // Name of the repository
+	Type                RepoType   `json:"type"`                 // Type of the repository
+	URL                 string     `json:"url"`                  // URL of the repository
+	CreatedAt           *time.Time `json:"created_at"`           // Creation timestamp of the repository
+	IsCNCF              bool       `json:"is_cncf"`              // True if the repository is part of CNCF
+	CNCFStatus          string     `json:"cncf_status"`          // CNCF status of the repository
+	IsKubernetesSIG     bool       `json:"is_kubernetes_sig"`    // True if the repository is a Kubernetes SIG project
+	IsApache            bool       `json:"is_apache"`            // True if the repository is an Apache project
+	BackingOrganization string     `json:"backing_organization"` // Organization backing the repository
+	License             string     `json:"license"`              // License of the repository
 
-	Version                        string     `json,yaml:"version"`            //The desired version to work with
-	VersionCreatedAt               *time.Time `json,yaml:"version_created_at"` // Creation timestamp of the repository version
+	Version                        string     `json:"version"`            // The desired version to work with
+	VersionCreatedAt               *time.Time `json:"version_created_at"` // Creation timestamp of the repository version
 	VersionCriticalVulnerabilities int        `json:"criticals"`
 	VersionHighVulnerabilities     int        `json:"highs"`
 	VersionMediumVulnerabilities   int        `json:"mediums"`
@@ -40,17 +40,17 @@ type Metrics struct {
 	FixedVersionMediumVulnerabilities   int `json:"fixedMediums"`
 	FixedVersionLowVulnerabilities      int `json:"fixedLows"`
 
-	LatestVersion                        string `json,yaml:"recentVersion"` // Current version of the repository
+	LatestVersion                        string `json:"recentVersion"` // Current version of the repository
 	LatestVersionCriticalVulnerabilities int    `json:"latestCriticals"`
 	LatestVersionHighVulnerabilities     int    `json:"latestHighs"`
 	LatestVersionMediumVulnerabilities   int    `json:"latestMediums"`
 	LatestVersionLowVulnerabilities      int    `json:"latestLows"`
 
-	Performance     string                   `json,yaml:"performance"`     // Performance of the repository
-	Vulnerabilities []types.VulnerabilityCDX `json,yaml:"vulnerabilities"` // Vulnerabilities found in the repository
-	Vex             []types.VEXCDX           `json,yaml:"vex"`             // Exploits found in the repository
-	Stats           *Stats                   `json,yaml:"stats"`           // Statistics of the repository
-	Conclusion      string                   `json,yaml:"conclusion"`      // Conclusion of the exploration
+	Performance     string                   `json:"performance"`     // Performance of the repository
+	Vulnerabilities []types.VulnerabilityCDX `json:"vulnerabilities"` // Vulnerabilities found in the repository
+	Vex             []types.VEXCDX           `json:"vex"`             // Exploits found in the repository
+	Stats           *Stats                   `json:"stats"`           // Statistics of the repository
+	Conclusion      string                   `json:"conclusion"`      // Conclusion of the exploration
 }
 
 // New creates a new Metrics

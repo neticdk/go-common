@@ -13,6 +13,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	open        = "open"
+	closed      = "closed"
+	bug         = "bug"
+	enhancement = "enhancement"
+	feature     = "feat"
+)
+
 // UpdateGitHub updates the metrics using data from a GitHub repository
 func (m *Metrics) UpdateGitHub(ctx context.Context, client *github.Client, owner, repository string) error {
 	if client == nil {
@@ -180,8 +188,7 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 	return err
 }
 
-func (gr *ghRepo) updateIssues(pit time.Time,
-	observations *issueCounts) error {
+func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 	issuesOpts := &github.IssueListByRepoOptions{
 		State:       "all",
 		Since:       pit,
@@ -206,32 +213,30 @@ func (gr *ghRepo) updateIssues(pit time.Time,
 	return nil
 }
 
-func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue,
-	counts *issueCounts) {
+func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
-		if issue.GetState() == "open" {
+		if issue.GetState() == open {
 			counts.openedPulls++
-		} else if issue.GetState() == "closed" {
+		} else if issue.GetState() == closed {
 			counts.closedPulls++
 		}
 	} else {
-		if issue.GetState() == "open" {
+		if issue.GetState() == open {
 			counts.openedIssues++
-		} else if issue.GetState() == "closed" {
+		} else if issue.GetState() == closed {
 			counts.closedIssues++
 		}
 	}
 }
 
-func (gr *ghRepo) updateFeatureCounts(issue *github.Issue,
-	counts *issueCounts) {
+func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, "enhancement") ||
-				strings.Contains(*issue.Labels[i].Name, "feat") {
-				if issue.GetState() == "open" {
+			if strings.Contains(*issue.Labels[i].Name, enhancement) ||
+				strings.Contains(*issue.Labels[i].Name, feature) {
+				if issue.GetState() == open {
 					counts.openedFeatures++
-				} else if issue.GetState() == "closed" {
+				} else if issue.GetState() == closed {
 					counts.closedFeatures++
 				}
 			}
@@ -239,14 +244,13 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue,
 	}
 }
 
-func (gr *ghRepo) updateBugsCounts(issue *github.Issue,
-	counts *issueCounts) {
+func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, "bug") {
-				if issue.GetState() == "open" {
+			if strings.Contains(*issue.Labels[i].Name, bug) {
+				if issue.GetState() == open {
 					counts.openedBugs++
-				} else if issue.GetState() == "closed" {
+				} else if issue.GetState() == closed {
 					counts.closedBugs++
 				}
 			}
@@ -455,12 +459,12 @@ func statistifyReleases(releases []*github.RepositoryRelease) []Release {
 	return releaseStats
 }
 
-func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (*github.RepositoryRelease, *github.RepositoryRelease) {
+func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (firstRelease *github.RepositoryRelease, lastRelease *github.RepositoryRelease) {
 	if len(releases) == 0 {
 		return nil, nil
 	}
-	firstRelease := releases[len(releases)-1]
-	lastRelease := releases[0]
+	firstRelease = releases[len(releases)-1]
+	lastRelease = releases[0]
 	return firstRelease, lastRelease
 }
 
