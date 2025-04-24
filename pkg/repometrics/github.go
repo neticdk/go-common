@@ -243,15 +243,16 @@ func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) 
 
 // gets the features from labeled issues
 func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) {
-	if issue.Labels != nil {
-		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
-				strings.Contains(*issue.Labels[i].Name, statusFeature) {
-				if issue.GetState() == statusOpen {
-					counts.openedFeatures++
-				} else if issue.GetState() == statusClosed {
-					counts.closedFeatures++
-				}
+	if issue.Labels == nil {
+		return
+	}
+	for i := range issue.Labels {
+		if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
+			strings.Contains(*issue.Labels[i].Name, statusFeature) {
+			if issue.GetState() == statusOpen {
+				counts.openedFeatures++
+			} else if issue.GetState() == statusClosed {
+				counts.closedFeatures++
 			}
 		}
 	}
