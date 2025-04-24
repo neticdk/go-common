@@ -74,6 +74,7 @@ type ghRepo struct {
 	name   string
 }
 
+// gets information concerning the repository
 func (gr *ghRepo) fetchRepoInfo(m *Metrics) (*github.Repository, error) {
 	r, _, err := gr.client.Repositories.Get(gr.ctx, gr.owner, gr.name)
 	if err != nil {
@@ -97,6 +98,7 @@ func (gr *ghRepo) fetchRepoInfo(m *Metrics) (*github.Repository, error) {
 	return r, nil
 }
 
+// fetching issues and PRs from repository
 func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 	if m.Stats == nil {
 		m.Stats = NewStats()
@@ -188,6 +190,7 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 	return err
 }
 
+// get updates to issues
 func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 	issuesOpts := &github.IssueListByRepoOptions{
 		State:       "all",
@@ -213,6 +216,7 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 	return nil
 }
 
+// gets the PRs from issue
 func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
 		if issue.GetState() == open {
@@ -229,6 +233,7 @@ func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) 
 	}
 }
 
+// gets the features from labeled issues
 func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
@@ -244,6 +249,7 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) 
 	}
 }
 
+// gets the bug from labeled issues
 func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
@@ -258,6 +264,7 @@ func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
 	}
 }
 
+// fetches the contributors from the repository
 func (gr *ghRepo) fetchContributors(m *Metrics) error {
 	contributorStats, _, err := gr.client.Repositories.ListContributorsStats(gr.ctx, gr.owner, gr.name)
 	if err != nil {
@@ -323,6 +330,7 @@ func (gr *ghRepo) fetchContributors(m *Metrics) error {
 	return nil
 }
 
+// gets contribution from the contributors within a period
 func handleCommittersInPeriod(period time.Time, committersInPeriod []Contributor, stat *github.ContributorStats, ecoType RepoType) []Contributor {
 	contributorPeriod := Contributor{
 		Name: stat.GetAuthor().GetLogin(),
@@ -370,6 +378,7 @@ func (gr *ghRepo) fetchCommits(m *Metrics) error {
 	return nil
 }
 
+// gets the last commit to a repository
 func (gr *ghRepo) getLastCommit(commits []*github.RepositoryCommit) *time.Time {
 	if len(commits) > 0 {
 		commit := commits[0].GetCommit().GetAuthor().GetDate().Time
@@ -378,6 +387,7 @@ func (gr *ghRepo) getLastCommit(commits []*github.RepositoryCommit) *time.Time {
 	return nil
 }
 
+// calculates the number of commits per month
 func (gr *ghRepo) calculateCommitsPerMonth(commits []*github.RepositoryCommit, months int) int {
 	if months <= 0 {
 		return 0
@@ -385,6 +395,7 @@ func (gr *ghRepo) calculateCommitsPerMonth(commits []*github.RepositoryCommit, m
 	return len(commits) / months
 }
 
+// calculates the number of verified commits per month
 func (gr *ghRepo) calculateVerifiedCommitsPerMonth(commits []*github.RepositoryCommit, months int) int {
 	if months <= 0 {
 		return 0
@@ -444,6 +455,7 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 	return nil
 }
 
+// create a list for releases aimed for the statistics part of metrics
 func statistifyReleases(releases []*github.RepositoryRelease) []Release {
 	releaseStats := make([]Release, 0)
 	for _, release := range releases {
@@ -459,6 +471,7 @@ func statistifyReleases(releases []*github.RepositoryRelease) []Release {
 	return releaseStats
 }
 
+// gets the first and last release from the list of releases
 func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (firstRelease *github.RepositoryRelease, lastRelease *github.RepositoryRelease) {
 	if len(releases) == 0 {
 		return nil, nil
@@ -468,6 +481,7 @@ func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (
 	return firstRelease, lastRelease
 }
 
+// guessVersion tries to guess the version of the repository based on releases, tags, and default branch name
 func (gr *ghRepo) guessVersion() string {
 	if gr.repo == nil || gr.client == nil {
 		return ""
@@ -502,6 +516,7 @@ func (gr *ghRepo) guessVersion() string {
 	return "unknown"
 }
 
+// paginate handles pagination for GitHub API requests
 func (gr *ghRepo) paginate(fetchPage func(page int) (int, error)) error {
 	page := 1
 	for {

@@ -21,8 +21,9 @@ func (m *Metrics) ScanVulnerabilities(ctx context.Context, s Scanner) error {
 	if err != nil {
 		return fmt.Errorf("scanning vulnerabilities: %w", err)
 	}
-	// m.Vulnerabilities = vulnerabilities
-	// produce a cycloneDX file from scanning, whether it is done by SBOM or image or File
+	// m.Vulnerabilities = vulnerabilities //we need to produce a cycloneDX file from scanning, //nolint:gofumpt
+	// and have that file being picked up in same way as externally generated setups using SBOM, Vulnerability files and VEX //nolint:gofumpt
+
 	fmt.Println("Vulnerabilities should be produced in CycloneDX format")
 	fmt.Println(vulnerabilities)
 	return nil

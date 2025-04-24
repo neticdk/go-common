@@ -20,6 +20,7 @@ func CreateGitHubRepository(ctx context.Context, client *github.Client, owner, n
 	return repo, res, nil
 }
 
+// gets a release from GitHub by tag
 func GetReleaseByTag(ctx context.Context, client *github.Client, owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error) {
 	release, res, err := client.Repositories.GetReleaseByTag(ctx, owner, repo, tag)
 	if err != nil {
@@ -28,6 +29,7 @@ func GetReleaseByTag(ctx context.Context, client *github.Client, owner, repo, ta
 	return release, res, nil
 }
 
+// gets the latest release from GitHub
 func GetLatestRelease(ctx context.Context, client *github.Client, owner, repo string) (*github.RepositoryRelease, *github.Response, error) {
 	release, res, err := client.Repositories.GetLatestRelease(ctx, owner, repo)
 	if err != nil {
@@ -36,6 +38,7 @@ func GetLatestRelease(ctx context.Context, client *github.Client, owner, repo st
 	return release, res, nil
 }
 
+// get a release by tag or get latest release
 func GetReleaseByTagOrLatest(ctx context.Context, client *github.Client, owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error) {
 	if tag == "" {
 		return GetLatestRelease(ctx, client, owner, repo)

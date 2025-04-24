@@ -113,6 +113,7 @@ type Contributor struct {
 	Commits int    `json:"commits"`
 }
 
+// Relase represents a release from a repository
 type Release struct {
 	AssetsURL   string    `json:"assets_url,omitempty"`   // URL of the release assets.
 	Date        time.Time `json:"date"`                   // Date of the release.
@@ -124,6 +125,7 @@ type Release struct {
 	UploadURL   string    `json:"uploaded,omitempty"`     // URL of the release upload.
 }
 
+// ExtRefs is information pointing to the SBOM, VEX and Vulnerabilities files that exists.
 type ExtRefs struct {
 	SBOMCDX string `json:"sbomCDX"`
 	VEXCDX  string `json:"vexCDX"`
@@ -132,12 +134,14 @@ type ExtRefs struct {
 	Latest  bool   `json:"actual"`
 }
 
+// CVE is an assembly of the Vulnerability, Exploitability and SBOMs
 type CVE struct {
 	Vulnerability  vul.ID   `json:"id"`             // the Vulnerability
 	Exploitability string   `json:"exploitability"` // the Exploitability not correct type yet
 	SBOMs          []string `json:"sboms"`          // the SBOMs not correct type yet
 }
 
+// NewStats resets the statistics
 func NewStats() *Stats {
 	return &Stats{
 		TopCommitters:   make([]Contributor, 0),
@@ -145,12 +149,14 @@ func NewStats() *Stats {
 	}
 }
 
+// sorts the contributors
 func sortContributors(contributors []Contributor) {
 	sort.Slice(contributors, func(i, j int) bool {
 		return contributors[i].Commits > contributors[j].Commits
 	})
 }
 
+// find the top contributors
 func getTopContributors(contributors []Contributor, limit int) []Contributor { //nolint:unparam
 	sortContributors(contributors)
 	if len(contributors) > limit {
@@ -159,6 +165,7 @@ func getTopContributors(contributors []Contributor, limit int) []Contributor { /
 	return contributors
 }
 
+// guess whether a contributor is a bot or not
 func isBot(login string) bool {
 	return strings.Contains(login, "[bot]") ||
 		strings.Contains(login, "bot") ||
@@ -170,6 +177,7 @@ func isBot(login string) bool {
 		strings.Contains(login, "action")
 }
 
+// issues without or with labels (bug and feature) and PRs
 type issueCounts struct {
 	openedIssues   int
 	closedIssues   int
