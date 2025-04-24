@@ -106,88 +106,90 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 
 	counts1Y := &issueCounts{}
 	oneYearAgo := time.Now().AddDate(-1, 0, 0)
-	err := gr.updateIssues(oneYearAgo, counts1Y)
-	if err == nil {
-		m.Stats.OpenedIssues1Y = counts1Y.openedIssues
-		m.Stats.ClosedIssues1Y = counts1Y.closedIssues
-		m.Stats.OpenedPRs1Y = counts1Y.openedPulls
-		m.Stats.ClosedPRs1Y = counts1Y.closedPulls
-		m.Stats.OpenedFeatures1Y = counts1Y.openedFeatures
-		m.Stats.ClosedFeatures1Y = counts1Y.closedFeatures
-		m.Stats.OpenedBugs1Y = counts1Y.openedBugs
-		m.Stats.ClosedBugs1Y = counts1Y.closedBugs
-
-		counts9M := &issueCounts{}
-		nineMonthsAgo := time.Now().AddDate(0, -9, 0)
-		err := gr.updateIssues(nineMonthsAgo, counts9M)
-		if err == nil {
-			m.Stats.OpenedIssues9M = counts9M.openedIssues
-			m.Stats.ClosedIssues9M = counts9M.closedIssues
-			m.Stats.OpenedPRs9M = counts9M.openedPulls
-			m.Stats.ClosedPRs9M = counts9M.closedPulls
-			m.Stats.OpenedFeatures9M = counts9M.openedFeatures
-			m.Stats.ClosedFeatures9M = counts9M.closedFeatures
-			m.Stats.OpenedBugs9M = counts9M.openedBugs
-			m.Stats.ClosedBugs9M = counts9M.closedBugs
-
-			counts6M := &issueCounts{}
-			sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-			err := gr.updateIssues(sixMonthsAgo, counts6M)
-			if err == nil {
-				m.Stats.OpenedIssues6M = counts6M.openedIssues
-				m.Stats.ClosedIssues6M = counts6M.closedIssues
-				m.Stats.OpenedPRs6M = counts6M.openedPulls
-				m.Stats.ClosedPRs6M = counts6M.closedPulls
-				m.Stats.OpenedFeatures6M = counts6M.openedFeatures
-				m.Stats.ClosedFeatures6M = counts6M.closedFeatures
-				m.Stats.OpenedBugs6M = counts6M.openedBugs
-				m.Stats.ClosedBugs6M = counts6M.closedBugs
-
-				counts3M := &issueCounts{}
-				threeMonthsAgo := time.Now().AddDate(0, -3, 0)
-				err := gr.updateIssues(threeMonthsAgo, counts3M)
-				if err == nil {
-					m.Stats.OpenedIssues3M = counts3M.openedIssues
-					m.Stats.ClosedIssues3M = counts3M.closedIssues
-					m.Stats.OpenedPRs3M = counts3M.openedPulls
-					m.Stats.ClosedPRs3M = counts3M.closedPulls
-					m.Stats.OpenedFeatures3M = counts3M.openedFeatures
-					m.Stats.ClosedFeatures3M = counts3M.closedFeatures
-					m.Stats.OpenedBugs3M = counts3M.openedBugs
-					m.Stats.ClosedBugs3M = counts3M.closedBugs
-
-					counts1M := &issueCounts{}
-					oneMonthsAgo := time.Now().AddDate(0, -1, 0)
-					err := gr.updateIssues(oneMonthsAgo, counts1M)
-					if err == nil {
-						m.Stats.OpenedIssues1M = counts1M.openedIssues
-						m.Stats.ClosedIssues1M = counts1M.closedIssues
-						m.Stats.OpenedPRs1M = counts1M.openedPulls
-						m.Stats.ClosedPRs1M = counts1M.closedPulls
-						m.Stats.OpenedFeatures1M = counts1M.openedFeatures
-						m.Stats.ClosedFeatures1M = counts1M.closedFeatures
-						m.Stats.OpenedBugs1M = counts1M.openedBugs
-						m.Stats.ClosedBugs1M = counts1M.closedBugs
-
-						countsNow := &issueCounts{}
-						rightNow := time.Now().AddDate(0, 0, -1)
-						err := gr.updateIssues(rightNow, countsNow)
-						if err == nil {
-							m.Stats.OpenedIssuesNow = countsNow.openedIssues
-							m.Stats.ClosedIssuesNow = countsNow.closedIssues
-							m.Stats.OpenedPRsNow = countsNow.openedPulls
-							m.Stats.ClosedPRsNow = countsNow.closedPulls
-							m.Stats.OpenedFeaturesNow = countsNow.openedFeatures
-							m.Stats.ClosedFeaturesNow = countsNow.closedFeatures
-							m.Stats.OpenedBugsNow = countsNow.openedBugs
-							m.Stats.ClosedBugsNow = countsNow.closedBugs
-						}
-					}
-				}
-			}
-		}
+	if err := gr.updateIssues(oneYearAgo, counts1Y); err != nil {
+		return err
 	}
-	return err
+	m.Stats.OpenedIssues1Y = counts1Y.openedIssues
+	m.Stats.ClosedIssues1Y = counts1Y.closedIssues
+	m.Stats.OpenedPRs1Y = counts1Y.openedPulls
+	m.Stats.ClosedPRs1Y = counts1Y.closedPulls
+	m.Stats.OpenedFeatures1Y = counts1Y.openedFeatures
+	m.Stats.ClosedFeatures1Y = counts1Y.closedFeatures
+	m.Stats.OpenedBugs1Y = counts1Y.openedBugs
+	m.Stats.ClosedBugs1Y = counts1Y.closedBugs
+
+	counts9M := &issueCounts{}
+	nineMonthsAgo := time.Now().AddDate(0, -9, 0)
+	if err := gr.updateIssues(nineMonthsAgo, counts9M); err != nil {
+		return err
+	}
+	m.Stats.OpenedIssues9M = counts9M.openedIssues
+	m.Stats.ClosedIssues9M = counts9M.closedIssues
+	m.Stats.OpenedPRs9M = counts9M.openedPulls
+	m.Stats.ClosedPRs9M = counts9M.closedPulls
+	m.Stats.OpenedFeatures9M = counts9M.openedFeatures
+	m.Stats.ClosedFeatures9M = counts9M.closedFeatures
+	m.Stats.OpenedBugs9M = counts9M.openedBugs
+	m.Stats.ClosedBugs9M = counts9M.closedBugs
+
+	counts6M := &issueCounts{}
+	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+	if err := gr.updateIssues(sixMonthsAgo, counts6M); err != nil {
+		return err
+	}
+	m.Stats.OpenedIssues6M = counts6M.openedIssues
+	m.Stats.ClosedIssues6M = counts6M.closedIssues
+	m.Stats.OpenedPRs6M = counts6M.openedPulls
+	m.Stats.ClosedPRs6M = counts6M.closedPulls
+	m.Stats.OpenedFeatures6M = counts6M.openedFeatures
+	m.Stats.ClosedFeatures6M = counts6M.closedFeatures
+	m.Stats.OpenedBugs6M = counts6M.openedBugs
+	m.Stats.ClosedBugs6M = counts6M.closedBugs
+
+	counts3M := &issueCounts{}
+	threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+	if err := gr.updateIssues(threeMonthsAgo, counts3M); err != nil {
+		return err
+	}
+	m.Stats.OpenedIssues3M = counts3M.openedIssues
+	m.Stats.ClosedIssues3M = counts3M.closedIssues
+	m.Stats.OpenedPRs3M = counts3M.openedPulls
+	m.Stats.ClosedPRs3M = counts3M.closedPulls
+	m.Stats.OpenedFeatures3M = counts3M.openedFeatures
+	m.Stats.ClosedFeatures3M = counts3M.closedFeatures
+	m.Stats.OpenedBugs3M = counts3M.openedBugs
+	m.Stats.ClosedBugs3M = counts3M.closedBugs
+
+	counts1M := &issueCounts{}
+	oneMonthsAgo := time.Now().AddDate(0, -1, 0)
+	if err := gr.updateIssues(oneMonthsAgo, counts1M); err != nil {
+		return err
+	}
+
+	m.Stats.OpenedIssues1M = counts1M.openedIssues
+	m.Stats.ClosedIssues1M = counts1M.closedIssues
+	m.Stats.OpenedPRs1M = counts1M.openedPulls
+	m.Stats.ClosedPRs1M = counts1M.closedPulls
+	m.Stats.OpenedFeatures1M = counts1M.openedFeatures
+	m.Stats.ClosedFeatures1M = counts1M.closedFeatures
+	m.Stats.OpenedBugs1M = counts1M.openedBugs
+	m.Stats.ClosedBugs1M = counts1M.closedBugs
+
+	countsNow := &issueCounts{}
+	rightNow := time.Now().AddDate(0, 0, -1)
+	if err := gr.updateIssues(rightNow, countsNow); err != nil {
+		return err
+	}
+	m.Stats.OpenedIssuesNow = countsNow.openedIssues
+	m.Stats.ClosedIssuesNow = countsNow.closedIssues
+	m.Stats.OpenedPRsNow = countsNow.openedPulls
+	m.Stats.ClosedPRsNow = countsNow.closedPulls
+	m.Stats.OpenedFeaturesNow = countsNow.openedFeatures
+	m.Stats.ClosedFeaturesNow = countsNow.closedFeatures
+	m.Stats.OpenedBugsNow = countsNow.openedBugs
+	m.Stats.ClosedBugsNow = countsNow.closedBugs
+
+	return nil
 }
 
 // get updates to issues
