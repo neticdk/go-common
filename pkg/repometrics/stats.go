@@ -189,12 +189,12 @@ type ReleaseMetrics struct {
 }
 
 const (
-	daysInWeek   = 7
-	daysInMonth  = 30.44
-	daysInYear   = 365.25
+	daysInWeek  = 7
+	daysInMonth = 30.44
+	daysInYear  = 365.25
 	hoursPerDay = 24
-	hundred      = 100
-	ten          = 10
+	hundred     = 100
+	ten         = 10
 )
 
 // CalculateReleaseMetrics calculates the release metrics based on the first and
@@ -209,7 +209,7 @@ func CalculateReleaseMetrics(firstRelease, lastRelease *time.Time, totalReleases
 		return ReleaseMetrics{}
 	}
 
-	daysInPeriod := period.Hours() / hoursPerDFay
+	daysInPeriod := period.Hours() / hoursPerDay
 	if daysInPeriod == 0 {
 		return ReleaseMetrics{}
 	}
