@@ -167,14 +167,13 @@ func getTopContributors(contributors []Contributor, limit int) []Contributor { /
 
 // guess whether a contributor is a bot or not
 func isBot(login string) bool {
-	return strings.Contains(login, "[bot]") ||
-		strings.Contains(login, "bot") ||
-		strings.Contains(login, "istio-testing") ||
-		strings.Contains(login, "fluxcdbot") ||
-		strings.Contains(login, "dependabot") ||
-		strings.Contains(login, "renovate-bot") ||
-		strings.Contains(login, "renovate[bot]") ||
-		strings.Contains(login, "action")
+	botPatterns := []string{"[bot]", "bot", "istio-testing", "fluxcdbot", "dependabot", "renovate-bot", "renovate[bot]", "action"}
+	for _, bp := range botPatterns {
+		if strings.Contains(login, bp) {
+			return true
+		}
+	}
+	return false
 }
 
 // issues without or with labels (bug and feature) and PRs
@@ -197,12 +196,12 @@ type ReleaseMetrics struct {
 }
 
 const (
-	daysInWeek  = 7
-	daysInMonth = 30.44
-	daysInYear  = 365.25
-	hoursPerDay = 24
-	hundred     = 100
-	ten         = 10
+	daysInWeek       = 7
+	daysInMonth      = 30.44
+	daysInYear       = 365.25
+	hoursPerDay      = 24
+	roundTwoDecimals = 100
+	roundOneDecimal  = 10
 )
 
 // CalculateReleaseMetrics calculates the release metrics based on the first and
@@ -232,9 +231,9 @@ func CalculateReleaseMetrics(firstRelease, lastRelease *time.Time, totalReleases
 	releasesPerYear := float64(totalReleases) / yearsInPeriod
 
 	return ReleaseMetrics{
-		PerDay:   math.Round(releasesPerDay*ten) / ten,
-		PerWeek:  math.Round(releasesPerWeek*ten) / ten,
-		PerMonth: math.Round(releasesPerMonth*hundred) / hundred,
-		PerYear:  math.Round(releasesPerYear*hundred) / hundred,
+		PerDay:   math.Round(releasesPerDay*roundOneDecimal) / roundOneDecimal,
+		PerWeek:  math.Round(releasesPerWeek*roundOneDecimal) / roundOneDecimal,
+		PerMonth: math.Round(releasesPerMonth*roundTwoDecimals) / roundTwoDecimals,
+		PerYear:  math.Round(releasesPerYear*roundTwoDecimals) / roundTwoDecimals,
 	}
 }
