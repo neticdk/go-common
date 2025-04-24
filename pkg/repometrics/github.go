@@ -225,15 +225,17 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 // gets the PRs from issue
 func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
-		if issue.GetState() == statusOpen {
+		switch issue.GetState() {
+		case statusOpen:
 			counts.openedPulls++
-		} else if issue.GetState() == statusClosed {
+		case statusClosed:
 			counts.closedPulls++
 		}
 	} else {
-		if issue.GetState() == statusOpen {
+		switch issue.GetState() {
+		case statusOpen:
 			counts.openedIssues++
-		} else if issue.GetState() == statusClosed {
+		case statusClosed:
 			counts.closedIssues++
 		}
 	}
