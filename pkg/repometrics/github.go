@@ -2,6 +2,7 @@ package repometrics
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -11,6 +12,14 @@ import (
 	"github.com/google/go-github/v71/github"
 	"golang.org/x/mod/semver"
 	"golang.org/x/oauth2"
+)
+
+const (
+	statusOpen        = "open"
+	statusClosed      = "closed"
+	statusBug         = "bug"
+	statusEnhancement = "enhancement"
+	statusFeature     = "feat"
 )
 
 // UpdateGitHub updates the metrics using data from a GitHub repository
@@ -53,7 +62,7 @@ func (m *Metrics) UpdateGitHub(ctx context.Context, client *github.Client, owner
 		return fmt.Errorf("fetching releases: %w", err)
 	}
 
-	m.CurrentVersion = gh.guessVersion()
+	m.LatestVersion = gh.guessVersion()
 
 	return nil
 }
@@ -66,6 +75,7 @@ type ghRepo struct {
 	name   string
 }
 
+// gets information concerning the repository
 func (gr *ghRepo) fetchRepoInfo(m *Metrics) (*github.Repository, error) {
 	r, _, err := gr.client.Repositories.Get(gr.ctx, gr.owner, gr.name)
 	if err != nil {
@@ -77,79 +87,208 @@ func (gr *ghRepo) fetchRepoInfo(m *Metrics) (*github.Repository, error) {
 	m.URL = r.GetHTMLURL()
 	m.IsCNCF = false
 	m.IsKubernetesSIG = gr.owner == "kubernetes-sigs"
+	m.IsApache = gr.owner == "apache"
 	m.License = r.GetLicense().GetName()
 	if r.CreatedAt != nil {
 		m.CreatedAt = &r.CreatedAt.Time
 	}
-	m.Stats.OpenIssuesNow = r.GetOpenIssuesCount()
+	m.Stats.OpenedIssuesNow = r.GetOpenIssuesCount()
 	m.Stats.Likes = r.GetStargazersCount()
 	m.Stats.Forks = r.GetForksCount()
 
 	return r, nil
 }
 
+// fetching issues and PRs from repository
 func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
-	counts := &issuePRCounts{}
+	var errs []error
 
-	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	issuesOpts := &github.IssueListByRepoOptions{
-		State:       "all",
-		Since:       sixMonthsAgo,
-		ListOptions: github.ListOptions{PerPage: perPage},
+	if m.Stats == nil {
+		m.Stats = NewStats()
 	}
 
-	err := gr.paginate(func(page int) (int, error) {
+	counts1Y := &issueCounts{}
+	oneYearAgo := time.Now().AddDate(-1, 0, 0)
+	if err := gr.updateIssues(oneYearAgo, counts1Y); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssues1Y = counts1Y.openedIssues
+		m.Stats.ClosedIssues1Y = counts1Y.closedIssues
+		m.Stats.OpenedPRs1Y = counts1Y.openedPulls
+		m.Stats.ClosedPRs1Y = counts1Y.closedPulls
+		m.Stats.OpenedFeatures1Y = counts1Y.openedFeatures
+		m.Stats.ClosedFeatures1Y = counts1Y.closedFeatures
+		m.Stats.OpenedBugs1Y = counts1Y.openedBugs
+		m.Stats.ClosedBugs1Y = counts1Y.closedBugs
+	}
+
+	counts9M := &issueCounts{}
+	nineMonthsAgo := time.Now().AddDate(0, -9, 0)
+	if err := gr.updateIssues(nineMonthsAgo, counts9M); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssues9M = counts9M.openedIssues
+		m.Stats.ClosedIssues9M = counts9M.closedIssues
+		m.Stats.OpenedPRs9M = counts9M.openedPulls
+		m.Stats.ClosedPRs9M = counts9M.closedPulls
+		m.Stats.OpenedFeatures9M = counts9M.openedFeatures
+		m.Stats.ClosedFeatures9M = counts9M.closedFeatures
+		m.Stats.OpenedBugs9M = counts9M.openedBugs
+		m.Stats.ClosedBugs9M = counts9M.closedBugs
+	}
+
+	counts6M := &issueCounts{}
+	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+	if err := gr.updateIssues(sixMonthsAgo, counts6M); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssues6M = counts6M.openedIssues
+		m.Stats.ClosedIssues6M = counts6M.closedIssues
+		m.Stats.OpenedPRs6M = counts6M.openedPulls
+		m.Stats.ClosedPRs6M = counts6M.closedPulls
+		m.Stats.OpenedFeatures6M = counts6M.openedFeatures
+		m.Stats.ClosedFeatures6M = counts6M.closedFeatures
+		m.Stats.OpenedBugs6M = counts6M.openedBugs
+		m.Stats.ClosedBugs6M = counts6M.closedBugs
+	}
+
+	counts3M := &issueCounts{}
+	threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+	if err := gr.updateIssues(threeMonthsAgo, counts3M); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssues3M = counts3M.openedIssues
+		m.Stats.ClosedIssues3M = counts3M.closedIssues
+		m.Stats.OpenedPRs3M = counts3M.openedPulls
+		m.Stats.ClosedPRs3M = counts3M.closedPulls
+		m.Stats.OpenedFeatures3M = counts3M.openedFeatures
+		m.Stats.ClosedFeatures3M = counts3M.closedFeatures
+		m.Stats.OpenedBugs3M = counts3M.openedBugs
+		m.Stats.ClosedBugs3M = counts3M.closedBugs
+	}
+
+	counts1M := &issueCounts{}
+	oneMonthsAgo := time.Now().AddDate(0, -1, 0)
+	if err := gr.updateIssues(oneMonthsAgo, counts1M); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssues1M = counts1M.openedIssues
+		m.Stats.ClosedIssues1M = counts1M.closedIssues
+		m.Stats.OpenedPRs1M = counts1M.openedPulls
+		m.Stats.ClosedPRs1M = counts1M.closedPulls
+		m.Stats.OpenedFeatures1M = counts1M.openedFeatures
+		m.Stats.ClosedFeatures1M = counts1M.closedFeatures
+		m.Stats.OpenedBugs1M = counts1M.openedBugs
+		m.Stats.ClosedBugs1M = counts1M.closedBugs
+	}
+
+	countsNow := &issueCounts{}
+	rightNow := time.Now().AddDate(0, 0, -1)
+	if err := gr.updateIssues(rightNow, countsNow); err != nil {
+		errs = append(errs, err)
+	} else {
+		m.Stats.OpenedIssuesNow = countsNow.openedIssues
+		m.Stats.ClosedIssuesNow = countsNow.closedIssues
+		m.Stats.OpenedPRsNow = countsNow.openedPulls
+		m.Stats.ClosedPRsNow = countsNow.closedPulls
+		m.Stats.OpenedFeaturesNow = countsNow.openedFeatures
+		m.Stats.ClosedFeaturesNow = countsNow.closedFeatures
+		m.Stats.OpenedBugsNow = countsNow.openedBugs
+		m.Stats.ClosedBugsNow = countsNow.closedBugs
+	}
+
+	return errors.Join(errs...)
+}
+
+// get updates to issues
+func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
+	issuesOpts := &github.IssueListByRepoOptions{
+		State:       "all",
+		Since:       pit,
+		ListOptions: github.ListOptions{PerPage: perPage},
+	}
+	return gr.paginate(func(page int) (int, error) {
 		issuesOpts.Page = page
 		pageIssues, resp, err := gr.client.Issues.ListByRepo(gr.ctx, gr.owner, gr.name, issuesOpts)
 		if err != nil {
 			return 0, fmt.Errorf("listing issues: %w", err)
 		}
 		for _, issue := range pageIssues {
-			gr.updateIssuePRCounts(issue, counts)
+			gr.updateIssuePRCounts(issue, observations)
+			gr.updateFeatureCounts(issue, observations)
+			gr.updateBugsCounts(issue, observations)
 		}
 		return resp.NextPage, nil
 	})
-	if err != nil {
-		return err
-	}
-
-	if m.Stats == nil {
-		m.Stats = NewStats()
-	}
-
-	m.Stats.OpenedIssues6M = counts.openedIssues6M
-	m.Stats.ClosedIssues6M = counts.closedIssues6M
-	m.Stats.OpenedPRs6M = counts.openedPulls6M
-	m.Stats.ClosedPRs6M = counts.closedPulls6M
-
-	return nil
 }
 
-func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issuePRCounts) {
+// gets the PRs from issue
+func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
-		if issue.GetState() == "open" {
-			counts.openedPulls6M++
-		} else if issue.GetState() == "closed" {
-			counts.closedPulls6M++
+		switch issue.GetState() {
+		case statusOpen:
+			counts.openedPulls++
+		case statusClosed:
+			counts.closedPulls++
 		}
 	} else {
-		if issue.GetState() == "open" {
-			counts.openedIssues6M++
-		} else if issue.GetState() == "closed" {
-			counts.closedIssues6M++
+		switch issue.GetState() {
+		case statusOpen:
+			counts.openedIssues++
+		case statusClosed:
+			counts.closedIssues++
 		}
 	}
 }
 
+// gets the features from labeled issues
+func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) {
+	if issue.Labels == nil {
+		return
+	}
+	for i := range issue.Labels {
+		if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
+			strings.Contains(*issue.Labels[i].Name, statusFeature) {
+			switch issue.GetState() {
+			case statusOpen:
+				counts.openedFeatures++
+			case statusClosed:
+				counts.closedFeatures++
+			}
+		}
+	}
+}
+
+// gets the bug from labeled issues
+func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
+	if issue.Labels == nil {
+		return
+	}
+	for i := range issue.Labels {
+		if strings.Contains(*issue.Labels[i].Name, statusBug) {
+			switch issue.GetState() {
+			case statusOpen:
+				counts.openedBugs++
+			case statusClosed:
+				counts.closedBugs++
+			}
+		}
+	}
+}
+
+// fetches the contributors from the repository
 func (gr *ghRepo) fetchContributors(m *Metrics) error {
 	contributorStats, _, err := gr.client.Repositories.ListContributorsStats(gr.ctx, gr.owner, gr.name)
 	if err != nil {
 		return fmt.Errorf("listing contributor stats: %w", err)
 	}
 
-	oneYearAgo := time.Now().AddDate(-1, 0, 0)
 	topCommitters := make([]Contributor, 0)
 	topCommitters1Y := make([]Contributor, 0)
+	topCommitters9M := make([]Contributor, 0)
+	topCommitters6M := make([]Contributor, 0)
+	topCommitters3M := make([]Contributor, 0)
+	topCommitters1M := make([]Contributor, 0)
 
 	for _, stat := range contributorStats {
 		if isBot(stat.GetAuthor().GetLogin()) {
@@ -160,27 +299,35 @@ func (gr *ghRepo) fetchContributors(m *Metrics) error {
 			Name:    stat.GetAuthor().GetLogin(),
 			Commits: stat.GetTotal(),
 		}
-		if m.Type == "github" {
+		ecoType := m.Type
+
+		if ecoType == "github" {
 			contributor.URL = fmt.Sprintf("https://github.com/%s", stat.GetAuthor().GetLogin())
 		}
 		topCommitters = append(topCommitters, contributor)
 
-		contributor1Y := Contributor{
-			Name: stat.GetAuthor().GetLogin(),
-		}
-		if m.Type == "github" {
-			contributor1Y.URL = fmt.Sprintf("https://github.com/%s", stat.GetAuthor().GetLogin())
-		}
-		for _, week := range stat.Weeks {
-			if week.Week.Unix() > oneYearAgo.Unix() {
-				contributor1Y.Commits += week.GetCommits()
-			}
-		}
-		topCommitters1Y = append(topCommitters1Y, contributor1Y)
+		oneYearAgo := time.Now().AddDate(-1, 0, 0)
+		topCommitters1Y = handleCommittersInPeriod(oneYearAgo, topCommitters1Y, stat, ecoType)
+
+		nineMonthsAgo := time.Now().AddDate(0, -9, 0)
+		topCommitters9M = handleCommittersInPeriod(nineMonthsAgo, topCommitters9M, stat, ecoType)
+
+		sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+		topCommitters6M = handleCommittersInPeriod(sixMonthsAgo, topCommitters6M, stat, ecoType)
+
+		threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+		topCommitters3M = handleCommittersInPeriod(threeMonthsAgo, topCommitters3M, stat, ecoType)
+
+		oneMonthAgo := time.Now().AddDate(0, -1, 0)
+		topCommitters1M = handleCommittersInPeriod(oneMonthAgo, topCommitters1M, stat, ecoType)
 	}
 
 	sortContributors(topCommitters)
 	sortContributors(topCommitters1Y)
+	sortContributors(topCommitters9M)
+	sortContributors(topCommitters6M)
+	sortContributors(topCommitters3M)
+	sortContributors(topCommitters1M)
 
 	if m.Stats == nil {
 		m.Stats = NewStats()
@@ -188,8 +335,28 @@ func (gr *ghRepo) fetchContributors(m *Metrics) error {
 	m.Stats.Contributors1Y = len(topCommitters1Y)
 	m.Stats.TopCommitters = getTopContributors(topCommitters, 10)
 	m.Stats.TopCommitters1Y = getTopContributors(topCommitters1Y, 10)
-
+	m.Stats.TopCommitters9M = getTopContributors(topCommitters9M, 10)
+	m.Stats.TopCommitters6M = getTopContributors(topCommitters6M, 10)
+	m.Stats.TopCommitters3M = getTopContributors(topCommitters3M, 10)
+	m.Stats.TopCommitters1M = getTopContributors(topCommitters1M, 10)
 	return nil
+}
+
+// gets contribution from the contributors within a period
+func handleCommittersInPeriod(period time.Time, committersInPeriod []Contributor, stat *github.ContributorStats, ecoType RepoType) []Contributor {
+	contributorPeriod := Contributor{
+		Name: stat.GetAuthor().GetLogin(),
+	}
+	if ecoType == "github" {
+		contributorPeriod.URL = fmt.Sprintf("https://github.com/%s", stat.GetAuthor().GetLogin())
+	}
+	for _, week := range stat.Weeks {
+		if week.Week.Unix() > period.Unix() {
+			contributorPeriod.Commits += week.GetCommits()
+		}
+	}
+	committersInPeriod = append(committersInPeriod, contributorPeriod)
+	return committersInPeriod
 }
 
 func (gr *ghRepo) fetchCommits(m *Metrics) error {
@@ -212,16 +379,18 @@ func (gr *ghRepo) fetchCommits(m *Metrics) error {
 
 	lastCommit := gr.getLastCommit(commits)
 	commitsPerMonth6M := gr.calculateCommitsPerMonth(commits, 6)
+	verifiedCommitsPerMonth6M := gr.calculateVerifiedCommitsPerMonth(commits, 6)
 
 	if m.Stats == nil {
 		m.Stats = NewStats()
 	}
 	m.Stats.LastCommit = lastCommit
 	m.Stats.CommitsPerMonth6M = commitsPerMonth6M
-
+	m.Stats.VerifiedCommitsPerMonth6M = verifiedCommitsPerMonth6M
 	return nil
 }
 
+// gets the last commit to a repository
 func (gr *ghRepo) getLastCommit(commits []*github.RepositoryCommit) *time.Time {
 	if len(commits) > 0 {
 		commit := commits[0].GetCommit().GetAuthor().GetDate().Time
@@ -230,11 +399,26 @@ func (gr *ghRepo) getLastCommit(commits []*github.RepositoryCommit) *time.Time {
 	return nil
 }
 
+// calculates the number of commits per month
 func (gr *ghRepo) calculateCommitsPerMonth(commits []*github.RepositoryCommit, months int) int {
 	if months <= 0 {
 		return 0
 	}
 	return len(commits) / months
+}
+
+// calculates the number of verified commits per month
+func (gr *ghRepo) calculateVerifiedCommitsPerMonth(commits []*github.RepositoryCommit, months int) int {
+	if months <= 0 {
+		return 0
+	}
+	verifiedCommits := 0
+	for _, commit := range commits {
+		if commit.GetCommit().GetVerification().GetVerified() {
+			verifiedCommits++
+		}
+	}
+	return verifiedCommits / months
 }
 
 func (gr *ghRepo) fetchReleases(m *Metrics) error {
@@ -273,7 +457,8 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 
 	m.Stats.FirstRelease = firstReleaseTime
 	m.Stats.LastRelease = lastReleaseTime
-	m.Stats.Releases = len(releases)
+	m.Stats.NoOfReleases = len(releases)
+	m.Stats.Releases = statistifyReleases(releases)
 	m.Stats.ReleasesPerDay = releaseMetrics.PerDay
 	m.Stats.ReleasesPerWeek = releaseMetrics.PerWeek
 	m.Stats.ReleasesPerMonth = releaseMetrics.PerMonth
@@ -282,15 +467,33 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 	return nil
 }
 
-func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (first *github.RepositoryRelease, last *github.RepositoryRelease) {
+// create a list for releases aimed for the statistics part of metrics
+func statistifyReleases(releases []*github.RepositoryRelease) []Release {
+	releaseStats := make([]Release, 0)
+	for _, release := range releases {
+		releaseStats = append(releaseStats, Release{
+			Name:       release.GetTagName(),
+			Date:       release.GetPublishedAt().Time,
+			ReleaseURL: release.GetHTMLURL(),
+			AssetsURL:  release.GetAssetsURL(),
+			UploadURL:  release.GetUploadURL(),
+			TarballURL: release.GetTarballURL(),
+		})
+	}
+	return releaseStats
+}
+
+// gets the first and last release from the list of releases
+func (gr *ghRepo) getFirstAndLastRelease(releases []*github.RepositoryRelease) (firstRelease *github.RepositoryRelease, lastRelease *github.RepositoryRelease) {
 	if len(releases) == 0 {
 		return nil, nil
 	}
-	first = releases[len(releases)-1]
-	last = releases[0]
-	return first, last
+	firstRelease = releases[len(releases)-1]
+	lastRelease = releases[0]
+	return firstRelease, lastRelease
 }
 
+// guessVersion tries to guess the version of the repository based on releases, tags, and default branch name
 func (gr *ghRepo) guessVersion() string {
 	if gr.repo == nil || gr.client == nil {
 		return ""
@@ -325,6 +528,7 @@ func (gr *ghRepo) guessVersion() string {
 	return "unknown"
 }
 
+// paginate handles pagination for GitHub API requests
 func (gr *ghRepo) paginate(fetchPage func(page int) (int, error)) error {
 	page := 1
 	for {

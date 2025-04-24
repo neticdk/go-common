@@ -106,7 +106,7 @@ func (ec *ExecutionContext) SetLogLevel() {
 // If the output is not a terminal, color is disabled
 // If the --no-color flag is set, color is disabled
 // If the --no-input flag is set, color is disabled
-func (ec *ExecutionContext) SetColor(noColor bool) { // nolint:revive
+func (ec *ExecutionContext) SetColor(noColor bool) { //nolint:revive
 	if !ec.IsTerminal || ec.PFlags.NoInput || noColor {
 		ui.DisableColor()
 	}

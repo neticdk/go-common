@@ -16,12 +16,12 @@ type Scanner interface {
 // ScanVulnerabilities scans for vulnerabilities and updates the metrics
 func (m *Metrics) ScanVulnerabilities(ctx context.Context, s Scanner) error {
 	var err error
-
-	vulns, err := s.Scan(ctx)
+	vulnerabilities, err := s.Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("scanning vulnerabilities: %w", err)
 	}
-	m.Vulnerabilities = vulns
-
-	return nil
+	// m.Vulnerabilities = vulnerabilities //TODO: we need to produce a cycloneDX file from scanning, //nolint:gofumpt
+	// TODO: have that file being picked up in same way as externally generated setups using SBOM, Vulnerability files and VEX //nolint:gofumpt
+	str := "TODO: Produce Vulnerabilities should be produced in CycloneDX format for the d% vulnerabilities found"
+	return fmt.Errorf(str, len(vulnerabilities))
 }
