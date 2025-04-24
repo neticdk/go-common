@@ -192,7 +192,7 @@ const (
 	daysInWeek   = 7
 	daysInMonth  = 30.44
 	daysInYear   = 365.25
-	hoursPerDFay = 24
+	hoursPerDay = 24
 	hundred      = 100
 	ten          = 10
 )
