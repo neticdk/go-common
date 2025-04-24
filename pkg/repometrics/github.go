@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	statutOpen        = "open"
+	statusOpen        = "open"
 	statusClosed      = "closed"
 	statusBug         = "bug"
 	statusEnhancement = "enhancement"
@@ -225,13 +225,13 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 // gets the PRs from issue
 func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
-		if issue.GetState() == statutOpen {
+		if issue.GetState() == statusOpen {
 			counts.openedPulls++
 		} else if issue.GetState() == statusClosed {
 			counts.closedPulls++
 		}
 	} else {
-		if issue.GetState() == statutOpen {
+		if issue.GetState() == statusOpen {
 			counts.openedIssues++
 		} else if issue.GetState() == statusClosed {
 			counts.closedIssues++
@@ -245,7 +245,7 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) 
 		for i := 0; i < len(issue.Labels); i++ {
 			if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
 				strings.Contains(*issue.Labels[i].Name, statusFeature) {
-				if issue.GetState() == statutOpen {
+				if issue.GetState() == statusOpen {
 					counts.openedFeatures++
 				} else if issue.GetState() == statusClosed {
 					counts.closedFeatures++
@@ -260,7 +260,7 @@ func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
 			if strings.Contains(*issue.Labels[i].Name, statusBug) {
-				if issue.GetState() == statutOpen {
+				if issue.GetState() == statusOpen {
 					counts.openedBugs++
 				} else if issue.GetState() == statusClosed {
 					counts.closedBugs++
