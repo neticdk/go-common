@@ -249,9 +249,10 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) 
 	for i := range issue.Labels {
 		if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
 			strings.Contains(*issue.Labels[i].Name, statusFeature) {
-			if issue.GetState() == statusOpen {
+			switch issue.GetState() {
+			case statusOpen:
 				counts.openedFeatures++
-			} else if issue.GetState() == statusClosed {
+			case statusClosed:
 				counts.closedFeatures++
 			}
 		}
@@ -260,14 +261,16 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) 
 
 // gets the bug from labeled issues
 func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
-	if issue.Labels != nil {
-		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, statusBug) {
-				if issue.GetState() == statusOpen {
-					counts.openedBugs++
-				} else if issue.GetState() == statusClosed {
-					counts.closedBugs++
-				}
+	if issue.Labels == nil {
+		return
+	}
+	for i := range issue.Labels {
+		if strings.Contains(*issue.Labels[i].Name, statusBug) {
+			switch issue.GetState() {
+			case statusOpen:
+				counts.openedBugs++
+			case statusClosed:
+				counts.closedBugs++
 			}
 		}
 	}
