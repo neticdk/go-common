@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	open        = "open"
-	closed      = "closed"
-	bug         = "bug"
-	enhancement = "enhancement"
-	feature     = "feat"
+	statutOpen        = "open"
+	statusClosed      = "closed"
+	statusBug         = "bug"
+	statusEnhancement = "enhancement"
+	statusFeature     = "feat"
 )
 
 // UpdateGitHub updates the metrics using data from a GitHub repository
@@ -219,15 +219,15 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 // gets the PRs from issue
 func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.IsPullRequest() {
-		if issue.GetState() == open {
+		if issue.GetState() == statutOpen {
 			counts.openedPulls++
-		} else if issue.GetState() == closed {
+		} else if issue.GetState() == statusClosed {
 			counts.closedPulls++
 		}
 	} else {
-		if issue.GetState() == open {
+		if issue.GetState() == statutOpen {
 			counts.openedIssues++
-		} else if issue.GetState() == closed {
+		} else if issue.GetState() == statusClosed {
 			counts.closedIssues++
 		}
 	}
@@ -237,11 +237,11 @@ func (gr *ghRepo) updateIssuePRCounts(issue *github.Issue, counts *issueCounts) 
 func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, enhancement) ||
-				strings.Contains(*issue.Labels[i].Name, feature) {
-				if issue.GetState() == open {
+			if strings.Contains(*issue.Labels[i].Name, statusEnhancement) ||
+				strings.Contains(*issue.Labels[i].Name, statusFeature) {
+				if issue.GetState() == statutOpen {
 					counts.openedFeatures++
-				} else if issue.GetState() == closed {
+				} else if issue.GetState() == statusClosed {
 					counts.closedFeatures++
 				}
 			}
@@ -253,10 +253,10 @@ func (gr *ghRepo) updateFeatureCounts(issue *github.Issue, counts *issueCounts) 
 func (gr *ghRepo) updateBugsCounts(issue *github.Issue, counts *issueCounts) {
 	if issue.Labels != nil {
 		for i := 0; i < len(issue.Labels); i++ {
-			if strings.Contains(*issue.Labels[i].Name, bug) {
-				if issue.GetState() == open {
+			if strings.Contains(*issue.Labels[i].Name, statusBug) {
+				if issue.GetState() == statutOpen {
 					counts.openedBugs++
-				} else if issue.GetState() == closed {
+				} else if issue.GetState() == statusClosed {
 					counts.closedBugs++
 				}
 			}
