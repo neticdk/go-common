@@ -9,8 +9,6 @@ require (
 	github.com/anchore/grype v0.91.1
 	github.com/anchore/syft v1.23.0
 	github.com/charmbracelet/glamour v0.10.0
-	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
-	github.com/charmbracelet/log v0.4.1
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-git/go-billy/v5 v5.6.2
@@ -120,7 +118,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
-	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
+	github.com/charmbracelet/colorprofile v0.3.0 // indirect
+	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250327172914-2fdc97757edf // indirect
@@ -176,7 +175,6 @@ require (
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
-	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
