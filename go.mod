@@ -6,11 +6,9 @@ require (
 	atomicgo.dev/keyboard v0.2.9
 	github.com/MicahParks/keyfunc/v3 v3.3.11
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
-	github.com/anchore/grype v0.91.0
+	github.com/anchore/grype v0.91.1
 	github.com/anchore/syft v1.23.0
 	github.com/charmbracelet/glamour v0.10.0
-	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
-	github.com/charmbracelet/log v0.4.1
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-git/go-billy/v5 v5.6.2
@@ -88,7 +86,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/anchore/archiver/v3 v3.5.3-0.20241210171143-5b1d8d1c7c51 // indirect
-	github.com/anchore/clio v0.0.0-20250319180342-2cfe4b0cb716 // indirect
+	github.com/anchore/clio v0.0.0-20250401141128-4c1d6bd1e872 // indirect
 	github.com/anchore/fangs v0.0.0-20250326231402-da263204d38e // indirect
 	github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46 // indirect
 	github.com/anchore/go-homedir v0.0.0-20250319154043-c29668562e4d // indirect
@@ -120,7 +118,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
-	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
+	github.com/charmbracelet/colorprofile v0.3.0 // indirect
+	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250327172914-2fdc97757edf // indirect
@@ -176,7 +175,6 @@ require (
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
-	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -196,7 +194,6 @@ require (
 	github.com/google/go-containerregistry v0.20.3 // indirect
 	github.com/google/go-github/v64 v64.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/licensecheck v0.3.1 // indirect
 	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -305,7 +302,7 @@ require (
 	github.com/rubenv/sql-migrate v1.7.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/rust-secure-code/go-rustaudit v0.0.0-20250226111315-e20ec32e963c // indirect
-	github.com/sagikazarmark/locafero v0.7.0 // indirect
+	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/sassoftware/go-rpmutils v0.4.0 // indirect
 	github.com/scylladb/go-set v1.0.3-0.20200225121959-cc7b2070d91e // indirect
@@ -359,7 +356,7 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.221.0 // indirect
 	google.golang.org/genproto v0.0.0-20250212204824-5a70512c5d8b // indirect
