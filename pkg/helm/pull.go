@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/neticdk/go-stdlib/version"
+	"github.com/neticdk/go-stdlib/xstrings"
 	"helm.sh/helm/v3/pkg/action"
 	helmChart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -105,7 +105,7 @@ func PullChart(_ context.Context, repository, chartName, dstDir string, opts ...
 		return nil, fmt.Errorf("renaming directory: %w", err)
 	}
 
-	artifactVersion := version.First(chart.Metadata.Version, opt.Version, "latest")
+	artifactVersion := xstrings.Coalesce(chart.Metadata.Version, opt.Version, "latest")
 
 	return &PullResult{
 		Chart:   chart,
