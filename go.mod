@@ -20,7 +20,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-shellwords v1.0.12
-	github.com/migueleliasweb/go-github-mock v1.1.0
+	github.com/migueleliasweb/go-github-mock v1.3.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/neticdk/go-stdlib v0.2.1
 	github.com/pkg/errors v0.9.1
