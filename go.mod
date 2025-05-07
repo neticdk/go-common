@@ -43,7 +43,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.26.1
-	gorm.io/plugin/opentelemetry v0.1.13
+	gorm.io/plugin/opentelemetry v0.1.14
 	helm.sh/helm/v3 v3.17.3
 	k8s.io/apimachinery v0.33.0
 )
