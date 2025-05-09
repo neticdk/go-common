@@ -25,7 +25,7 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*syft
 		return nil, fmt.Errorf("extracting image names from manifest: %w", err)
 	}
 
-	sboms := make([]*syftSbom.SBOM, len(imageNames))
+	sboms := make([]*syftSbom.SBOM, 0, len(imageNames))
 	for _, imageName := range imageNames {
 		cfg := syft.DefaultCreateSBOMConfig().WithParallelism(10)
 		src, err := syft.GetSource(
