@@ -20,6 +20,7 @@ import (
 
 // GenerateSBOMsFromManifest generates SBOMs from the given manifest
 func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*syftSbom.SBOM, error) {
+	logger := slog.Default()
 	imageNames, err := extractImageNamesFromManifest(ctx, manifest)
 	if err != nil {
 		return nil, fmt.Errorf("extracting image names from manifest: %w", err)
@@ -27,20 +28,34 @@ func GenerateSBOMsFromManifest(ctx context.Context, manifest io.Reader) ([]*syft
 
 	sboms := make([]*syftSbom.SBOM, 0, len(imageNames))
 	for _, imageName := range imageNames {
-		cfg := syft.DefaultCreateSBOMConfig().WithParallelism(10)
-		src, err := syft.GetSource(
-			ctx,
-			imageName,
-			syft.DefaultGetSourceConfig(),
-		)
+		// process a single image and ensure resources are cleaned up
+		err := func() error {
+			cfg := syft.DefaultCreateSBOMConfig().WithParallelism(10)
+			src, err := syft.GetSource(
+				ctx,
+				imageName,
+				syft.DefaultGetSourceConfig(),
+			)
+			if err != nil {
+				return fmt.Errorf("getting source for image %s: %w", imageName, err)
+			}
+			defer func() {
+				if src != nil {
+					if closeErr := src.Close(); closeErr != nil {
+						logger.WarnContext(ctx, "closing source for %q: %v", imageName, closeErr)
+					}
+				}
+			}()
+			s, err := syft.CreateSBOM(ctx, src, cfg)
+			if err != nil {
+				return fmt.Errorf("creating SBOM for image %s: %w", imageName, err)
+			}
+			sboms = append(sboms, s)
+			return nil
+		}()
 		if err != nil {
-			return nil, fmt.Errorf("getting source for image %s: %w", imageName, err)
+			return nil, err
 		}
-		s, err := syft.CreateSBOM(ctx, src, cfg)
-		if err != nil {
-			return nil, fmt.Errorf("creating SBOM for image %s: %w", imageName, err)
-		}
-		sboms = append(sboms, s)
 	}
 
 	return sboms, nil
