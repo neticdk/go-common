@@ -115,6 +115,8 @@ func (g *gitRepository) CreateRemote(name string, url string) (*git.Remote, erro
 //
 //	// Set local branch "main" to track remote branch "main"
 //	gitRepository.SetUpstream("main", "origin", "main")
+//	// Set local branch "fix/issue" to track remote branch "develop"
+//	gitRepository.SetUpstream("fix/issue", "origin", "develop")
 func (g *gitRepository) SetUpstream(local, remote, branch string) error {
 	remoteRef := plumbing.NewRemoteReferenceName(remote, branch)
 	ref, err := g.Repo().Reference(remoteRef, true)
