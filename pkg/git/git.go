@@ -28,7 +28,7 @@ type Repository interface {
 
 	// SetUpstream sets the upstream for the specified local branch
 	// to the specified remote branch.
-	SetUpstream(local string, remote string) error
+	SetUpstream(local, remote, branch string) error
 
 	// Add adds the specified files to the repository
 	Add(paths ...string) error
@@ -110,15 +110,19 @@ func (g *gitRepository) CreateRemote(name string, url string) (*git.Remote, erro
 }
 
 // SetUpstream sets the upstream for the specified local branch
-// to the specified remote branch.
-func (g *gitRepository) SetUpstream(local string, remote string) error {
-	remoteRef := plumbing.NewRemoteReferenceName(remote, local)
+// to the specified branch for the remote repository.
+// Example:
+//
+//	// Set local branch "main" to track remote branch "main"
+//	gitRepository.SetUpstream("main", "origin", "main")
+func (g *gitRepository) SetUpstream(local, remote, branch string) error {
+	remoteRef := plumbing.NewRemoteReferenceName(remote, branch)
 	ref, err := g.Repo().Reference(remoteRef, true)
 	if err != nil {
 		return fmt.Errorf("getting reference: %w", err)
 	}
 
-	mergeRef := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", local))
+	mergeRef := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch))
 	if err := g.Repo().CreateBranch(&config.Branch{Name: local, Remote: remote, Merge: mergeRef}); err != nil {
 		return fmt.Errorf("creating branch: %w", err)
 	}

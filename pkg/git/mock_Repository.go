@@ -520,17 +520,17 @@ func (_c *MockRepository_Repo_Call) RunAndReturn(run func() *v5.Repository) *Moc
 	return _c
 }
 
-// SetUpstream provides a mock function with given fields: local, remote
-func (_m *MockRepository) SetUpstream(local string, remote string) error {
-	ret := _m.Called(local, remote)
+// SetUpstream provides a mock function with given fields: local, remote, branch
+func (_m *MockRepository) SetUpstream(local string, remote string, branch string) error {
+	ret := _m.Called(local, remote, branch)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SetUpstream")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(local, remote)
+	if rf, ok := ret.Get(0).(func(string, string, string) error); ok {
+		r0 = rf(local, remote, branch)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -546,13 +546,14 @@ type MockRepository_SetUpstream_Call struct {
 // SetUpstream is a helper method to define mock.On call
 //   - local string
 //   - remote string
-func (_e *MockRepository_Expecter) SetUpstream(local interface{}, remote interface{}) *MockRepository_SetUpstream_Call {
-	return &MockRepository_SetUpstream_Call{Call: _e.mock.On("SetUpstream", local, remote)}
+//   - branch string
+func (_e *MockRepository_Expecter) SetUpstream(local interface{}, remote interface{}, branch interface{}) *MockRepository_SetUpstream_Call {
+	return &MockRepository_SetUpstream_Call{Call: _e.mock.On("SetUpstream", local, remote, branch)}
 }
 
-func (_c *MockRepository_SetUpstream_Call) Run(run func(local string, remote string)) *MockRepository_SetUpstream_Call {
+func (_c *MockRepository_SetUpstream_Call) Run(run func(local string, remote string, branch string)) *MockRepository_SetUpstream_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		run(args[0].(string), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -562,7 +563,7 @@ func (_c *MockRepository_SetUpstream_Call) Return(_a0 error) *MockRepository_Set
 	return _c
 }
 
-func (_c *MockRepository_SetUpstream_Call) RunAndReturn(run func(string, string) error) *MockRepository_SetUpstream_Call {
+func (_c *MockRepository_SetUpstream_Call) RunAndReturn(run func(string, string, string) error) *MockRepository_SetUpstream_Call {
 	_c.Call.Return(run)
 	return _c
 }
