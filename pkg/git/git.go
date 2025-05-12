@@ -26,6 +26,10 @@ type Repository interface {
 	// CreateRemote creates a new remote with the specified name and url
 	CreateRemote(name string, url string) (*git.Remote, error)
 
+	// SetUpstream sets the upstream for the specified local branch
+	// to the specified remote branch.
+	SetUpstream(local string, remote string) error
+
 	// Add adds the specified files to the repository
 	Add(paths ...string) error
 
@@ -103,6 +107,27 @@ func (g *gitRepository) CreateRemote(name string, url string) (*git.Remote, erro
 		return nil, fmt.Errorf("creating remote: %w", err)
 	}
 	return remote, nil
+}
+
+// SetUpstream sets the upstream for the specified local branch
+// to the specified remote branch.
+func (g *gitRepository) SetUpstream(local string, remote string) error {
+	remoteRef := plumbing.NewRemoteReferenceName(remote, local)
+	ref, err := g.Repo().Reference(remoteRef, true)
+	if err != nil {
+		return fmt.Errorf("getting reference: %w", err)
+	}
+
+	mergeRef := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", local))
+	if err := g.Repo().CreateBranch(&config.Branch{Name: local, Remote: remote, Merge: mergeRef}); err != nil {
+		return fmt.Errorf("creating branch: %w", err)
+	}
+
+	localRef := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", local))
+	if err := g.Repo().Storer.SetReference(plumbing.NewHashReference(localRef, ref.Hash())); err != nil {
+		return fmt.Errorf("setting reference: %w", err)
+	}
+	return nil
 }
 
 // Add adds the specified files to the repository
