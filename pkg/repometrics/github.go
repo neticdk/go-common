@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v71/github"
+	"github.com/google/go-github/v72/github"
 	"golang.org/x/mod/semver"
 	"golang.org/x/oauth2"
 )
@@ -208,7 +208,7 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 		ListOptions: github.ListOptions{PerPage: perPage},
 	}
 	return gr.paginate(func(page int) (int, error) {
-		issuesOpts.Page = page
+		issuesOpts.ListOptions.Page = page
 		pageIssues, resp, err := gr.client.Issues.ListByRepo(gr.ctx, gr.owner, gr.name, issuesOpts)
 		if err != nil {
 			return 0, fmt.Errorf("listing issues: %w", err)
