@@ -723,8 +723,12 @@ github.com/anchore/archiver/v3 v3.5.3-0.20241210171143-5b1d8d1c7c51 h1:yhk+P8lF3
 github.com/anchore/archiver/v3 v3.5.3-0.20241210171143-5b1d8d1c7c51/go.mod h1:nwuGSd7aZp0rtYt79YggCGafz1RYsclE7pi3fhLwvuw=
 github.com/anchore/clio v0.0.0-20250401141128-4c1d6bd1e872 h1:iEF0xhHUuh3J8FrlPsZAQVaMpTa2j4lvLRI5XrXzge4=
 github.com/anchore/clio v0.0.0-20250401141128-4c1d6bd1e872/go.mod h1:Utb9i4kwiCWvqAIxZaJeMIXFO9uOgQXlvH2BfbfO/zI=
+github.com/anchore/clio v0.0.0-20250408180537-ec8fa27f0d9f h1:jTeN+fKTXz1VFo3Zj7Msnx//s5kD6Htd+SS0z9/o7Ss=
+github.com/anchore/clio v0.0.0-20250408180537-ec8fa27f0d9f/go.mod h1:jQ+jv7v9RQnc5oA+Z0rAyXsQfaCAZHwY/CJZiLVggQ4=
 github.com/anchore/fangs v0.0.0-20250326231402-da263204d38e h1:9hXsNmfBqo2exA4a90Qw33Edb+OROVmeibe9RzgS1wA=
 github.com/anchore/fangs v0.0.0-20250326231402-da263204d38e/go.mod h1:vrcYMDps9YXwwx2a9AsvipM6Fi5H9//9bymGb8G8BIQ=
+github.com/anchore/fangs v0.0.0-20250402135612-96e29e45f3fe h1:qv/xxpjF5RdKPqZjx8RM0aBi3HUCAO0DhRBMs2xhY1I=
+github.com/anchore/fangs v0.0.0-20250402135612-96e29e45f3fe/go.mod h1:vrcYMDps9YXwwx2a9AsvipM6Fi5H9//9bymGb8G8BIQ=
 github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46 h1:huvprHsfzhrIIkk7kja1Fm5Wn3mnwPv4CeHrGlGD3ds=
 github.com/anchore/go-collections v0.0.0-20241211140901-567f400e9a46/go.mod h1:1aiktV46ATCkuVg0O573ZrH56BUawTECPETbZyBcqT8=
 github.com/anchore/go-homedir v0.0.0-20250319154043-c29668562e4d h1:gT69osH9AsdpOfqxbRwtxcNnSZ1zg4aKy2BevO3ZBdc=
@@ -744,12 +748,16 @@ github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4 h1:rmZG77uXgE
 github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4/go.mod h1:Bkc+JYWjMCF8OyZ340IMSIi2Ebf3uwByOk6ho4wne1E=
 github.com/anchore/grype v0.91.2 h1:+aDXXbSrzucm1rxiNxG9K1/fUNGZPiIHrmMMnpuV9E4=
 github.com/anchore/grype v0.91.2/go.mod h1:84eh5UCvFv+M56BAZ9Qpr0wDDNudZXE6XZZjpXpYIY0=
+github.com/anchore/grype v0.92.0 h1:koNk8kaYjNG3Ny0B/9WpWcrPHtHdrhnhqu4PkSVLDWA=
+github.com/anchore/grype v0.92.0/go.mod h1:3t6v1aC5OiiwJwo+VBmlWMvKgInbPU9437Nogq1NYIE=
 github.com/anchore/packageurl-go v0.1.1-0.20250220190351-d62adb6e1115 h1:ZyRCmiEjnoGJZ1+Ah0ZZ/mKKqNhGcUZBl0s7PTTDzvY=
 github.com/anchore/packageurl-go v0.1.1-0.20250220190351-d62adb6e1115/go.mod h1:KoYIv7tdP5+CC9VGkeZV4/vGCKsY55VvoG+5dadg4YI=
 github.com/anchore/stereoscope v0.1.4 h1:e+iT9UdUzLBabWGe84hn5sTHDRioY+4IHsVzJXuJlek=
 github.com/anchore/stereoscope v0.1.4/go.mod h1:omWgXDEp/XfqCJlZXIByEo1c3ArZg/qTJ5LBKVLAIdw=
 github.com/anchore/syft v1.23.1 h1:QFWFMlwyJprl60RMrceSB6FJpZCsAQeWVLd9Ltzgwa0=
 github.com/anchore/syft v1.23.1/go.mod h1:vDV0VBC601wHZ2nGuxqoDjfYsiu87WmE0w8HG3RDI6k=
+github.com/anchore/syft v1.24.0 h1:l5snrcZdZ+eFGiEtLhlVmjLSihWcWEs94wgauFj4cvU=
+github.com/anchore/syft v1.24.0/go.mod h1:rD7NI0LzopzDuVe5SW+NOUAcbaRe8TYwwourGwBYZZk=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
@@ -1036,6 +1044,8 @@ github.com/gabriel-vasile/mimetype v1.4.9/go.mod h1:WnSQhFKJuBlRyLiKohA/2DtIlPFA
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/github/go-spdx/v2 v2.3.2 h1:IfdyNHTqzs4zAJjXdVQfRnxt1XMfycXoHBE2Vsm1bjs=
 github.com/github/go-spdx/v2 v2.3.2/go.mod h1:2ZxKsOhvBp+OYBDlsGnUMcchLeo2mrpEBn2L1C+U3IQ=
+github.com/github/go-spdx/v2 v2.3.3 h1:QI7evnHWEfWkT54eJwkoV/f3a0xD3gLlnVmT5wQG6LE=
+github.com/github/go-spdx/v2 v2.3.3/go.mod h1:2ZxKsOhvBp+OYBDlsGnUMcchLeo2mrpEBn2L1C+U3IQ=
 github.com/glebarez/go-sqlite v1.22.0 h1:uAcMJhaA6r3LHMTFgP0SifzgXg46yJkgxqyuyec+ruQ=
 github.com/glebarez/go-sqlite v1.22.0/go.mod h1:PlBIdHe0+aUEFn+r2/uthrWq4FxbzugL0L8Li6yQJbc=
 github.com/glebarez/sqlite v1.11.0 h1:wSG0irqzP6VurnMEpFGer5Li19RpIRi2qvQz++w0GMw=
@@ -1564,6 +1574,8 @@ github.com/ncruces/go-strftime v0.1.9 h1:bY0MQC28UADQmHmaF5dgpLmImcShSi2kHU9XLdh
 github.com/ncruces/go-strftime v0.1.9/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
 github.com/neticdk/go-stdlib v0.2.1 h1:tUxYvWH4l8j+4WG9jcn/QuU+9T/IB3WUUoRK4ZqlN5s=
 github.com/neticdk/go-stdlib v0.2.1/go.mod h1:Av42pL+G/2EnCPZVF6WsJnCvvUXhkVpNDZp1YqY2ZTM=
+github.com/nix-community/go-nix v0.0.0-20250101154619-4bdde671e0a1 h1:kpt9ZfKcm+EDG4s40hMwE//d5SBgDjUOrITReV2u4aA=
+github.com/nix-community/go-nix v0.0.0-20250101154619-4bdde671e0a1/go.mod h1:qgCw4bBKZX8qMgGeEZzGFVT3notl42dBjNqO2jut0M0=
 github.com/nwaples/rardecode v1.1.3 h1:cWCaZwfM5H7nAD6PyEdcVnczzV8i/JtotnyW/dD9lEc=
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/nwaples/rardecode/v2 v2.1.0 h1:JQl9ZoBPDy+nIZGb1mx8+anfHp/LV3NE2MjMiv0ct/U=
