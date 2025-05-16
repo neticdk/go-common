@@ -9,6 +9,10 @@ import (
 
 // SubCommandRunner is an interface for a subcommand runner
 type SubCommandRunner[T any] interface {
+	// SetupFlags sets up the flags for the command
+	// Returns error if flag setup fails
+	SetupFlags(ctx context.Context, cmd *cobra.Command) error
+
 	// Complete performs any setup or completion of arguments
 	Complete(ctx context.Context, arg T) error
 
@@ -151,6 +155,9 @@ func (b *SubCommandBuilder[T]) WithMaxArgs(n int) *SubCommandBuilder[T] {
 func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, _ []string) error {
 		ctx := cmd.Context()
+		if err := runner.SetupFlags(ctx, cmd); err != nil {
+			return err
+		}
 		if err := runner.Complete(ctx, runnerArg); err != nil {
 			return err
 		}
@@ -163,9 +170,14 @@ func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command,
 
 // TestRunner is a test runner for commands
 type TestRunner[T any] struct {
-	CompleteFunc func(context.Context, T) error
-	ValidateFunc func(context.Context, T) error
-	RunFunc      func(context.Context, T) error
+	SetupFlagsFunc func(context.Context, *cobra.Command) error
+	CompleteFunc   func(context.Context, T) error
+	ValidateFunc   func(context.Context, T) error
+	RunFunc        func(context.Context, T) error
+}
+
+func (tr *TestRunner[T]) SetupFlags(ctx context.Context, cmd *cobra.Command) error {
+	return tr.SetupFlagsFunc(ctx, cmd)
 }
 
 func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) error {
@@ -182,6 +194,7 @@ func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error {
 
 type NoopRunner[T any] struct{}
 
-func (o *NoopRunner[T]) Complete(_ context.Context, _ T) error { return nil }
-func (o *NoopRunner[T]) Validate(_ context.Context, _ T) error { return nil }
-func (o *NoopRunner[T]) Run(_ context.Context, _ T) error      { return nil }
+func (o *NoopRunner[T]) SetupFlags(_ context.Context, _ *cobra.Command) error { return nil }
+func (o *NoopRunner[T]) Complete(_ context.Context, _ T) error                { return nil }
+func (o *NoopRunner[T]) Validate(_ context.Context, _ T) error                { return nil }
+func (o *NoopRunner[T]) Run(_ context.Context, _ T) error                     { return nil }

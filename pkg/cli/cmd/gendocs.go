@@ -15,6 +15,7 @@ type genDocsOptions struct {
 	dir string
 }
 
+func (o *genDocsOptions) SetupFlags(_ context.Context, _ *cobra.Command) error  { return nil }
 func (o *genDocsOptions) Complete(_ context.Context, _ *ExecutionContext) error { return nil }
 func (o *genDocsOptions) Validate(_ context.Context, _ *ExecutionContext) error { return nil }
 func (o *genDocsOptions) Run(_ context.Context, ec *ExecutionContext) error {
