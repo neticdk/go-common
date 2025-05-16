@@ -53,6 +53,9 @@ func NewSubCommand[T any](
 // Build builds the subcommand
 func (b *SubCommandBuilder[T]) Build() *cobra.Command {
 	b.cmd.RunE = mkRunE(b.runner, b.runnerArg)
+	if err := b.runner.SetupFlags(b.cmd.Context(), b.cmd); err != nil {
+		panic(err)
+	}
 	return b.cmd
 }
 
@@ -155,9 +158,6 @@ func (b *SubCommandBuilder[T]) WithMaxArgs(n int) *SubCommandBuilder[T] {
 func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, _ []string) error {
 		ctx := cmd.Context()
-		if err := runner.SetupFlags(ctx, cmd); err != nil {
-			return err
-		}
 		if err := runner.Complete(ctx, runnerArg); err != nil {
 			return err
 		}
