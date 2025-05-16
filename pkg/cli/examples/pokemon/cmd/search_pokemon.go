@@ -12,7 +12,6 @@ import (
 	"github.com/neticdk/go-common/pkg/cli/cmd"
 	"github.com/neticdk/go-common/pkg/cli/ui"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 func newSearchPokemonCmd(ac *pokemon.Context) *cobra.Command {
@@ -23,7 +22,6 @@ func newSearchPokemonCmd(ac *pokemon.Context) *cobra.Command {
 		WithExample(searchPokemonCmdExample()).
 		Build()
 
-	o.bindFlags(c.Flags())
 	return c
 }
 
@@ -31,8 +29,10 @@ type searchPokemonOptions struct {
 	name string
 }
 
-func (o *searchPokemonOptions) bindFlags(f *pflag.FlagSet) {
-	f.StringVar(&o.name, "name", "", "Name of the pokemon to search for")
+func (o *searchPokemonOptions) SetupFlags(_ context.Context, cmd *cobra.Command) error {
+	flags := cmd.Flags()
+	flags.StringVar(&o.name, "name", "", "Name of the pokemon to search for")
+	return nil
 }
 
 func (o *searchPokemonOptions) Complete(_ context.Context, ac *pokemon.Context) error {

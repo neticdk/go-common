@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	"pokemon/internal/pokemon"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"
@@ -38,10 +36,7 @@ func Execute(version string) int {
 	ec := cmd.NewExecutionContext(
 		AppName,
 		ShortDesc,
-		version,
-		os.Stdin,
-		os.Stdout,
-		os.Stderr)
+		version)
 	ac := pokemon.NewContext()
 	ac.EC = ec
 	ec.LongDescription = LongDesc
