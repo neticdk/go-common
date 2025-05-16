@@ -45,7 +45,7 @@ require (
 	gorm.io/gorm v1.26.1
 	gorm.io/plugin/opentelemetry v0.1.14
 	helm.sh/helm/v3 v3.17.3
-	k8s.io/apimachinery v0.33.0
+	k8s.io/apimachinery v0.33.1
 )
 
 require (
@@ -74,7 +74,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.50.0 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Masterminds/squirrel v1.5.4 // indirect
