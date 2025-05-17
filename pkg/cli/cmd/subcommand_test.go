@@ -42,6 +42,7 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("complete_called", func(t *testing.T) {
 		completeCalled := false
 		runner := &TestRunner[arg]{
+			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
 			CompleteFunc: func(ctx context.Context, a arg) error {
 				completeCalled = true
 				return nil
@@ -58,9 +59,10 @@ func Test_mkRunE(t *testing.T) {
 
 	t.Run("validate_error", func(t *testing.T) {
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(ctx context.Context, a arg) error { return nil },
-			ValidateFunc: func(ctx context.Context, a arg) error { return assert.AnError },
-			RunFunc:      func(ctx context.Context, a arg) error { return nil },
+			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
+			CompleteFunc:   func(ctx context.Context, a arg) error { return nil },
+			ValidateFunc:   func(ctx context.Context, a arg) error { return assert.AnError },
+			RunFunc:        func(ctx context.Context, a arg) error { return nil },
 		}
 		runE := mkRunE(runner, arg{})
 		cmd := &cobra.Command{}
@@ -71,9 +73,10 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("run_called", func(t *testing.T) {
 		runCalled := false
 		runner := &TestRunner[arg]{
-			CompleteFunc: func(ctx context.Context, a arg) error { return nil },
-			ValidateFunc: func(ctx context.Context, a arg) error { return nil },
-			RunFunc:      func(ctx context.Context, a arg) error { runCalled = true; return nil },
+			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
+			CompleteFunc:   func(ctx context.Context, a arg) error { return nil },
+			ValidateFunc:   func(ctx context.Context, a arg) error { return nil },
+			RunFunc:        func(ctx context.Context, a arg) error { runCalled = true; return nil },
 		}
 
 		runE := mkRunE(runner, arg{})
@@ -82,6 +85,28 @@ func Test_mkRunE(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, runCalled)
 	})
+}
+
+type testOpts struct {
+	testFlag string
+}
+
+func (o *testOpts) SetupFlags(_ context.Context, cmd *cobra.Command) error {
+	flags := cmd.Flags()
+	flags.StringVar(&o.testFlag, "test-flag", "default-value", "Test flag")
+	return nil
+}
+func (o *testOpts) Complete(_ context.Context, _ any) error { return nil }
+func (o *testOpts) Validate(_ context.Context, _ any) error { return nil }
+func (o *testOpts) Run(_ context.Context, _ any) error      { return nil }
+
+func TestSetupFlags(t *testing.T) {
+	o := &testOpts{}
+	builder := NewSubCommand("test", o, nil)
+	cmd := builder.Build()
+	v, err := cmd.Flags().GetString("test-flag")
+	assert.Nil(t, err)
+	assert.Equal(t, "default-value", v)
 }
 
 func TestArgsHelpers(t *testing.T) {
