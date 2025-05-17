@@ -87,6 +87,28 @@ func Test_mkRunE(t *testing.T) {
 	})
 }
 
+type testOpts struct {
+	testFlag string
+}
+
+func (o *testOpts) SetupFlags(_ context.Context, cmd *cobra.Command) error {
+	flags := cmd.Flags()
+	flags.StringVar(&o.testFlag, "test-flag", "default-value", "Test flag")
+	return nil
+}
+func (o *testOpts) Complete(_ context.Context, _ any) error { return nil }
+func (o *testOpts) Validate(_ context.Context, _ any) error { return nil }
+func (o *testOpts) Run(_ context.Context, _ any) error      { return nil }
+
+func TestSetupFlags(t *testing.T) {
+	o := &testOpts{}
+	builder := NewSubCommand("test", o, nil)
+	cmd := builder.Build()
+	v, err := cmd.Flags().GetString("test-flag")
+	assert.Nil(t, err)
+	assert.Equal(t, "default-value", v)
+}
+
 func TestArgsHelpers(t *testing.T) {
 	t.Run("NoArgsReturnsErrorWhenArgsProvided", func(t *testing.T) {
 		builder := NewSubCommand("test", &NoopRunner[any]{}, nil)
