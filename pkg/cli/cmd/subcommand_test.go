@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -42,7 +43,7 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("complete_called", func(t *testing.T) {
 		completeCalled := false
 		runner := &TestRunner[arg]{
-			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
+			SetupFlagsFunc: func(ctx context.Context, a arg) error { return nil },
 			CompleteFunc: func(ctx context.Context, a arg) error {
 				completeCalled = true
 				return nil
@@ -59,7 +60,7 @@ func Test_mkRunE(t *testing.T) {
 
 	t.Run("validate_error", func(t *testing.T) {
 		runner := &TestRunner[arg]{
-			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
+			SetupFlagsFunc: func(ctx context.Context, a arg) error { return nil },
 			CompleteFunc:   func(ctx context.Context, a arg) error { return nil },
 			ValidateFunc:   func(ctx context.Context, a arg) error { return assert.AnError },
 			RunFunc:        func(ctx context.Context, a arg) error { return nil },
@@ -73,7 +74,7 @@ func Test_mkRunE(t *testing.T) {
 	t.Run("run_called", func(t *testing.T) {
 		runCalled := false
 		runner := &TestRunner[arg]{
-			SetupFlagsFunc: func(ctx context.Context, cmd *cobra.Command) error { return nil },
+			SetupFlagsFunc: func(ctx context.Context, a arg) error { return nil },
 			CompleteFunc:   func(ctx context.Context, a arg) error { return nil },
 			ValidateFunc:   func(ctx context.Context, a arg) error { return nil },
 			RunFunc:        func(ctx context.Context, a arg) error { runCalled = true; return nil },
@@ -87,26 +88,47 @@ func Test_mkRunE(t *testing.T) {
 	})
 }
 
+type AppContext struct {
+	EC *ExecutionContext
+}
+
 type testOpts struct {
 	testFlag string
 }
 
-func (o *testOpts) SetupFlags(_ context.Context, cmd *cobra.Command) error {
+func (o *testOpts) SetupFlags(_ context.Context, ac *AppContext) error {
+	cmd := ac.EC.Command
 	flags := cmd.Flags()
+
 	flags.StringVar(&o.testFlag, "test-flag", "default-value", "Test flag")
+
+	if err := cmd.MarkFlagRequired("test-flag"); err != nil {
+		return fmt.Errorf("failed to mark flag as required: %w", err)
+	}
+
 	return nil
 }
-func (o *testOpts) Complete(_ context.Context, _ any) error { return nil }
-func (o *testOpts) Validate(_ context.Context, _ any) error { return nil }
-func (o *testOpts) Run(_ context.Context, _ any) error      { return nil }
+func (o *testOpts) Complete(_ context.Context, _ *AppContext) error { return nil }
+func (o *testOpts) Validate(_ context.Context, _ *AppContext) error { return nil }
+func (o *testOpts) Run(_ context.Context, _ *AppContext) error      { return nil }
 
 func TestSetupFlags(t *testing.T) {
+	ac := &AppContext{
+		EC: NewExecutionContext("test-app", "test", "v0.0.0"),
+	}
+	rootCmd := NewRootCommand(ac.EC).Build()
 	o := &testOpts{}
-	builder := NewSubCommand("test", o, nil)
-	cmd := builder.Build()
+	cmd := NewSubCommand("test", o, ac).Build()
 	v, err := cmd.Flags().GetString("test-flag")
 	assert.Nil(t, err)
-	assert.Equal(t, "default-value", v)
+	assert.Equal(t, v, "default-value")
+	rootCmd.AddCommand(cmd)
+	rootCmd.SetArgs([]string{"test", "--test-flag", "new value"})
+	err = rootCmd.ExecuteContext(context.Background())
+	assert.NoError(t, err)
+	v, err = cmd.Flags().GetString("test-flag")
+	assert.Nil(t, err)
+	assert.Equal(t, v, "new value")
 }
 
 func TestArgsHelpers(t *testing.T) {

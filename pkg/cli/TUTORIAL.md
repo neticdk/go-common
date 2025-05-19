@@ -950,14 +950,22 @@ Let's see an example of how to do that:
 ```go
 import "github.com/spf13/pflag"
 
-func (o *driveOptions) SetupFlags(_ context.Context, cmd *cobra.Command) error {
+func (o *driveOptions) SetupFlags(_ context.Context, ac *helloworld.Context) error {
+    cmd := ac.EC.Command
     flags := cmd.Flags()
-    flags.SortFlags = false
-    _ = cmd.MarkFlagRequired("name")
-    _ = cmd.MarkFlagRequired("age")
 
     flags.StringVar(&o.name, "name", "", "Driver name")
     flags.IntVar(&o.age, "age", 0, "Driver age")
+
+    flags.SortFlags = false
+
+    if err := cmd.MarkFlagRequired("name"); err != nil {
+        return err
+    }
+    if err := cmd.MarkFlagRequired("age"); err != nil {
+        return err
+    }
+
 
     return nil
 }

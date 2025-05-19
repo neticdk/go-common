@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/spf13/cobra"
 )
@@ -11,7 +12,7 @@ import (
 type SubCommandRunner[T any] interface {
 	// SetupFlags sets up the flags for the command
 	// Returns error if flag setup fails
-	SetupFlags(ctx context.Context, cmd *cobra.Command) error
+	SetupFlags(ctx context.Context, arg T) error
 
 	// Complete performs any setup or completion of arguments
 	Complete(ctx context.Context, arg T) error
@@ -32,6 +33,27 @@ type SubCommandBuilder[T any] struct {
 	runnerArg T
 }
 
+// setECCommandField sets the command field in the runner argument if it
+// contains the ExecutionContext
+func setECCommandField(runnerArg any, c *cobra.Command) {
+	v := reflect.ValueOf(runnerArg)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() == reflect.Struct {
+		field := v.FieldByName("EC")
+
+		var ecType *ExecutionContext
+		if field.IsValid() && field.Kind() == reflect.Ptr && !field.IsNil() && field.Type() == reflect.TypeOf(ecType) {
+			ecField := field.Elem()
+			commandField := ecField.FieldByName("Command")
+			if commandField.IsValid() && commandField.CanSet() && commandField.Type() == reflect.TypeOf((*cobra.Command)(nil)) {
+				commandField.Set(reflect.ValueOf(c))
+			}
+		}
+	}
+}
+
 // NewSubCommand creates a new subcommand
 // args can be used to pass arguments to the runner
 func NewSubCommand[T any](
@@ -43,6 +65,11 @@ func NewSubCommand[T any](
 		Use: name,
 	}
 
+	// We don't know the type of runnerArg but we will set .EC.Command on it if
+	// it exists. This mus tbe set for SetupFlags to be able to access the
+	// cobra command (and flags).
+	setECCommandField(runnerArg, c)
+
 	return &SubCommandBuilder[T]{
 		cmd:       c,
 		runner:    runner,
@@ -53,7 +80,7 @@ func NewSubCommand[T any](
 // Build builds the subcommand
 func (b *SubCommandBuilder[T]) Build() *cobra.Command {
 	b.cmd.RunE = mkRunE(b.runner, b.runnerArg)
-	if err := b.runner.SetupFlags(b.cmd.Context(), b.cmd); err != nil {
+	if err := b.runner.SetupFlags(b.cmd.Context(), b.runnerArg); err != nil {
 		panic(err)
 	}
 	return b.cmd
@@ -170,14 +197,14 @@ func mkRunE[T any](runner SubCommandRunner[T], runnerArg T) func(*cobra.Command,
 
 // TestRunner is a test runner for commands
 type TestRunner[T any] struct {
-	SetupFlagsFunc func(context.Context, *cobra.Command) error
+	SetupFlagsFunc func(context.Context, T) error
 	CompleteFunc   func(context.Context, T) error
 	ValidateFunc   func(context.Context, T) error
 	RunFunc        func(context.Context, T) error
 }
 
-func (tr *TestRunner[T]) SetupFlags(ctx context.Context, cmd *cobra.Command) error {
-	return tr.SetupFlagsFunc(ctx, cmd)
+func (tr *TestRunner[T]) SetupFlags(ctx context.Context, runnerArg T) error {
+	return tr.SetupFlagsFunc(ctx, runnerArg)
 }
 
 func (tr *TestRunner[T]) Complete(ctx context.Context, runnerArg T) error {
@@ -194,7 +221,7 @@ func (tr *TestRunner[T]) Run(ctx context.Context, runnerArg T) error {
 
 type NoopRunner[T any] struct{}
 
-func (o *NoopRunner[T]) SetupFlags(_ context.Context, _ *cobra.Command) error { return nil }
-func (o *NoopRunner[T]) Complete(_ context.Context, _ T) error                { return nil }
-func (o *NoopRunner[T]) Validate(_ context.Context, _ T) error                { return nil }
-func (o *NoopRunner[T]) Run(_ context.Context, _ T) error                     { return nil }
+func (o *NoopRunner[T]) SetupFlags(_ context.Context, _ T) error { return nil }
+func (o *NoopRunner[T]) Complete(_ context.Context, _ T) error   { return nil }
+func (o *NoopRunner[T]) Validate(_ context.Context, _ T) error   { return nil }
+func (o *NoopRunner[T]) Run(_ context.Context, _ T) error        { return nil }
