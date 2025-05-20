@@ -67,6 +67,11 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 		},
 	}
 
+	// Update default execution context command
+	// For subcommands, this is set to the subcommand's command though
+	// PersistentPreRunE (defaultInitFunc)
+	ec.Command = c
+
 	AddPersistentFlags(c, ec)
 	ec.SetLogLevel()
 

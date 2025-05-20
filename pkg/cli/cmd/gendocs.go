@@ -15,8 +15,9 @@ type genDocsOptions struct {
 	dir string
 }
 
-func (o *genDocsOptions) Complete(_ context.Context, _ *ExecutionContext) error { return nil }
-func (o *genDocsOptions) Validate(_ context.Context, _ *ExecutionContext) error { return nil }
+func (o *genDocsOptions) SetupFlags(_ context.Context, _ *ExecutionContext) error { return nil }
+func (o *genDocsOptions) Complete(_ context.Context, _ *ExecutionContext) error   { return nil }
+func (o *genDocsOptions) Validate(_ context.Context, _ *ExecutionContext) error   { return nil }
 func (o *genDocsOptions) Run(_ context.Context, ec *ExecutionContext) error {
 	if err := os.MkdirAll(o.dir, file.FileModeNewDirectory); err != nil {
 		return fmt.Errorf("failed to create directory %s: %w", o.dir, err)

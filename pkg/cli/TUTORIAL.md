@@ -937,15 +937,12 @@ func newDriveCmd(ac *myapp.Context) *cobra.Command {
         WithGroupID(groupComponent).
         Build()
 
-    o.bindFlags(c.Flags())
-    c.Flags().SortFlags = false
-    _ = c.MarkFlagRequired("name")
-    _ = c.MarkFlagRequired("age")
     return c
 }
 ```
 
-Notice the `bindFlags` function. It binds the command line flags to the options.
+Flags are bound in to the options struct using the `SetupFlags` method.
+
 You will have to create it yourself.
 
 Let's see an example of how to do that:
@@ -953,9 +950,24 @@ Let's see an example of how to do that:
 ```go
 import "github.com/spf13/pflag"
 
-func (o *driveOptions) bindFlags(f *pflag.FlagSet) {
-    f.StringVar(&o.name, "name", "", "Driver name")
-    f.IntVar(&o.age, "age", 0, "Driver age")
+func (o *driveOptions) SetupFlags(_ context.Context, ac *helloworld.Context) error {
+    cmd := ac.EC.Command
+    flags := cmd.Flags()
+
+    flags.StringVar(&o.name, "name", "", "Driver name")
+    flags.IntVar(&o.age, "age", 0, "Driver age")
+
+    flags.SortFlags = false
+
+    if err := cmd.MarkFlagRequired("name"); err != nil {
+        return err
+    }
+    if err := cmd.MarkFlagRequired("age"); err != nil {
+        return err
+    }
+
+
+    return nil
 }
 ```
 
