@@ -2,6 +2,7 @@ package cncf
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,9 +15,10 @@ import (
 type MockHTTPClient struct {
 	Response *http.Response
 	Err      error
+	Context  context.Context
 }
 
-func (m *MockHTTPClient) Get(url string) (*http.Response, error) {
+func (m *MockHTTPClient) Get(ctx context.Context, url string) (*http.Response, error) {
 	return m.Response, m.Err
 }
 
@@ -43,12 +45,13 @@ landscape:
 
 	mockClient := &MockHTTPClient{
 		Response: mockResponse,
+		Context:  t.Context(),
 	}
 
 	// Clear the cache before running the test
 	cache = &Cache{}
 
-	landscape, err := GetLandscape(mockClient)
+	landscape, err := GetLandscape(t.Context(), mockClient)
 	assert.NoError(t, err)
 	assert.NotNil(t, landscape)
 	assert.Equal(t, "Provisioning", landscape.Categories[0].Name)
@@ -88,14 +91,14 @@ landscape:
 	cache = &Cache{}
 
 	// First call to populate the cache
-	_, err := GetLandscape(mockClient)
+	_, err := GetLandscape(t.Context(), mockClient)
 	assert.NoError(t, err)
 
 	// Modify the mock client to return an error
 	mockClient.Err = fmt.Errorf("network error")
 
 	// Second call should return cached data
-	landscape, err := GetLandscape(mockClient)
+	landscape, err := GetLandscape(t.Context(), mockClient)
 	assert.NoError(t, err)
 	assert.NotNil(t, landscape)
 	assert.Equal(t, "Provisioning", landscape.Categories[0].Name)

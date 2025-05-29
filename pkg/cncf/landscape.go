@@ -1,10 +1,10 @@
 package cncf
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -48,24 +48,24 @@ type Project struct {
 // HTTPClient is an interface that abstracts the http.Get function.
 type HTTPClient interface {
 	// Get gets the content of the URL and returns the response.
-	Get(rawURL string) (*http.Response, error)
+	Get(ctx context.Context, rawURL string) (*http.Response, error)
 }
 
 // DefaultHTTPClient is the default implementation of HTTPClient that uses http.Get.
 type DefaultHTTPClient struct{}
 
 // Get gets the content of the URL and returns the response.
-func (c *DefaultHTTPClient) Get(rawURL string) (*http.Response, error) {
-	parsedURL, err := url.Parse(rawURL)
+func (c *DefaultHTTPClient) Get(ctx context.Context, rawURL string) (*http.Response, error) {
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("invalid URL: %w", err)
+		return nil, fmt.Errorf("creating request: %w", err)
 	}
-
-	return http.Get(parsedURL.String())
+	return client.Do(req)
 }
 
 // GetLandscape fetches the CNCF landscape from the official repository
-func GetLandscape(client HTTPClient) (*Landscape, error) {
+func GetLandscape(ctx context.Context, client HTTPClient) (*Landscape, error) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
@@ -74,7 +74,7 @@ func GetLandscape(client HTTPClient) (*Landscape, error) {
 		return cache.data, nil
 	}
 
-	res, err := client.Get(LandscapeURL)
+	res, err := client.Get(ctx, LandscapeURL)
 	if err != nil {
 		return nil, fmt.Errorf("fetching landscape: %w", err)
 	}

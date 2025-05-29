@@ -1,6 +1,7 @@
 package repometrics
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/neticdk/go-common/pkg/cncf"
@@ -27,7 +28,7 @@ func (m *Metrics) UpdateCNCFStatus(opts UpdateCNCFOptions) error {
 	if opts.Client == nil {
 		opts.Client = &cncf.DefaultHTTPClient{}
 	}
-	l, err := cncf.GetLandscape(opts.Client)
+	l, err := cncf.GetLandscape(context.Background(), opts.Client)
 	if err != nil {
 		return fmt.Errorf("getting landscape: %w", err)
 	}
