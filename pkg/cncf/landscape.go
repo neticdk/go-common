@@ -117,10 +117,13 @@ func (l *Landscape) FindProject(opts FindProjectOptions) *Project {
 	for _, category := range l.Categories {
 		for _, subcategory := range category.Subcategories {
 			for _, item := range subcategory.Items {
-				if item.RepoURL == opts.RepoURL || item.HomepageURL == opts.HomepageURL {
+				if opts.RepoURL != "" && item.RepoURL == opts.RepoURL {
 					return &item
 				}
-				if strings.EqualFold(item.Name, opts.Name) {
+				if opts.HomepageURL != "" && item.HomepageURL == opts.HomepageURL {
+					return &item
+				}
+				if opts.Name != "" && strings.EqualFold(item.Name, opts.Name) {
 					return &item
 				}
 			}
