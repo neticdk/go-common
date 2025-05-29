@@ -12,10 +12,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	LandscapeURL = "https://raw.githubusercontent.com/cncf/landscape/master/landscape.yml"
-	CacheTTL     = 1 * time.Hour
-)
+const LandscapeURL = "https://raw.githubusercontent.com/cncf/landscape/master/landscape.yml"
+
+var CacheTTL = 1 * time.Hour
 
 type Cache struct {
 	data      *Landscape
@@ -128,4 +127,12 @@ func (l *Landscape) FindProject(opts FindProjectOptions) *Project {
 		}
 	}
 	return nil
+}
+
+// ClearCache clears the cache of the landscape data.
+func ClearCache() {
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	cache.data = nil
+	cache.expiresAt = time.Time{}
 }

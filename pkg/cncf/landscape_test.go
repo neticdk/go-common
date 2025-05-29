@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -234,5 +235,24 @@ func TestLandscape_FindProject(t *testing.T) {
 				t.Errorf("FindProject().RepoURL = %v, want %v", got.RepoURL, tt.want.RepoURL)
 			}
 		})
+	}
+}
+
+func TestClearCache(t *testing.T) {
+	// Set some dummy values to ensure they are cleared
+	cache.data = &Landscape{} // Use a dummy non-nil value
+	cache.expiresAt = time.Now().Add(1 * time.Hour)
+
+	// Call the function to clear the cache
+	ClearCache()
+
+	// Assert that the cache is cleared
+	if cache.data != nil {
+		t.Errorf("cache.data was not cleared, expected nil, got %+v", cache.data)
+	}
+
+	var zeroTime time.Time
+	if !cache.expiresAt.Equal(zeroTime) {
+		t.Errorf("cache.expiresAt was not cleared, expected zero time (%s), got %s", zeroTime, cache.expiresAt)
 	}
 }
