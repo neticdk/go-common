@@ -6,7 +6,7 @@ require (
 	atomicgo.dev/keyboard v0.2.9
 	github.com/MicahParks/keyfunc/v3 v3.3.11
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
-	github.com/anchore/grype v0.92.1
+	github.com/anchore/grype v0.92.2
 	github.com/anchore/syft v1.26.1
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/chelnak/ysmrr v0.6.0
@@ -17,7 +17,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/go-github/v72 v72.0.0
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
-	github.com/labstack/echo/v4 v4.13.3
+	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/migueleliasweb/go-github-mock v1.3.0
@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 	gorm.io/plugin/opentelemetry v0.1.14
-	helm.sh/helm/v3 v3.18.0
+	helm.sh/helm/v3 v3.18.1
 	k8s.io/apimachinery v0.33.1
 )
 
