@@ -36,6 +36,17 @@ landscape:
             homepage_url: https://www.airshipit.org/
             repo_url: https://github.com/airshipit/treasuremap
             project: airship
+            crunchbase: https://www.crunchbase.com/organization/cloud-native-computing-foundation
+            extra:
+              accepted: '2022-09-14'
+              incubating: '2022-09-14'
+              archived: '2022-09-14'
+              graduated: '2024-09-11'
+              audits:
+                - date: '2024-01-01'
+                  type: security
+                  url: https://github.com/airshipit/treasuremap/blob/main/audits/security.md
+                  vendor: Cure53
 `
 
 	mockResponse := &http.Response{
@@ -59,7 +70,14 @@ landscape:
 	assert.Equal(t, "Airship", landscape.Categories[0].Subcategories[0].Items[0].Name)
 	assert.Equal(t, "https://www.airshipit.org/", landscape.Categories[0].Subcategories[0].Items[0].HomepageURL)
 	assert.Equal(t, "https://github.com/airshipit/treasuremap", landscape.Categories[0].Subcategories[0].Items[0].RepoURL)
+	assert.Equal(t, "https://www.crunchbase.com/organization/cloud-native-computing-foundation", landscape.Categories[0].Subcategories[0].Items[0].Crunchbase)
 	assert.Equal(t, "airship", landscape.Categories[0].Subcategories[0].Items[0].Project)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Accepted)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Incubating)
+	assert.Equal(t, "2024-09-11", landscape.Categories[0].Subcategories[0].Items[0].Extra.Graduated)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Archived)
+	assert.Equal(t, 1, len(landscape.Categories[0].Subcategories[0].Items[0].Extra.Audits))
+	assert.Equal(t, "security", landscape.Categories[0].Subcategories[0].Items[0].Extra.Audits[0].Type)
 }
 
 func TestGetLandscape_Cache(t *testing.T) {
@@ -76,6 +94,17 @@ landscape:
             homepage_url: https://www.airshipit.org/
             repo_url: https://github.com/airshipit/treasuremap
             project: airship
+            crunchbase: https://www.crunchbase.com/organization/cloud-native-computing-foundation
+            extra:
+              accepted: '2022-09-14'
+              incubating: '2022-09-14'
+              archived: '2022-09-14'
+              graduated: '2024-09-11'
+              audits:
+                - date: '2024-01-01'
+                  type: security
+                  url: https://github.com/airshipit/treasuremap/blob/main/audits/security.md
+                  vendor: Cure53
 `
 
 	mockResponse := &http.Response{
@@ -107,6 +136,13 @@ landscape:
 	assert.Equal(t, "https://www.airshipit.org/", landscape.Categories[0].Subcategories[0].Items[0].HomepageURL)
 	assert.Equal(t, "https://github.com/airshipit/treasuremap", landscape.Categories[0].Subcategories[0].Items[0].RepoURL)
 	assert.Equal(t, "airship", landscape.Categories[0].Subcategories[0].Items[0].Project)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Accepted)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Incubating)
+	assert.Equal(t, "2024-09-11", landscape.Categories[0].Subcategories[0].Items[0].Extra.Graduated)
+	assert.Equal(t, "2022-09-14", landscape.Categories[0].Subcategories[0].Items[0].Extra.Archived)
+	assert.Equal(t, 1, len(landscape.Categories[0].Subcategories[0].Items[0].Extra.Audits))
+	assert.Equal(t, "security", landscape.Categories[0].Subcategories[0].Items[0].Extra.Audits[0].Type)
+	assert.Equal(t, 1, len(cache.data.Categories)) // Ensure item is cached
 }
 
 func TestLandscape_FindProject(t *testing.T) {

@@ -39,10 +39,35 @@ type Subcategory struct {
 }
 
 type Project struct {
+	// Native fields.
 	Name        string `yaml:"name"`
 	HomepageURL string `yaml:"homepage_url"`
 	RepoURL     string `yaml:"repo_url"`
 	Project     string `yaml:"project"`
+	Crunchbase  string `yaml:"crunchbase"`
+	Extra       Extra  `yaml:"extra,omitempty"`
+
+	// The fields are added for convenience to avoid having to look them up in
+	// the subcategory.
+	Category    string `yaml:"category"`
+	Subcategory string `yaml:"subcategory"`
+}
+
+// Extra holds extra information about the project status.
+type Extra struct {
+	Accepted   string  `yaml:"accepted,omitempty"`
+	Incubating string  `yaml:"incubating,omitempty"`
+	Graduated  string  `yaml:"graduated,omitempty"`
+	Archived   string  `yaml:"archived,omitempty"`
+	Audits     []Audit `yaml:"audits,omitempty"`
+}
+
+// Audit holds information about the audit of a project.
+type Audit struct {
+	Date   string `yaml:"date,omitempty"`
+	Type   string `yaml:"type,omitempty"`
+	URL    string `yaml:"url,omitempty"`
+	Vendor string `yaml:"vendor,omitempty"`
 }
 
 // HTTPClient is an interface that abstracts the http.Get function.
@@ -117,19 +142,22 @@ func (l *Landscape) FindProject(opts FindProjectOptions) *Project {
 	for _, category := range l.Categories {
 		for _, subcategory := range category.Subcategories {
 			for _, item := range subcategory.Items {
-				if opts.RepoURL != "" && item.RepoURL == opts.RepoURL {
-					return &item
-				}
-				if opts.HomepageURL != "" && item.HomepageURL == opts.HomepageURL {
-					return &item
-				}
-				if opts.Name != "" && strings.EqualFold(item.Name, opts.Name) {
+				foundByRepo := opts.RepoURL != "" && item.RepoURL == opts.RepoURL
+				foundByHomepage := opts.HomepageURL != "" && item.HomepageURL == opts.HomepageURL
+				foundByName := opts.Name != "" && strings.EqualFold(item.Name, opts.Name)
+				if foundByRepo || foundByHomepage || foundByName {
+					fillProject(&item, category.Name, subcategory.Name)
 					return &item
 				}
 			}
 		}
 	}
 	return nil
+}
+
+func fillProject(p *Project, category, subcategory string) {
+	p.Category = category
+	p.Subcategory = subcategory
 }
 
 // ClearCache clears the cache of the landscape data.
