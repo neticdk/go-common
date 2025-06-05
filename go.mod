@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	atomicgo.dev/keyboard v0.2.9
-	github.com/MicahParks/keyfunc/v3 v3.3.11
+	github.com/MicahParks/keyfunc/v3 v3.4.0
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.92.1
 	github.com/anchore/syft v1.26.1
@@ -37,7 +37,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	golang.org/x/crypto v0.38.0
-	golang.org/x/mod v0.24.0
+	golang.org/x/mod v0.25.0
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/term v0.32.0
 	gopkg.in/yaml.v3 v3.0.1
