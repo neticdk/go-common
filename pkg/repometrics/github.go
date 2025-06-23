@@ -206,6 +206,9 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 		State:       "all",
 		Since:       pit,
 		ListOptions: github.ListOptions{PerPage: perPage},
+		ListCursorOptions: github.ListCursorOptions{
+			PerPage: perPage,
+		},
 	}
 	return gr.paginate(func(page int) (int, error) {
 		issuesOpts.ListOptions.Page = page
