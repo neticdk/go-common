@@ -205,7 +205,6 @@ func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 	issuesOpts := &github.IssueListByRepoOptions{
 		State: "all",
 		Since: pit,
-		// ListOptions: github.ListOptions{PerPage: perPage},
 		ListCursorOptions: github.ListCursorOptions{
 			PerPage: perPage,
 		},
@@ -547,6 +546,7 @@ func (gr *ghRepo) paginate(fetchPage func(page int) (int, error)) error {
 	return nil
 }
 
+// paginate Github API requests using cursors
 func (gr *ghRepo) paginateCursor(fetchAfter func(after string) (string, error)) error {
 	after := ""
 	for {
