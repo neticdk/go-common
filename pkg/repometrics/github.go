@@ -203,22 +203,24 @@ func (gr *ghRepo) fetchIssuesAndPRs(m *Metrics) error {
 // get updates to issues
 func (gr *ghRepo) updateIssues(pit time.Time, observations *issueCounts) error {
 	issuesOpts := &github.IssueListByRepoOptions{
-		State:       "all",
-		Since:       pit,
-		ListOptions: github.ListOptions{PerPage: perPage},
+		State: "all",
+		Since: pit,
+		ListCursorOptions: github.ListCursorOptions{
+			PerPage: perPage,
+		},
 	}
-	return gr.paginate(func(page int) (int, error) {
-		issuesOpts.ListOptions.Page = page
+	return gr.paginateCursor(func(after string) (string, error) {
+		issuesOpts.After = after
 		pageIssues, resp, err := gr.client.Issues.ListByRepo(gr.ctx, gr.owner, gr.name, issuesOpts)
 		if err != nil {
-			return 0, fmt.Errorf("listing issues: %w", err)
+			return "", fmt.Errorf("listing issues: %w", err)
 		}
 		for _, issue := range pageIssues {
 			gr.updateIssuePRCounts(issue, observations)
 			gr.updateFeatureCounts(issue, observations)
 			gr.updateBugsCounts(issue, observations)
 		}
-		return resp.NextPage, nil
+		return resp.After, nil
 	})
 }
 
@@ -540,6 +542,22 @@ func (gr *ghRepo) paginate(fetchPage func(page int) (int, error)) error {
 			break
 		}
 		page = nextPage
+	}
+	return nil
+}
+
+// paginate Github API requests using cursors
+func (gr *ghRepo) paginateCursor(fetchAfter func(after string) (string, error)) error {
+	after := ""
+	for {
+		nextAfter, err := fetchAfter(after)
+		if err != nil {
+			return err
+		}
+		if nextAfter == "" {
+			break
+		}
+		after = nextAfter
 	}
 	return nil
 }
