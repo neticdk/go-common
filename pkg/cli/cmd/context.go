@@ -133,7 +133,7 @@ func (ec *ExecutionContext) initOutput() {
 		ec.Stderr = os.Stderr
 	}
 
-	ui.SetDefaultOutput(ec.Stdout)
+	ui.SetDefaultOutput(ec.Stderr)
 
 	ec.initSpinner()
 }
