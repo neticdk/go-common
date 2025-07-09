@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 	gorm.io/plugin/opentelemetry v0.1.15
-	helm.sh/helm/v3 v3.18.3
+	helm.sh/helm/v3 v3.18.4
 	k8s.io/apimachinery v0.33.2
 )
 
@@ -383,15 +383,15 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
-	k8s.io/api v0.33.1 // indirect
-	k8s.io/apiextensions-apiserver v0.33.1 // indirect
-	k8s.io/apiserver v0.33.1 // indirect
-	k8s.io/cli-runtime v0.33.1 // indirect
-	k8s.io/client-go v0.33.1 // indirect
-	k8s.io/component-base v0.33.1 // indirect
+	k8s.io/api v0.33.2 // indirect
+	k8s.io/apiextensions-apiserver v0.33.2 // indirect
+	k8s.io/apiserver v0.33.2 // indirect
+	k8s.io/cli-runtime v0.33.2 // indirect
+	k8s.io/client-go v0.33.2 // indirect
+	k8s.io/component-base v0.33.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff // indirect
-	k8s.io/kubectl v0.33.1 // indirect
+	k8s.io/kubectl v0.33.2 // indirect
 	k8s.io/utils v0.0.0-20241210054802-24370beab758 // indirect
 	modernc.org/libc v1.65.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
