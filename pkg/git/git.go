@@ -7,6 +7,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	ssh2 "golang.org/x/crypto/ssh"
@@ -34,20 +35,21 @@ type Repository interface {
 	Add(paths ...string) error
 
 	// Commit commits the changes to the repository
-	Commit(message string) (plumbing.Hash, error)
+	Commit(message string, opts *git.CommitOptions) (plumbing.Hash, error)
 
 	// Push pushes the changes to the remote
 	Push(o *git.PushOptions) error
 
 	// InitAndCommit initializes a git repository, adds all files in the directory,
-	InitAndCommit(dir string, url string, cfg *config.Config) error
+	InitAndCommit(dir string, url string, cfg *config.Config, opts *git.CommitOptions) error
 
 	// Config returns the repository configuration
 	Config() (*config.Config, error)
 }
 
 type gitRepository struct {
-	repo *git.Repository
+	repo   *git.Repository
+	author *object.Signature
 }
 
 // NewGitRepository returns a new gitRepository
@@ -155,15 +157,18 @@ func (g *gitRepository) Add(paths ...string) error {
 }
 
 // Commit commits the changes to the repository
-func (g *gitRepository) Commit(message string) (plumbing.Hash, error) {
+func (g *gitRepository) Commit(message string, opts *git.CommitOptions) (plumbing.Hash, error) {
 	if g.repo == nil {
 		return plumbing.ZeroHash, fmt.Errorf("repository is not yet initialized")
+	}
+	if opts == nil {
+		opts = &git.CommitOptions{}
 	}
 	worktree, err := g.repo.Worktree()
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("getting worktree: %w", err)
 	}
-	hash, err := worktree.Commit(message, &git.CommitOptions{})
+	hash, err := worktree.Commit(message, opts)
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("committing changes: %w", err)
 	}
@@ -184,7 +189,7 @@ func (g *gitRepository) Push(o *git.PushOptions) error {
 
 // InitAndCommit initializes a git repository, adds all files in the directory,
 // and commits them
-func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Config) error {
+func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Config, opts *git.CommitOptions) error {
 	repo, err := g.Init(path, "main")
 	if err != nil {
 		return err
@@ -201,7 +206,7 @@ func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Confi
 	if err := g.Add("."); err != nil {
 		return err
 	}
-	if _, err := g.Commit("Initial commit"); err != nil {
+	if _, err := g.Commit("Initial commit", opts); err != nil {
 		return err
 	}
 	return nil
