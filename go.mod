@@ -14,7 +14,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.6.2
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/go-jose/go-jose/v4 v4.1.1
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/google/go-github/v73 v73.0.0
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
 	github.com/labstack/echo/v4 v4.13.4
@@ -45,7 +45,7 @@ require (
 	gorm.io/gorm v1.30.0
 	gorm.io/plugin/opentelemetry v0.1.15
 	helm.sh/helm/v3 v3.18.4
-	k8s.io/apimachinery v0.33.2
+	k8s.io/apimachinery v0.33.3
 )
 
 require (
