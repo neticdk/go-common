@@ -44,6 +44,54 @@ func TestPullRepository(t *testing.T) {
 		assert.DirExists(t, artifactDir)
 	})
 
+	t.Run("success_with_single_file_artifact", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "go-common-test-")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		art := &artifact.Artifact{
+			Name:         "my-repo",
+			URL:          "https://github.com/example/my-repo.git",
+			BaseDir:      tmpDir,
+			RelativePath: "single-file.yaml",
+		}
+
+		mockRepo := git.NewMockRepository(t)
+		mockRepo.On("PlainCloneContext", mock.Anything, mock.Anything, mock.Anything).
+			Run(func(args mock.Arguments) {
+				cloneDestPath := args.Get(1).(string)
+
+				err = os.WriteFile(filepath.Join(cloneDestPath, "single-file.yaml"), []byte("file content"), 0644)
+				require.NoError(t, err)
+				err = os.WriteFile(filepath.Join(cloneDestPath, "other-file.yaml"), []byte("file content"), 0644)
+				require.NoError(t, err)
+				err = os.MkdirAll(filepath.Join(cloneDestPath, "example"), 0755)
+				require.NoError(t, err)
+				err = os.MkdirAll(filepath.Join(cloneDestPath, ".git"), 0755)
+				require.NoError(t, err)
+			}).
+			Return(&gogit.Repository{}, nil)
+
+		opts := &RepositoryOptions{
+			Repository: mockRepo,
+		}
+
+		result, err := PullRepository(context.Background(), art, opts)
+
+		require.NoError(t, err)
+		require.NotNil(t, result)
+
+		finalDir := art.DestDir()
+		finalFile := filepath.Join(finalDir, "single-file.yaml")
+		noExistDir := filepath.Join(finalDir, "example")
+		noExistFile := filepath.Join(finalDir, "other-file.yaml")
+
+		assert.DirExists(t, finalDir, "The final destination directory should be created")
+		assert.FileExists(t, finalFile, "The artifact file should exist in the destination directory")
+		assert.NoDirExists(t, noExistDir, "The final destination should not contain example directory")
+		assert.NoFileExists(t, noExistFile, "The final destination should not contain other-file.yaml")
+	})
+
 	t.Run("error_no_repository", func(t *testing.T) {
 		art := &artifact.Artifact{
 			Name: "my-repo",
