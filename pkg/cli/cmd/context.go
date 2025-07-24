@@ -133,7 +133,7 @@ func (ec *ExecutionContext) initOutput() {
 		ec.Stderr = os.Stderr
 	}
 
-	ui.SetDefaultOutput(ec.Stdout)
+	ui.SetDefaultOutput(ec.Stderr)
 
 	ec.initSpinner()
 }
@@ -160,6 +160,6 @@ func (ec *ExecutionContext) initErrorHandler() {
 
 func (ec *ExecutionContext) initSpinner() {
 	if ec.Spinner == nil {
-		ec.Spinner = ui.DefaultSpinner.WithWriter(ec.Stdout)
+		ec.Spinner = ui.DefaultSpinner.WithWriter(ec.Stderr)
 	}
 }
