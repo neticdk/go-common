@@ -87,11 +87,24 @@ func PullRepository(ctx context.Context, a *artifact.Artifact, opts *RepositoryO
 		tmpDstDir = filepath.Join(tmpDstDir, a.RelativePath)
 	}
 
-	// Move the directory to the final destination
-	if err := os.Rename(
-		tmpDstDir,
-		a.DestDir()); err != nil {
-		return nil, fmt.Errorf("renaming directory: %w", err)
+	fi, err := os.Stat(tmpDstDir)
+	if err != nil {
+		return nil, fmt.Errorf("stat temporary artifact: %w", err)
+	}
+
+	finalDest := a.DestDir()
+
+	if !fi.IsDir() {
+		// The artifact is a single file. Create the destination directory
+		// and adjust the destination path to include the filename.
+		if err = os.MkdirAll(finalDest, file.FileModeNewDirectory); err != nil {
+			return nil, fmt.Errorf("creating destination directory for file: %w", err)
+		}
+		finalDest = filepath.Join(finalDest, filepath.Base(tmpDstDir))
+	}
+
+	if err = os.Rename(tmpDstDir, finalDest); err != nil {
+		return nil, fmt.Errorf("moving artifact to destination: %w", err)
 	}
 
 	artifactVersion := artifact.FirstVersionOrLatest(a.Version)
