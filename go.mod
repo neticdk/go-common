@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	atomicgo.dev/keyboard v0.2.9
-	github.com/MicahParks/keyfunc/v3 v3.5.0
+	github.com/MicahParks/keyfunc/v3 v3.6.1
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.97.1
 	github.com/anchore/syft v1.29.1
