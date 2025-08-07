@@ -34,13 +34,13 @@ type Repository interface {
 	Add(paths ...string) error
 
 	// Commit commits the changes to the repository
-	Commit(message string) (plumbing.Hash, error)
+	Commit(message string, opts ...Option) (plumbing.Hash, error)
 
 	// Push pushes the changes to the remote
 	Push(o *git.PushOptions) error
 
 	// InitAndCommit initializes a git repository, adds all files in the directory,
-	InitAndCommit(dir string, url string, cfg *config.Config) error
+	InitAndCommit(dir string, url string, cfg *config.Config, opts ...Option) error
 
 	// Config returns the repository configuration
 	Config() (*config.Config, error)
@@ -48,6 +48,22 @@ type Repository interface {
 
 type gitRepository struct {
 	repo *git.Repository
+}
+
+// Options holds options for git operations.
+type Options struct {
+	// CommitOptions are options for the commit.
+	CommitOptions *git.CommitOptions
+}
+
+// Option is a function that configures git options.
+type Option func(*Options)
+
+// WithCommitOptions sets the commit options.
+func WithCommitOptions(o *git.CommitOptions) Option {
+	return func(g *Options) {
+		g.CommitOptions = o
+	}
 }
 
 // NewGitRepository returns a new gitRepository
@@ -155,15 +171,23 @@ func (g *gitRepository) Add(paths ...string) error {
 }
 
 // Commit commits the changes to the repository
-func (g *gitRepository) Commit(message string) (plumbing.Hash, error) {
+func (g *gitRepository) Commit(message string, opts ...Option) (plumbing.Hash, error) {
 	if g.repo == nil {
 		return plumbing.ZeroHash, fmt.Errorf("repository is not yet initialized")
 	}
+	gitOptions := &Options{}
+	for _, opt := range opts {
+		opt(gitOptions)
+	}
+	if gitOptions.CommitOptions == nil {
+		gitOptions.CommitOptions = &git.CommitOptions{}
+	}
+
 	worktree, err := g.repo.Worktree()
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("getting worktree: %w", err)
 	}
-	hash, err := worktree.Commit(message, &git.CommitOptions{})
+	hash, err := worktree.Commit(message, gitOptions.CommitOptions)
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("committing changes: %w", err)
 	}
@@ -184,7 +208,7 @@ func (g *gitRepository) Push(o *git.PushOptions) error {
 
 // InitAndCommit initializes a git repository, adds all files in the directory,
 // and commits them
-func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Config) error {
+func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Config, opts ...Option) error {
 	repo, err := g.Init(path, "main")
 	if err != nil {
 		return err
@@ -201,7 +225,7 @@ func (g *gitRepository) InitAndCommit(path string, url string, cfg *config.Confi
 	if err := g.Add("."); err != nil {
 		return err
 	}
-	if _, err := g.Commit("Initial commit"); err != nil {
+	if _, err := g.Commit("Initial commit", opts...); err != nil {
 		return err
 	}
 	return nil
