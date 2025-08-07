@@ -43,7 +43,7 @@ func TestGitRepository_Init(t *testing.T) {
 
 	t.Run("Commit", func(t *testing.T) {
 		g.Repo().SetConfig(cfg)
-		hash, err := g.Commit("Initial commit", nil)
+		hash, err := g.Commit("Initial commit")
 		assert.NoError(t, err)
 		assert.NotEmpty(t, hash)
 	})
@@ -64,7 +64,7 @@ func TestGitRepository_InitAndCommit(t *testing.T) {
 	t.Run("InitAndCommit", func(t *testing.T) {
 		err = os.WriteFile(filepath.Join(tmpDir, "test1.txt"), []byte("test1"), 0o640)
 		assert.NoError(t, err)
-		err = g.InitAndCommit(tmpDir, "https://example.com/repo.git", cfg, nil)
+		err = g.InitAndCommit(tmpDir, "https://example.com/repo.git", cfg)
 		assert.NoError(t, err)
 		assert.DirExists(t, filepath.Join(tmpDir, ".git"))
 

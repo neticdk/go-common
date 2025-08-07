@@ -87,8 +87,15 @@ func (_c *MockRepository_Add_Call) RunAndReturn(run func(...string) error) *Mock
 }
 
 // Commit provides a mock function with given fields: message, opts
-func (_m *MockRepository) Commit(message string, opts *v5.CommitOptions) (plumbing.Hash, error) {
-	ret := _m.Called(message, opts)
+func (_m *MockRepository) Commit(message string, opts ...Option) (plumbing.Hash, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, message)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Commit")
@@ -96,19 +103,19 @@ func (_m *MockRepository) Commit(message string, opts *v5.CommitOptions) (plumbi
 
 	var r0 plumbing.Hash
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, *v5.CommitOptions) (plumbing.Hash, error)); ok {
-		return rf(message, opts)
+	if rf, ok := ret.Get(0).(func(string, ...Option) (plumbing.Hash, error)); ok {
+		return rf(message, opts...)
 	}
-	if rf, ok := ret.Get(0).(func(string, *v5.CommitOptions) plumbing.Hash); ok {
-		r0 = rf(message, opts)
+	if rf, ok := ret.Get(0).(func(string, ...Option) plumbing.Hash); ok {
+		r0 = rf(message, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(plumbing.Hash)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, *v5.CommitOptions) error); ok {
-		r1 = rf(message, opts)
+	if rf, ok := ret.Get(1).(func(string, ...Option) error); ok {
+		r1 = rf(message, opts...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -123,14 +130,21 @@ type MockRepository_Commit_Call struct {
 
 // Commit is a helper method to define mock.On call
 //   - message string
-//   - opts *v5.CommitOptions
-func (_e *MockRepository_Expecter) Commit(message interface{}, opts interface{}) *MockRepository_Commit_Call {
-	return &MockRepository_Commit_Call{Call: _e.mock.On("Commit", message, opts)}
+//   - opts ...Option
+func (_e *MockRepository_Expecter) Commit(message interface{}, opts ...interface{}) *MockRepository_Commit_Call {
+	return &MockRepository_Commit_Call{Call: _e.mock.On("Commit",
+		append([]interface{}{message}, opts...)...)}
 }
 
-func (_c *MockRepository_Commit_Call) Run(run func(message string, opts *v5.CommitOptions)) *MockRepository_Commit_Call {
+func (_c *MockRepository_Commit_Call) Run(run func(message string, opts ...Option)) *MockRepository_Commit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(*v5.CommitOptions))
+		variadicArgs := make([]Option, len(args)-1)
+		for i, a := range args[1:] {
+			if a != nil {
+				variadicArgs[i] = a.(Option)
+			}
+		}
+		run(args[0].(string), variadicArgs...)
 	})
 	return _c
 }
@@ -140,7 +154,7 @@ func (_c *MockRepository_Commit_Call) Return(_a0 plumbing.Hash, _a1 error) *Mock
 	return _c
 }
 
-func (_c *MockRepository_Commit_Call) RunAndReturn(run func(string, *v5.CommitOptions) (plumbing.Hash, error)) *MockRepository_Commit_Call {
+func (_c *MockRepository_Commit_Call) RunAndReturn(run func(string, ...Option) (plumbing.Hash, error)) *MockRepository_Commit_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -321,16 +335,23 @@ func (_c *MockRepository_Init_Call) RunAndReturn(run func(string, string) (*v5.R
 }
 
 // InitAndCommit provides a mock function with given fields: dir, url, cfg, opts
-func (_m *MockRepository) InitAndCommit(dir string, url string, cfg *config.Config, opts *v5.CommitOptions) error {
-	ret := _m.Called(dir, url, cfg, opts)
+func (_m *MockRepository) InitAndCommit(dir string, url string, cfg *config.Config, opts ...Option) error {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, dir, url, cfg)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for InitAndCommit")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, *config.Config, *v5.CommitOptions) error); ok {
-		r0 = rf(dir, url, cfg, opts)
+	if rf, ok := ret.Get(0).(func(string, string, *config.Config, ...Option) error); ok {
+		r0 = rf(dir, url, cfg, opts...)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -347,14 +368,21 @@ type MockRepository_InitAndCommit_Call struct {
 //   - dir string
 //   - url string
 //   - cfg *config.Config
-//   - opts *v5.CommitOptions
-func (_e *MockRepository_Expecter) InitAndCommit(dir interface{}, url interface{}, cfg interface{}, opts interface{}) *MockRepository_InitAndCommit_Call {
-	return &MockRepository_InitAndCommit_Call{Call: _e.mock.On("InitAndCommit", dir, url, cfg, opts)}
+//   - opts ...Option
+func (_e *MockRepository_Expecter) InitAndCommit(dir interface{}, url interface{}, cfg interface{}, opts ...interface{}) *MockRepository_InitAndCommit_Call {
+	return &MockRepository_InitAndCommit_Call{Call: _e.mock.On("InitAndCommit",
+		append([]interface{}{dir, url, cfg}, opts...)...)}
 }
 
-func (_c *MockRepository_InitAndCommit_Call) Run(run func(dir string, url string, cfg *config.Config, opts *v5.CommitOptions)) *MockRepository_InitAndCommit_Call {
+func (_c *MockRepository_InitAndCommit_Call) Run(run func(dir string, url string, cfg *config.Config, opts ...Option)) *MockRepository_InitAndCommit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(*config.Config), args[3].(*v5.CommitOptions))
+		variadicArgs := make([]Option, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(Option)
+			}
+		}
+		run(args[0].(string), args[1].(string), args[2].(*config.Config), variadicArgs...)
 	})
 	return _c
 }
@@ -364,7 +392,7 @@ func (_c *MockRepository_InitAndCommit_Call) Return(_a0 error) *MockRepository_I
 	return _c
 }
 
-func (_c *MockRepository_InitAndCommit_Call) RunAndReturn(run func(string, string, *config.Config, *v5.CommitOptions) error) *MockRepository_InitAndCommit_Call {
+func (_c *MockRepository_InitAndCommit_Call) RunAndReturn(run func(string, string, *config.Config, ...Option) error) *MockRepository_InitAndCommit_Call {
 	_c.Call.Return(run)
 	return _c
 }
