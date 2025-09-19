@@ -19,10 +19,32 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
+// config holds the configuration for telemetry.
+type config struct {
+	startServer bool
+}
+
+// Option is a functional option for configuring telemetry.
+type Option func(*config)
+
+// WithoutMetricsServer disables the startup of the metrics server.
+func WithoutMetricsServer() Option {
+	return func(c *config) {
+		c.startServer = false
+	}
+}
+
 // ConfigureTelemetry will configure OpenTelemetry to expose metrics and traces using Prometheus export for metrics and OTEL grpc exporter for traces. The
 // given port is the port to expose metrics, the given serviceName is the OTEL service name attribute associated with all traces. The function will return
 // a shutdown function that can be called when shutting down the process.
-func ConfigureTelemetry(metricsPort int, serviceName string) (func(context.Context) error, error) {
+func ConfigureTelemetry(metricsPort int, serviceName string, opts ...Option) (func(context.Context) error, error) {
+	cfg := &config{
+		startServer: true,
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
 	ctx := context.Background()
 	logger := slog.Default()
 	exporter, err := prometheus.New()
@@ -31,19 +53,21 @@ func ConfigureTelemetry(metricsPort int, serviceName string) (func(context.Conte
 	}
 	otel.SetMeterProvider(metric.NewMeterProvider(metric.WithReader(exporter)))
 
-	go func() {
-		logger.InfoContext(ctx, "starting metrics server")
-		mux := http.NewServeMux()
-		mux.Handle("/metrics", promhttp.Handler())
-		s := http.Server{
-			Addr:              fmt.Sprintf(":%d", metricsPort),
-			Handler:           mux,
-			ReadHeaderTimeout: 3 * time.Second,
-		}
-		if err := s.ListenAndServe(); err != nil {
-			logger.ErrorContext(ctx, "metrics listener failed", log.Error(err))
-		}
-	}()
+	if cfg.startServer {
+		go func() {
+			logger.InfoContext(ctx, "starting metrics server")
+			mux := http.NewServeMux()
+			mux.Handle("/metrics", promhttp.Handler())
+			s := http.Server{
+				Addr:              fmt.Sprintf(":%d", metricsPort),
+				Handler:           mux,
+				ReadHeaderTimeout: 3 * time.Second,
+			}
+			if err := s.ListenAndServe(); err != nil {
+				logger.ErrorContext(ctx, "metrics listener failed", log.Error(err))
+			}
+		}()
+	}
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
