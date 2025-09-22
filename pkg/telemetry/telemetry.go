@@ -22,6 +22,7 @@ import (
 // config holds the configuration for telemetry.
 type config struct {
 	startServer bool
+	envConfig   bool
 }
 
 // Option is a functional option for configuring telemetry.
@@ -31,6 +32,13 @@ type Option func(*config)
 func WithoutMetricsServer() Option {
 	return func(c *config) {
 		c.startServer = false
+	}
+}
+
+// WithEnvConfig disables default options to OTLP trace client and allows for env params
+func WithEnvConfig() Option {
+	return func(c *config) {
+		c.envConfig = true
 	}
 }
 
@@ -78,7 +86,11 @@ func ConfigureTelemetry(metricsPort int, serviceName string, opts ...Option) (fu
 		return nil, fmt.Errorf("creating resource: %w", err)
 	}
 
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
+	tOpts := []otlptracegrpc.Option{}
+	if !cfg.envConfig {
+		tOpts = append(tOpts, otlptracegrpc.WithInsecure())
+	}
+	traceExporter, err := otlptracegrpc.New(ctx, tOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("creating trace exporter: %w", err)
 	}
