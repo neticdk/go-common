@@ -35,7 +35,7 @@ func WithoutMetricsServer() Option {
 	}
 }
 
-// WithEnvConfig disables default options to OTLP trace client and allows for env params
+// WithEnvConfig allows for OTLP trace client configuration via environment variables, overriding the default insecure gRPC connection.
 func WithEnvConfig() Option {
 	return func(c *config) {
 		c.envConfig = true
