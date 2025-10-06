@@ -12,8 +12,8 @@ require (
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-git/go-billy/v5 v5.6.2
-	github.com/go-git/go-git/v5 v5.16.2
-	github.com/go-jose/go-jose/v4 v4.1.2
+	github.com/go-git/go-git/v5 v5.16.3
+	github.com/go-jose/go-jose/v4 v4.1.3
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/go-github/v75 v75.0.0
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
