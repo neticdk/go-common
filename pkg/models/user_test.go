@@ -46,7 +46,6 @@ func TestValidate(t *testing.T) {
 			t.Errorf(`User{%s: ""}.Validate() == %v want nil`, tt.attr, errs)
 		}
 	}
-
 }
 
 func TestHasRole(t *testing.T) {

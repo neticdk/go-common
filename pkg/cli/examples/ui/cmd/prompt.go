@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-
 	"ui/internal/ui"
 	"ui/internal/usecases/prompt"
 

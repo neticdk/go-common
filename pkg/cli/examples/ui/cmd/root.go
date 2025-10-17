@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-
 	"ui/internal/ui"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"

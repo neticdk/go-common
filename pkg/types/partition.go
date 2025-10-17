@@ -23,7 +23,7 @@ func AllPartitionsString() (partitions []string) {
 	for _, p := range AllPartitions() {
 		partitions = append(partitions, p.String())
 	}
-	return
+	return partitions
 }
 
 func ParsePartition(name string) (Partition, bool) {

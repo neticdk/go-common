@@ -23,7 +23,7 @@ func AllInfrastructureProvidersString() (providers []string) {
 	for _, p := range AllInfrastructureProviders() {
 		providers = append(providers, p.String())
 	}
-	return
+	return providers
 }
 
 func ParseInfrastructureProvider(name string) (InfrastructureProvider, bool) {
