@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"pokemon/internal/pokemon"
 	"strings"
 
-	"pokemon/internal/pokemon"
 	svc "pokemon/internal/service/pokemon"
 	pkmn "pokemon/internal/usecases/pokemon"
 

@@ -230,7 +230,7 @@ func AllRegionsString() (regions []string) {
 	for _, r := range allRegions {
 		regions = append(regions, r.String())
 	}
-	return
+	return regions
 }
 
 func PartitionRegions(p Partition) Regions {

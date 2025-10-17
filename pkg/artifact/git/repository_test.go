@@ -61,13 +61,13 @@ func TestPullRepository(t *testing.T) {
 			Run(func(args mock.Arguments) {
 				cloneDestPath := args.Get(1).(string)
 
-				err = os.WriteFile(filepath.Join(cloneDestPath, "single-file.yaml"), []byte("file content"), 0644)
+				err = os.WriteFile(filepath.Join(cloneDestPath, "single-file.yaml"), []byte("file content"), 0o644)
 				require.NoError(t, err)
-				err = os.WriteFile(filepath.Join(cloneDestPath, "other-file.yaml"), []byte("file content"), 0644)
+				err = os.WriteFile(filepath.Join(cloneDestPath, "other-file.yaml"), []byte("file content"), 0o644)
 				require.NoError(t, err)
-				err = os.MkdirAll(filepath.Join(cloneDestPath, "example"), 0755)
+				err = os.MkdirAll(filepath.Join(cloneDestPath, "example"), 0o755)
 				require.NoError(t, err)
-				err = os.MkdirAll(filepath.Join(cloneDestPath, ".git"), 0755)
+				err = os.MkdirAll(filepath.Join(cloneDestPath, ".git"), 0o755)
 				require.NoError(t, err)
 			}).
 			Return(&gogit.Repository{}, nil)

@@ -49,7 +49,7 @@ func AllResilienceZonesString() (rzs []string) {
 	for _, rz := range allResilienceZones {
 		rzs = append(rzs, rz.String())
 	}
-	return
+	return rzs
 }
 
 func ParseResilienceZone(name string) (ResilienceZone, bool) {
