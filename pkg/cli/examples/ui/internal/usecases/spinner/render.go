@@ -3,7 +3,6 @@ package spinner
 import (
 	"errors"
 	"time"
-
 	"ui/internal/ui"
 
 	cliui "github.com/neticdk/go-common/pkg/cli/ui"

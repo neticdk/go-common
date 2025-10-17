@@ -31,7 +31,7 @@ func (u User) Validate() (errs []error) {
 	if u.Username == "" {
 		errs = append(errs, errors.New("username is empty"))
 	}
-	return
+	return errs
 }
 
 func (u User) HasRole(role string) bool {

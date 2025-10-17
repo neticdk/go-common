@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-
 	"helloworld/internal/helloworld"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"

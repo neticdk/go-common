@@ -82,7 +82,6 @@ func TestEncode(t *testing.T) {
 			err := Encode(&buf, testSBOM, tt.format)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Encode() error = %v, wantErr %v", err, tt.wantErr)
-
 			}
 			t.Logf("Encoded SBOM: %s", buf.String())
 

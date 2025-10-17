@@ -83,6 +83,7 @@ func TestCalculateReleaseMetrics(t *testing.T) {
 		})
 	}
 }
+
 func TestSortContributors(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -231,7 +232,6 @@ func TestGetTopContributors(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestIsBot(t *testing.T) {
