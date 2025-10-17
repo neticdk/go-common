@@ -151,7 +151,7 @@ func ParseSearchQuery(r *http.Request) (sp *SearchParams, err error) {
 	sp = &SearchParams{}
 
 	if err = r.ParseForm(); err != nil {
-		return
+		return sp, err
 	}
 
 	for key, val := range r.Form {
@@ -252,7 +252,7 @@ func ParseSearchQuery(r *http.Request) (sp *SearchParams, err error) {
 		err = errors.Join(err, errors.New("parsing ord parameter: more directions than fields"))
 		sp.Order.Directions = nil
 	}
-	return
+	return sp, err
 }
 
 func parseStrIntPtr(s string) (*int, error) {
@@ -266,5 +266,5 @@ func parseStrIntPtr(s string) (*int, error) {
 func escape(s string) (e string) {
 	e = strings.ReplaceAll(s, "\\", "\\\\")
 	e = strings.ReplaceAll(e, "'", "\\'")
-	return
+	return e
 }

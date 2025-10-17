@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"strings"
-
 	"pokemon/internal/pokemon"
+	"strings"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"
 	"github.com/spf13/cobra"

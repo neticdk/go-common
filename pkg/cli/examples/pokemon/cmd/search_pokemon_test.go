@@ -3,9 +3,9 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"pokemon/internal/pokemon"
 	"testing"
 
-	"pokemon/internal/pokemon"
 	svc "pokemon/internal/service/pokemon"
 
 	"github.com/neticdk/go-common/pkg/cli/cmd"
