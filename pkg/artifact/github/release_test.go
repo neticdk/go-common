@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	gh "github.com/google/go-github/v76/github"
+	gh "github.com/google/go-github/v78/github"
 	ghmock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/neticdk/go-common/pkg/artifact"
 	"github.com/stretchr/testify/assert"
