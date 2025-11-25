@@ -200,7 +200,7 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 		go func() {
 			defer wg.Done()
 			for match := range workChan {
-				grypeProcessMatch(ctx, match, datastore, resultChan)
+				grypeProcessMatch(match, resultChan)
 			}
 		}()
 	}
@@ -223,13 +223,8 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	return vulns, nil
 }
 
-func grypeProcessMatch(ctx context.Context, match grypeMatch.Match, datastore grypeVulnerability.Provider, resultChan chan<- types.Vulnerability) {
-	logger := slog.Default()
-	metadata, err := datastore.VulnerabilityMetadata(match.Vulnerability.Reference)
-	if err != nil {
-		logger.WarnContext(ctx, "getting metadata for vulnerability", slog.String("ID", match.Vulnerability.ID), slog.Any("error", err))
-		return
-	}
+func grypeProcessMatch(match grypeMatch.Match, resultChan chan<- types.Vulnerability) {
+	metadata := match.Vulnerability.Metadata
 
 	// Only interested in the highest CVSS version
 	versions := metadata.Cvss
