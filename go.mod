@@ -1,6 +1,6 @@
 module github.com/neticdk/go-common
 
-go 1.25.4
+go 1.25.5
 
 require (
 	atomicgo.dev/keyboard v0.2.9
