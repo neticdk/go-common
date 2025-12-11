@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 	gorm.io/plugin/opentelemetry v0.1.16
-	helm.sh/helm/v3 v3.19.2
+	helm.sh/helm/v3 v3.19.3
 	k8s.io/apimachinery v0.34.3
 )
 
