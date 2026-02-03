@@ -471,7 +471,7 @@ func (gr *ghRepo) fetchReleases(m *Metrics) error {
 
 // create a list for releases aimed for the statistics part of metrics
 func statistifyReleases(releases []*github.RepositoryRelease) []Release {
-	releaseStats := make([]Release, 0)
+	releaseStats := make([]Release, 0, len(releases))
 	for _, release := range releases {
 		releaseStats = append(releaseStats, Release{
 			Name:       release.GetTagName(),
