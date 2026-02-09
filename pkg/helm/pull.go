@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 
 	"github.com/neticdk/go-stdlib/xstrings"
-	"helm.sh/helm/v3/pkg/action"
-	helmChart "helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/registry"
+	"helm.sh/helm/v4/pkg/action"
+	helmChart "helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/registry"
 )
 
 type pullOption struct {
