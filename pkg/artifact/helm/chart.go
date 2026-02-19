@@ -12,11 +12,12 @@ import (
 
 type ChartOptions struct {
 	RegistryClient *registry.Client
+	Version        string
 }
 
 // PullChart pulls a helm chart to the destination directory
 func PullChart(ctx context.Context, a *artifact.Artifact, opts *ChartOptions) (*artifact.PullResult, error) {
-	res, err := helm.PullChart(ctx, a.Repository, a.Name, a.DestDir(), helm.WithRegistryClient(opts.RegistryClient))
+	res, err := helm.PullChart(ctx, a.Repository, a.Name, a.DestDir(), helm.WithRegistryClient(opts.RegistryClient), helm.WithVersion(opts.Version))
 	if err != nil {
 		return nil, fmt.Errorf("pulling helm chart: %w", err)
 	}
