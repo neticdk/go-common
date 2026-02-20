@@ -1,6 +1,6 @@
 module github.com/neticdk/go-common
 
-go 1.25.6
+go 1.26.0
 
 require (
 	atomicgo.dev/keyboard v0.2.9
@@ -12,7 +12,7 @@ require (
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-git/go-billy/v5 v5.7.0
-	github.com/go-git/go-git/v5 v5.16.4
+	github.com/go-git/go-git/v5 v5.16.5
 	github.com/go-jose/go-jose/v4 v4.1.3
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/go-github/v82 v82.0.0
@@ -61,7 +61,7 @@ require (
 	cloud.google.com/go/storage v1.58.0 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/ClickHouse/ch-go v0.65.1 // indirect

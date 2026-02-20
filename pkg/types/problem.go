@@ -34,7 +34,7 @@ func (p *Problem) Error() string {
 	sb := strings.Builder{}
 
 	if p.Type != "" {
-		sb.WriteString(fmt.Sprintf("%s: ", p.Type))
+		fmt.Fprintf(&sb, "%s: ", p.Type)
 	}
 
 	if p.Detail != "" {
@@ -44,7 +44,7 @@ func (p *Problem) Error() string {
 	}
 
 	if p.Err != nil {
-		sb.WriteString(fmt.Sprintf(": %s", p.Err.Error()))
+		fmt.Fprintf(&sb, ": %s", p.Err.Error())
 	}
 
 	return sb.String()

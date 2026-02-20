@@ -97,6 +97,7 @@ func (r *Request) DownloadToWriter(originURL string, w io.Writer) (int64, error)
 	if err != nil {
 		return 0, err
 	}
+	// #nosec G704 -- URL scheme is validated, and risk is acknowledged
 	resp, err := r.client.Do(r.req)
 	if err != nil {
 		return 0, err
