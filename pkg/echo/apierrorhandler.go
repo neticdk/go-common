@@ -2,11 +2,10 @@ package echo
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/neticdk/go-common/pkg/log"
 	"github.com/neticdk/go-common/pkg/types"
 )
@@ -16,8 +15,13 @@ import (
 // Based on [echo.DefaultHTTPErrorHandler] but always logging errors and returning "problem" response with content-type
 // "application/problem+json". By default the handler will setup a http status code 500 unless the error is either a
 // [types.Problem] or [echo.HTTPError] then the status code from the error will be used.
-func APIErrorHandler(err error, c echo.Context) {
-	if c.Response().Committed {
+func APIErrorHandler(err error, c *echo.Context) {
+	rw := c.Response()
+	response, errS := echo.UnwrapResponse(rw)
+	if errS != nil {
+		return
+	}
+	if response.Committed {
 		return
 	}
 
@@ -27,8 +31,8 @@ func APIErrorHandler(err error, c echo.Context) {
 		if ok {
 			p = &types.Problem{
 				Status: &he.Code,
-				Detail: fmt.Sprintf("%s", he.Message),
-				Err:    he.Internal,
+				Detail: he.Message,
+				Err:    he.Unwrap(),
 			}
 		} else {
 			p = &types.Problem{
