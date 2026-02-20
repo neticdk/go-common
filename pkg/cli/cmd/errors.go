@@ -22,18 +22,18 @@ func (e *InvalidArgumentError) Code() int     { return 0 }
 func (e *InvalidArgumentError) Help() string {
 	var msg strings.Builder
 
-	msg.WriteString(fmt.Sprintf("The argument %q is not valid for flag %q.", e.Val, e.Flag))
+	fmt.Fprintf(&msg, "The argument %q is not valid for flag %q.", e.Val, e.Flag)
 	if len(e.OneOf) > 0 {
 		msg.WriteString("\n\nValid choices:\n\n")
 		for _, choice := range e.OneOf {
-			msg.WriteString(fmt.Sprintf("  - %s\n", choice))
+			fmt.Fprintf(&msg, "  - %s\n", choice)
 		}
 	}
 	if e.Context != "" {
-		msg.WriteString(fmt.Sprintf("\n\n%s", e.Context))
+		fmt.Fprintf(&msg, "\n\n%s", e.Context)
 	}
 	if e.SeeOther != "" {
-		msg.WriteString(fmt.Sprintf("\n\nSee also: %q", e.SeeOther))
+		fmt.Fprintf(&msg, "\n\nSee also: %q", e.SeeOther)
 	}
 	return msg.String()
 }
