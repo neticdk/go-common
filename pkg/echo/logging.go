@@ -3,8 +3,8 @@ package echo
 import (
 	"log/slog"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/neticdk/go-common/pkg/log"
 )
 
@@ -13,7 +13,7 @@ import (
 // [log.FromContext]
 func SlogContext(logger *slog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			ctx := log.WithLogger(c.Request().Context(), logger)
 			req := c.Request().WithContext(ctx)
 			c.SetRequest(req)
@@ -32,10 +32,9 @@ func RequestLogger() echo.MiddlewareFunc {
 		LogMethod:    true,
 		LogHost:      true,
 		LogUserAgent: true,
-		LogError:     true,
 		LogLatency:   true,
 		LogRemoteIP:  true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			attrs := []any{}
 			attrs = append(attrs, slog.String("URI", v.URI))
 			attrs = append(attrs, slog.Int("status", v.Status))
