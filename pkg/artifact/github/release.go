@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -37,10 +38,6 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 
 	if opts.Downloader == nil {
 		return nil, fmt.Errorf("downloader is required")
-	}
-
-	if opts.Uncompress == nil {
-		opts.Uncompress = archive.Uncompress
 	}
 
 	tmpDir, err := os.MkdirTemp("", "go-common-")
@@ -82,6 +79,14 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 		return nil, fmt.Errorf("finding asset %q", opts.AssetName)
 	}
 
+	if opts.Uncompress == nil {
+		if isCompressed(assetURL) {
+			opts.Uncompress = archive.Uncompress
+		} else {
+			opts.Uncompress = copySource
+		}
+	}
+
 	assetDestFile := filepath.Join(tmpDir, assetName)
 	if _, err = opts.Downloader.Download(assetURL, assetDestFile); err != nil {
 		return nil, fmt.Errorf(`downloading asset %q: %w`, assetURL, err)
@@ -121,4 +126,67 @@ func PullRelease(ctx context.Context, a *artifact.Artifact, opts *ReleaseOptions
 		Dir:     filepath.Join(a.BaseDir, artifactDirName),
 		Version: artifactVersion,
 	}, nil
+}
+
+var compressedFormats = []string{
+	".zip",
+	".tgz",
+	".tar.gz",
+}
+
+func isCompressed(url string) bool {
+	for _, format := range compressedFormats {
+		if strings.HasSuffix(url, format) {
+			return true
+		}
+	}
+	return false
+}
+
+func copySource(src, destDir string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	copyFile := func(src, dest string, info os.FileInfo) error {
+		in, err := os.Open(src)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+
+		out, err := os.Create(dest)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+
+		if _, err = io.Copy(out, in); err != nil {
+			return err
+		}
+		return os.Chmod(dest, info.Mode())
+	}
+
+	if !info.IsDir() {
+		return copyFile(src, filepath.Join(destDir, filepath.Base(src)), info)
+	}
+
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(destDir, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		}
+
+		return copyFile(path, destPath, info)
+	})
 }
