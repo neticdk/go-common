@@ -1,6 +1,6 @@
 module github.com/neticdk/go-common
 
-go 1.26.0
+go 1.26.1
 
 require (
 	atomicgo.dev/keyboard v0.2.9
@@ -8,7 +8,7 @@ require (
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.109.0
 	github.com/anchore/syft v1.42.1
-	github.com/charmbracelet/glamour v0.10.0
+	github.com/charmbracelet/glamour v1.0.0
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-git/go-billy/v5 v5.7.0
@@ -87,7 +87,7 @@ require (
 	github.com/acobaugh/osrelease v0.1.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/anchore/clio v0.0.0-20250715152405-a0fa658e5084 // indirect
 	github.com/anchore/fangs v0.0.0-20250716230140-94c22408c232 // indirect
 	github.com/anchore/go-collections v0.0.0-20251016125210-a3c352120e8c // indirect
@@ -149,7 +149,7 @@ require (
 	github.com/clipperhouse/displaywidth v0.9.0 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.5.0 // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
 	github.com/containerd/cgroups/v3 v3.1.2 // indirect
 	github.com/containerd/console v1.0.5 // indirect
@@ -370,7 +370,7 @@ require (
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yuin/goldmark v1.7.13 // indirect
-	github.com/yuin/goldmark-emoji v1.0.5 // indirect
+	github.com/yuin/goldmark-emoji v1.0.6 // indirect
 	github.com/zclconf/go-cty v1.16.3 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
