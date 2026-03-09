@@ -57,12 +57,18 @@ func unzip(f *os.File, size int64, dir string) error {
 		defer rc.Close()
 
 		baseFile := filepath.Base(f.Name)
+		if !filepath.IsLocal(baseFile) {
+			return fmt.Errorf("illegal file path: %s", baseFile)
+		}
+
 		path := filepath.Join(dir, baseFile)
 		if f.FileInfo().Mode().IsDir() {
+			// #nosec G703 -- path is sanitized via filepath.Base and IsLocal
 			if err := os.MkdirAll(path, f.Mode()); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}
 		} else if f.FileInfo().Mode().IsRegular() {
+			// #nosec G703 -- path is sanitized via filepath.Base and IsLocal
 			if err := os.MkdirAll(filepath.Dir(path), f.Mode()); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}
@@ -116,13 +122,18 @@ func untarGz(r io.Reader, dir string) error {
 	// methods
 	extractAndWriteFile := func(header *tar.Header) error {
 		baseFile := filepath.Base(header.Name)
+		if !filepath.IsLocal(baseFile) {
+			return fmt.Errorf("illegal file path: %s", baseFile)
+		}
 		path := filepath.Join(dir, baseFile)
 		switch header.Typeflag {
 		case tar.TypeDir:
+			// #nosec G703 -- path is sanitized via filepath.Base and IsLocal
 			if err := os.MkdirAll(path, file.FileModeNewDirectory); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}
 		case tar.TypeReg:
+			// #nosec G703 -- path is sanitized via filepath.Base and IsLocal
 			if err := os.MkdirAll(filepath.Dir(path), file.FileModeNewDirectory); err != nil {
 				return fmt.Errorf("creating directory: %w", err)
 			}

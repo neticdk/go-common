@@ -77,7 +77,7 @@ func TestPullChart(t *testing.T) {
 			t.Fatalf("creating registry client: %v", err)
 		}
 		ociServer.URL = strings.Replace(ociServer.URL, "http://", "oci://", 1)
-		ociServer.URL = fmt.Sprintf("%s/library/test-chart", ociServer.URL)
+		ociServer.URL = fmt.Sprintf("%s/library", ociServer.URL)
 		result, err := PullChart(context.Background(), ociServer.URL, "test-chart", dstDir, WithRegistryClient(registryClient))
 		if err != nil {
 			t.Fatalf("pulling chart from OCI registry: %v", err)

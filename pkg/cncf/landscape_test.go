@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -18,7 +19,16 @@ type MockHTTPClient struct {
 	Context  context.Context
 }
 
-func (m *MockHTTPClient) Get(ctx context.Context, url string) (*http.Response, error) {
+func (m *MockHTTPClient) Get(ctx context.Context, rawUrl string) (*http.Response, error) {
+	parsedURL, err := url.Parse(rawUrl)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	if parsedURL.Scheme != "https" {
+		return nil, fmt.Errorf("unsupported scheme: %s", parsedURL.Scheme)
+	}
+
 	return m.Response, m.Err
 }
 

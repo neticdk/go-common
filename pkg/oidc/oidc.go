@@ -39,6 +39,7 @@ func NewKeyfunc(ctx context.Context, issuers ...string) (jwt.Keyfunc, error) {
 		if err != nil {
 			return nil, fmt.Errorf("unable to create request for OpenID configuration: %w", err)
 		}
+		// #nosec G704 -- URL scheme is validated, and risk is acknowledged
 		resp, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("unable to request OpenID configuration: %w", err)

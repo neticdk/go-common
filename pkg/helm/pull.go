@@ -74,7 +74,7 @@ func PullChart(_ context.Context, repository, chartName, dstDir string, opts ...
 
 	chartRef := chartName
 	if registry.IsOCI(repository) {
-		chartRef = repository
+		chartRef = repository + "/" + chartName
 		if opt.RegistryClient == nil {
 			registryClient, err := registry.NewClient()
 			if err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -81,11 +82,26 @@ type DefaultHTTPClient struct{}
 
 // Get gets the content of the URL and returns the response.
 func (c *DefaultHTTPClient) Get(ctx context.Context, rawURL string) (*http.Response, error) {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	// Restrict to HTTPS
+	if parsedURL.Scheme != "https" {
+		return nil, fmt.Errorf("unsupported scheme: %s", parsedURL.Scheme)
+	}
+
 	client := http.Client{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+
+	safeURL := parsedURL.String()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, safeURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
+
+	// #nosec G704 -- URL scheme is validated, and risk is acknowledged
 	return client.Do(req)
 }
 
