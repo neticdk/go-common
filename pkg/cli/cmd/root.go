@@ -21,8 +21,10 @@ const (
 type InitFunc = func(cmd *cobra.Command, args []string) error
 
 type RootCommandBuilder struct {
-	cmd *cobra.Command
-	ec  *ExecutionContext
+	cmd           *cobra.Command
+	ec            *ExecutionContext
+	updateChecker *UpdateChecker
+	updateChan    <-chan string
 }
 
 // NewRootCommand creates a new root command
@@ -117,6 +119,25 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 
 // Build builds the root command
 func (b *RootCommandBuilder) Build() *cobra.Command {
+	if b.updateChecker != nil {
+		b.updateChan = b.updateChecker.CheckForUpdateAsync()
+
+		existingPostRunE := b.cmd.PersistentPostRunE
+		b.cmd.PersistentPostRunE = func(cmd *cobra.Command, args []string) error {
+			var err error
+			if existingPostRunE != nil {
+				err = existingPostRunE(cmd, args)
+			}
+			select {
+			case msg, ok := <-b.updateChan:
+				if ok && msg != "" {
+					fmt.Fprintln(b.ec.Stderr, msg)
+				}
+			default:
+			}
+			return err
+		}
+	}
 	return b.cmd
 }
 
@@ -154,6 +175,12 @@ func (b *RootCommandBuilder) WithNoSubCommands() *RootCommandBuilder {
 		}
 		return nil
 	}
+	return b
+}
+
+// WithUpdateChecker enables the update checker for the command
+func (b *RootCommandBuilder) WithUpdateChecker(checker *UpdateChecker) *RootCommandBuilder {
+	b.updateChecker = checker
 	return b
 }
 
