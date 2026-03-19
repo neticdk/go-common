@@ -100,7 +100,7 @@ func writeJSONFile(name string, d any) error {
 	}
 	b = append(b, []byte("\n")...)
 
-	return os.WriteFile(name, b, filePermissionNewFile)
+	return os.WriteFile(name, b, filePermissionNewFile) //nolint:gosec // G703: path is safe
 }
 
 func writeChangedJsonnetFile(originalBytes []byte, modified *specv1.JsonnetFile, path string) error {

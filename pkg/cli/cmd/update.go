@@ -11,6 +11,8 @@ import (
 	"golang.org/x/mod/semver"
 )
 
+const defaultCacheDuration = 24
+
 // UpdateCache represents the data we store locally.
 type UpdateCache struct {
 	LastCheck     time.Time `json:"last_check"`
@@ -72,7 +74,7 @@ func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInst
 		githubURL:           fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", githubOwner, githubRepo),
 		installInstructions: installInstructions,
 		cacheDir:            filepath.Join(dir, ec.AppName),
-		cacheDuration:       24 * time.Hour,
+		cacheDuration:       defaultCacheDuration * time.Hour,
 		messageFormatter: func(current, latest string) string {
 			msg := fmt.Sprintf("\n🚀 A new version is available! (%s -> %s)", current, latest)
 			if installInstructions != "" {
@@ -127,7 +129,7 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 					LastCheck:     time.Now(),
 					LatestVersion: latestVersion,
 				})
-				_ = os.WriteFile(cachePath, newCache, 0o644)
+				_ = os.WriteFile(cachePath, newCache, 0o640)
 			}
 		}
 
