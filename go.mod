@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/neticdk/go-stdlib v0.2.2
+	github.com/neticdk/go-stdlib v1.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/pterm/pterm v0.12.83
