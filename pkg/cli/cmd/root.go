@@ -119,7 +119,7 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 // Build builds the root command
 func (b *RootCommandBuilder) Build() *cobra.Command {
 	if len(b.updateCheckers) > 0 {
-		var updateChans []<-chan string
+		updateChans := make([]<-chan string, 0, len(b.updateCheckers))
 		for _, checker := range b.updateCheckers {
 			updateChans = append(updateChans, checker.CheckForUpdateAsync())
 		}
