@@ -60,6 +60,26 @@ func WithMessageFormatter(f UpdateMessageFormatter) UpdateCheckerOption {
 	}
 }
 
+// WithAppName overrides the default app name.
+// This is useful when creating an update checker for secondary dependencies.
+func WithAppName(name string) UpdateCheckerOption {
+	return func(u *UpdateChecker) {
+		u.appName = name
+		dir, err := os.UserCacheDir()
+		if err != nil {
+			dir = os.TempDir()
+		}
+		u.cacheDir = filepath.Join(dir, name)
+	}
+}
+
+// WithCurrentVersion overrides the default current version.
+func WithCurrentVersion(version string) UpdateCheckerOption {
+	return func(u *UpdateChecker) {
+		u.currentVersion = version
+	}
+}
+
 // NewUpdateChecker creates a new UpdateChecker
 func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInstructions string, opts ...UpdateCheckerOption) *UpdateChecker {
 	dir, err := os.UserCacheDir()

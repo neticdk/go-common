@@ -21,10 +21,9 @@ const (
 type InitFunc = func(cmd *cobra.Command, args []string) error
 
 type RootCommandBuilder struct {
-	cmd           *cobra.Command
-	ec            *ExecutionContext
-	updateChecker *UpdateChecker
-	updateChan    <-chan string
+	cmd            *cobra.Command
+	ec             *ExecutionContext
+	updateCheckers []*UpdateChecker
 }
 
 // NewRootCommand creates a new root command
@@ -119,8 +118,11 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 
 // Build builds the root command
 func (b *RootCommandBuilder) Build() *cobra.Command {
-	if b.updateChecker != nil {
-		b.updateChan = b.updateChecker.CheckForUpdateAsync()
+	if len(b.updateCheckers) > 0 {
+		var updateChans []<-chan string
+		for _, checker := range b.updateCheckers {
+			updateChans = append(updateChans, checker.CheckForUpdateAsync())
+		}
 
 		existingPostRunE := b.cmd.PersistentPostRunE
 		b.cmd.PersistentPostRunE = func(cmd *cobra.Command, args []string) error {
@@ -128,12 +130,14 @@ func (b *RootCommandBuilder) Build() *cobra.Command {
 			if existingPostRunE != nil {
 				err = existingPostRunE(cmd, args)
 			}
-			select {
-			case msg, ok := <-b.updateChan:
-				if ok && msg != "" {
-					fmt.Fprintln(b.ec.Stderr, msg)
+			for _, ch := range updateChans {
+				select {
+				case msg, ok := <-ch:
+					if ok && msg != "" {
+						fmt.Fprintln(b.ec.Stderr, msg)
+					}
+				default:
 				}
-			default:
 			}
 			return err
 		}
@@ -178,9 +182,9 @@ func (b *RootCommandBuilder) WithNoSubCommands() *RootCommandBuilder {
 	return b
 }
 
-// WithUpdateChecker enables the update checker for the command
+// WithUpdateChecker adds an update checker to the command. Can be called multiple times.
 func (b *RootCommandBuilder) WithUpdateChecker(checker *UpdateChecker) *RootCommandBuilder {
-	b.updateChecker = checker
+	b.updateCheckers = append(b.updateCheckers, checker)
 	return b
 }
 

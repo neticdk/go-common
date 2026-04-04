@@ -11,6 +11,7 @@
   - [Error Handling](#error-handling)
   - [Commands and Sub-Commands](#commands-and-sub-commands)
   - [UI Elements](#ui-elements)
+  - [Update Checkers](#update-checkers)
 - [Building a Simple Project](#building-a-simple-project)
 
 ## Introduction
@@ -1186,6 +1187,42 @@ ui.Success.Printf("Operation completed: %s\n", result)
 Look at the [package](ui/) to see what is available.
 
 See [examples/ui](examples/ui/) for example usage.
+
+### Update Checkers
+
+The `cmd` package provides an `UpdateChecker` that can asynchronously check for new releases of your CLI (or its dependencies) on GitHub. If a newer version is found, it will print a notification message to `stderr` after the command finishes executing.
+
+You can attach one or more update checkers to your root command using `WithUpdateChecker()`:
+
+```go
+func newRootCmd(ac *myapp.Context) *cobra.Command {
+    // Create an update checker for the main application
+    mainChecker := cmd.NewUpdateChecker(
+        ac.EC,
+        "my-github-owner",
+        "my-cli-repo",
+        "Run 'brew upgrade my-cli' to update.",
+    )
+
+    // Create an update checker for a secondary dependency
+    depChecker := cmd.NewUpdateChecker(
+        ac.EC,
+        "other-owner",
+        "other-repo",
+        "Run 'my-cli update-dep' to update.",
+        cmd.WithAppName("other-dep"),
+        cmd.WithCurrentVersion("v1.2.3"),
+    )
+
+    c := cmd.NewRootCommand(ac.EC).
+        WithUpdateChecker(mainChecker).
+        WithUpdateChecker(depChecker).
+        Build()
+
+    // ... add commands ...
+    return c
+}
+```
 
 ## Building a Simple Project
 
