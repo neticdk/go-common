@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -82,18 +83,25 @@ func WithCurrentVersion(version string) UpdateCheckerOption {
 
 // NewUpdateChecker creates a new UpdateChecker
 func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInstructions string, opts ...UpdateCheckerOption) *UpdateChecker {
+	appName := "unknown"
+	version := ""
+	if ec != nil {
+		appName = ec.AppName
+		version = ec.Version
+	}
+
 	dir, err := os.UserCacheDir()
 	if err != nil {
 		dir = os.TempDir()
 	}
 	u := &UpdateChecker{
-		appName:             ec.AppName,
-		currentVersion:      ec.Version,
+		appName:             appName,
+		currentVersion:      version,
 		githubOwner:         githubOwner,
 		githubRepo:          githubRepo,
-		githubURL:           fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", githubOwner, githubRepo),
+		githubURL:           fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", url.PathEscape(githubOwner), url.PathEscape(githubRepo)),
 		installInstructions: installInstructions,
-		cacheDir:            filepath.Join(dir, ec.AppName),
+		cacheDir:            filepath.Join(dir, appName),
 		cacheDuration:       defaultCacheDuration * time.Hour,
 		messageFormatter: func(current, latest string) string {
 			msg := fmt.Sprintf("\n🚀 A new version is available! (%s -> %s)", current, latest)
@@ -131,7 +139,7 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 
 		var latestVersion string
 
-		cachePath := filepath.Join(u.cacheDir, "update.json")
+		cachePath := filepath.Join(u.cacheDir, fmt.Sprintf("update-%s-%s.json", u.githubOwner, u.githubRepo))
 
 		if !u.disableCache {
 			cacheData, err := os.ReadFile(cachePath)
@@ -160,15 +168,7 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 		latestSemver := ensureVPrefix(latestVersion)
 
 		if semver.IsValid(latestSemver) && semver.Compare(currentSemver, latestSemver) < 0 {
-			if u.messageFormatter != nil {
-				notifyChan <- u.messageFormatter(u.currentVersion, latestVersion)
-			} else {
-				msg := fmt.Sprintf("\n🚀 A new version is available! (%s -> %s)", u.currentVersion, latestVersion)
-				if u.installInstructions != "" {
-					msg += fmt.Sprintf("\n%s", u.installInstructions)
-				}
-				notifyChan <- msg
-			}
+			notifyChan <- u.messageFormatter(u.currentVersion, latestVersion)
 		}
 	}()
 

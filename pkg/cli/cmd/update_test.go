@@ -34,7 +34,7 @@ func TestUpdateChecker_CheckForUpdateAsync(t *testing.T) {
 	assert.Contains(t, msg, "Run 'brew upgrade testapp'")
 
 	// Check if cache is created
-	cachePath := filepath.Join(tempDir, "update.json")
+	cachePath := filepath.Join(tempDir, "update-owner-repo.json")
 	assert.FileExists(t, cachePath)
 
 	cacheData, err := os.ReadFile(cachePath)
@@ -59,7 +59,7 @@ func TestUpdateChecker_CheckForUpdateAsync(t *testing.T) {
 func TestUpdateChecker_NoUpdate(t *testing.T) {
 	tempDir := t.TempDir()
 
-	cachePath := filepath.Join(tempDir, "update.json")
+	cachePath := filepath.Join(tempDir, "update-owner-repo.json")
 	_ = os.MkdirAll(tempDir, 0o755)
 	newCache, _ := json.Marshal(UpdateCache{
 		LastCheck:     time.Now(),
@@ -96,7 +96,7 @@ func TestUpdateChecker_WithoutCache(t *testing.T) {
 	assert.Contains(t, msg, "v1.0.0 -> v1.3.0")
 
 	// Verify that no cache file was created
-	cachePath := filepath.Join(tempDir, "update.json")
+	cachePath := filepath.Join(tempDir, "update-owner-repo.json")
 	assert.NoFileExists(t, cachePath)
 }
 

@@ -183,6 +183,10 @@ func (b *RootCommandBuilder) WithNoSubCommands() *RootCommandBuilder {
 }
 
 // WithUpdateChecker adds an update checker to the command. Can be called multiple times.
+//
+// Note: The update checkers are executed in the PersistentPostRunE hook of the root command.
+// If a subcommand defines its own PersistentPostRunE, it will override the root command's hook.
+// To ensure the update checkers run, subcommands with a custom PersistentPostRunE must explicitly call the root's PersistentPostRunE.
 func (b *RootCommandBuilder) WithUpdateChecker(checker *UpdateChecker) *RootCommandBuilder {
 	b.updateCheckers = append(b.updateCheckers, checker)
 	return b
