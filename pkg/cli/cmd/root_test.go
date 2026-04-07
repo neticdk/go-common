@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -132,6 +136,53 @@ func TestGenDocsCommand(t *testing.T) {
 
 	assert.NotNil(t, c)
 	assert.Equal(t, "gendocs", c.Name())
+}
+
+func TestWithUpdateChecker(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"tag_name": "v1.2.0"}`))
+	}))
+	defer ts.Close()
+
+	ec := newEC()
+	ec.Version = "v1.0.0"
+	var buf bytes.Buffer
+	ec.Stderr = &buf
+	ec.initLogger() // Re-bind the logger so it writes to the test buffer
+
+	checker := NewUpdateChecker(ec, "owner", "repo", "")
+	checker.githubURL = ts.URL
+	checker.cacheDir = t.TempDir()
+	checker.cacheDuration = 0
+
+	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"tag_name": "v2.0.0"}`))
+	}))
+	defer ts2.Close()
+
+	checker2 := NewUpdateChecker(ec, "owner2", "repo2", "",
+		WithAppName("dep2"),
+		WithCurrentVersion("v1.5.0"),
+	)
+	checker2.githubURL = ts2.URL
+	checker2.cacheDir = t.TempDir()
+	checker2.cacheDuration = 0
+
+	c := NewRootCommand(ec).
+		WithUpdateChecker(checker).
+		WithUpdateChecker(checker2).
+		Build()
+	c.RunE = func(cmd *cobra.Command, args []string) error {
+		time.Sleep(100 * time.Millisecond) // wait for async routine
+		return nil
+	}
+
+	err := c.Execute()
+	assert.NoError(t, err)
+	assert.Contains(t, buf.String(), "🚀 A new version is available! (v1.0.0 -> v1.2.0)")
+	assert.Contains(t, buf.String(), "🚀 A new version is available! (v1.5.0 -> v2.0.0)")
 }
 
 func newEC() *ExecutionContext {
