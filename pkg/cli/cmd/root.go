@@ -134,7 +134,11 @@ func (b *RootCommandBuilder) Build() *cobra.Command {
 				select {
 				case msg, ok := <-ch:
 					if ok && msg != "" {
-						b.ec.Logger.Info(msg)
+						if b.ec.PFlags.LogFormat == LogFormatJSON {
+							b.ec.Logger.Info(strings.TrimSpace(msg))
+						} else {
+							fmt.Fprintln(b.ec.Stderr, msg)
+						}
 					}
 				default:
 				}
