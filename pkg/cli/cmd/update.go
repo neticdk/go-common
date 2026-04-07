@@ -68,7 +68,7 @@ func WithMessageFormatter(f UpdateMessageFormatter) UpdateCheckerOption {
 // UIMessageFormatter returns an UpdateMessageFormatter that formats the message using the ui package.
 func UIMessageFormatter(installInstructions string) UpdateMessageFormatter {
 	return func(current, latest string) string {
-		msg := "\n" + ui.Success.Sprintf("A new version is available! (%s -> %s)", current, latest)
+		msg := "\n" + ui.Info.Sprintf("A new version is available! (%s -> %s)", current, latest)
 		if installInstructions != "" {
 			msg += fmt.Sprintf("\n%s", installInstructions)
 		}

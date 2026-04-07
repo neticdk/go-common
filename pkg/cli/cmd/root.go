@@ -24,6 +24,7 @@ type RootCommandBuilder struct {
 	cmd            *cobra.Command
 	ec             *ExecutionContext
 	updateCheckers []*UpdateChecker
+	updateNotifier func(msg string)
 }
 
 // NewRootCommand creates a new root command
@@ -110,9 +111,18 @@ func NewRootCommand(ec *ExecutionContext) *RootCommandBuilder {
 		GenDocsCommand(ec),
 	)
 
+	defaultNotifier := func(msg string) {
+		if ec.PFlags.LogFormat == LogFormatJSON {
+			ec.Logger.Info(strings.TrimSpace(msg))
+		} else {
+			fmt.Fprintln(ec.Stderr, msg)
+		}
+	}
+
 	return &RootCommandBuilder{
-		cmd: c,
-		ec:  ec,
+		cmd:            c,
+		ec:             ec,
+		updateNotifier: defaultNotifier,
 	}
 }
 
@@ -133,12 +143,8 @@ func (b *RootCommandBuilder) Build() *cobra.Command {
 			for _, ch := range updateChans {
 				select {
 				case msg, ok := <-ch:
-					if ok && msg != "" {
-						if b.ec.PFlags.LogFormat == LogFormatJSON {
-							b.ec.Logger.Info(strings.TrimSpace(msg))
-						} else {
-							fmt.Fprintln(b.ec.Stderr, msg)
-						}
+					if ok && msg != "" && b.updateNotifier != nil {
+						b.updateNotifier(msg)
 					}
 				default:
 				}
@@ -193,6 +199,12 @@ func (b *RootCommandBuilder) WithNoSubCommands() *RootCommandBuilder {
 // To ensure the update checkers run, subcommands with a custom PersistentPostRunE must explicitly call the root's PersistentPostRunE.
 func (b *RootCommandBuilder) WithUpdateChecker(checker *UpdateChecker) *RootCommandBuilder {
 	b.updateCheckers = append(b.updateCheckers, checker)
+	return b
+}
+
+// WithUpdateNotifier sets a custom function to handle update notification messages.
+func (b *RootCommandBuilder) WithUpdateNotifier(notifier func(msg string)) *RootCommandBuilder {
+	b.updateNotifier = notifier
 	return b
 }
 
