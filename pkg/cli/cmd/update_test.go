@@ -40,7 +40,7 @@ func TestUpdateChecker_CheckForUpdateAsync(t *testing.T) {
 	cacheData, err := os.ReadFile(cachePath)
 	assert.NoError(t, err)
 
-	var cache UpdateCache
+	var cache updateCache
 	err = json.Unmarshal(cacheData, &cache)
 	assert.NoError(t, err)
 	assert.Equal(t, "v1.2.0", cache.LatestVersion)
@@ -61,7 +61,7 @@ func TestUpdateChecker_NoUpdate(t *testing.T) {
 
 	cachePath := filepath.Join(tempDir, "update-owner-repo.json")
 	_ = os.MkdirAll(tempDir, 0o755)
-	newCache, _ := json.Marshal(UpdateCache{
+	newCache, _ := json.Marshal(updateCache{
 		LastCheck:     time.Now(),
 		LatestVersion: "v1.0.0",
 	})
@@ -86,7 +86,7 @@ func TestUpdateChecker_WithoutCache(t *testing.T) {
 
 	tempDir := t.TempDir()
 
-	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithoutCache())
+	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithCache(false))
 	u.githubURL = ts.URL
 	u.cacheDir = tempDir
 
@@ -107,7 +107,7 @@ func TestUpdateChecker_WithMessageFormatter(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithoutCache(), WithMessageFormatter(func(current, latest string) string {
+	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithCache(false), WithMessageFormatter(func(current, latest string) string {
 		return fmt.Sprintf("Hey! %s is out (you have %s)", latest, current)
 	}))
 	u.githubURL = ts.URL

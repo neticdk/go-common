@@ -149,6 +149,7 @@ func TestWithUpdateChecker(t *testing.T) {
 	ec.Version = "v1.0.0"
 	var buf bytes.Buffer
 	ec.Stderr = &buf
+	ec.initLogger() // Re-bind the logger so it writes to the test buffer
 
 	checker := NewUpdateChecker(ec, "owner", "repo", "")
 	checker.githubURL = ts.URL

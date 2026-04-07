@@ -3,19 +3,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/neticdk/go-common/pkg/cli/ui"
 	"golang.org/x/mod/semver"
 )
 
-const defaultCacheDuration = 24
+const defaultCacheDuration = 24 // hours
 
-// UpdateCache represents the data we store locally.
-type UpdateCache struct {
+// updateCache represents the data we store locally.
+type updateCache struct {
 	LastCheck     time.Time `json:"last_check"`
 	LatestVersion string    `json:"latest_version"`
 }
@@ -33,8 +35,10 @@ type UpdateChecker struct {
 	installInstructions string
 	cacheDir            string
 	cacheDuration       time.Duration
-	disableCache        bool
+	cacheEnabled        bool
+	disabled            bool
 	messageFormatter    UpdateMessageFormatter
+	logger              *slog.Logger
 }
 
 // UpdateCheckerOption is a function that configures an UpdateChecker
@@ -47,10 +51,10 @@ func WithCacheDuration(d time.Duration) UpdateCheckerOption {
 	}
 }
 
-// WithoutCache disables caching for the update checker
-func WithoutCache() UpdateCheckerOption {
+// WithCache enables or disables caching for the update checker
+func WithCache(enabled bool) UpdateCheckerOption {
 	return func(u *UpdateChecker) {
-		u.disableCache = true
+		u.cacheEnabled = enabled
 	}
 }
 
@@ -58,6 +62,17 @@ func WithoutCache() UpdateCheckerOption {
 func WithMessageFormatter(f UpdateMessageFormatter) UpdateCheckerOption {
 	return func(u *UpdateChecker) {
 		u.messageFormatter = f
+	}
+}
+
+// UIMessageFormatter returns an UpdateMessageFormatter that formats the message using the ui package.
+func UIMessageFormatter(installInstructions string) UpdateMessageFormatter {
+	return func(current, latest string) string {
+		msg := "\n" + ui.Success.Sprintf("A new version is available! (%s -> %s)", current, latest)
+		if installInstructions != "" {
+			msg += fmt.Sprintf("\n%s", installInstructions)
+		}
+		return msg
 	}
 }
 
@@ -85,9 +100,11 @@ func WithCurrentVersion(version string) UpdateCheckerOption {
 func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInstructions string, opts ...UpdateCheckerOption) *UpdateChecker {
 	appName := "unknown"
 	version := ""
+	var logger *slog.Logger
 	if ec != nil {
 		appName = ec.AppName
 		version = ec.Version
+		logger = ec.Logger
 	}
 
 	dir, err := os.UserCacheDir()
@@ -103,6 +120,9 @@ func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInst
 		installInstructions: installInstructions,
 		cacheDir:            filepath.Join(dir, appName),
 		cacheDuration:       defaultCacheDuration * time.Hour,
+		cacheEnabled:        true,
+		disabled:            os.Getenv("NO_UPDATE_NOTIFIER") != "",
+		logger:              logger,
 		messageFormatter: func(current, latest string) string {
 			msg := fmt.Sprintf("\n🚀 A new version is available! (%s -> %s)", current, latest)
 			if installInstructions != "" {
@@ -123,7 +143,7 @@ func NewUpdateChecker(ec *ExecutionContext, githubOwner, githubRepo, installInst
 func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 	notifyChan := make(chan string, 1)
 
-	if os.Getenv("NO_UPDATE_NOTIFIER") != "" {
+	if u.disabled {
 		close(notifyChan)
 		return notifyChan
 	}
@@ -141,19 +161,23 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 
 		cachePath := filepath.Join(u.cacheDir, fmt.Sprintf("update-%s-%s.json", u.githubOwner, u.githubRepo))
 
-		if !u.disableCache {
+		if u.cacheEnabled {
 			cacheData, err := os.ReadFile(cachePath)
-			var cache UpdateCache
+			var cache updateCache
 			if err == nil && json.Unmarshal(cacheData, &cache) == nil && time.Since(cache.LastCheck) < u.cacheDuration {
 				latestVersion = cache.LatestVersion
 			}
 		}
 
 		if latestVersion == "" {
-			latestVersion = u.fetchLatestFromGitHub()
-			if latestVersion != "" && !u.disableCache {
+			var err error
+			latestVersion, err = u.fetchLatestFromGitHub()
+			if err != nil && u.logger != nil {
+				u.logger.Debug("Update check failed", "error", err)
+			}
+			if latestVersion != "" && u.cacheEnabled {
 				_ = os.MkdirAll(filepath.Dir(cachePath), 0o755)
-				newCache, _ := json.Marshal(UpdateCache{
+				newCache, _ := json.Marshal(updateCache{
 					LastCheck:     time.Now(),
 					LatestVersion: latestVersion,
 				})
@@ -162,7 +186,10 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 		}
 
 		if latestVersion == "" {
-			return // Network failed or other error, silently exit
+			if u.logger != nil {
+				u.logger.Debug("Update check aborted: no latest version found")
+			}
+			return
 		}
 
 		latestSemver := ensureVPrefix(latestVersion)
@@ -175,11 +202,11 @@ func (u *UpdateChecker) CheckForUpdateAsync() <-chan string {
 	return notifyChan
 }
 
-func (u *UpdateChecker) fetchLatestFromGitHub() string {
+func (u *UpdateChecker) fetchLatestFromGitHub() (string, error) {
 	client := http.Client{Timeout: 2 * time.Second}
 	req, err := http.NewRequest(http.MethodGet, u.githubURL, nil)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
 	req.Header.Set("User-Agent", u.appName)
@@ -189,8 +216,11 @@ func (u *UpdateChecker) fetchLatestFromGitHub() string {
 	}
 
 	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return ""
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 
@@ -198,10 +228,10 @@ func (u *UpdateChecker) fetchLatestFromGitHub() string {
 		TagName string `json:"tag_name"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return ""
+		return "", err
 	}
 
-	return release.TagName
+	return release.TagName, nil
 }
 
 func ensureVPrefix(v string) string {

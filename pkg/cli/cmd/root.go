@@ -134,7 +134,7 @@ func (b *RootCommandBuilder) Build() *cobra.Command {
 				select {
 				case msg, ok := <-ch:
 					if ok && msg != "" {
-						fmt.Fprintln(b.ec.Stderr, msg)
+						b.ec.Logger.Info(msg)
 					}
 				default:
 				}

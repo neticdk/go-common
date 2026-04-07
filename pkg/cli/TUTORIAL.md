@@ -1192,7 +1192,8 @@ See [examples/ui](examples/ui/) for example usage.
 
 The `cmd` package provides an `UpdateChecker` that can asynchronously check for new releases of your CLI (or its dependencies) on GitHub. If a newer version is found, it will print a notification message to `stderr` after the command finishes executing.
 
-You can attach one or more update checkers to your root command using `WithUpdateChecker()`:
+You can attach one or more update checkers to your root command using `WithUpdateChecker()`. 
+To use the visually richer formatting provided by the `ui` package, use the `cmd.WithMessageFormatter()` option with `cmd.UIMessageFormatter()`:
 
 ```go
 func newRootCmd(ac *myapp.Context) *cobra.Command {
@@ -1201,7 +1202,8 @@ func newRootCmd(ac *myapp.Context) *cobra.Command {
         ac.EC,
         "my-github-owner",
         "my-cli-repo",
-        "Run 'brew upgrade my-cli' to update.",
+        "", // The default install instructions can be empty when passing a custom formatter
+        cmd.WithMessageFormatter(cmd.UIMessageFormatter("Run 'brew upgrade my-cli' to update.")),
     )
 
     // Create an update checker for a secondary dependency
