@@ -23,6 +23,13 @@ type updateCache struct {
 	LatestVersion string    `json:"latest_version"`
 }
 
+// githubRelease represents the GitHub release payload used during update checks.
+type githubRelease struct {
+	TagName    string `json:"tag_name"`
+	Prerelease bool   `json:"prerelease"`
+	Draft      bool   `json:"draft"`
+}
+
 // UpdateMessageFormatter is a function type for formatting the update message
 type UpdateMessageFormatter func(currentVersion, latestVersion string) string
 
@@ -66,7 +73,9 @@ func WithCache(enabled bool) UpdateCheckerOption {
 func WithReleaseNameFormat(format string) UpdateCheckerOption {
 	return func(u *UpdateChecker) {
 		u.releaseNameFormat = format
-		u.githubURL = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", url.PathEscape(u.githubOwner), url.PathEscape(u.githubRepo))
+		if format != "" {
+			u.githubURL = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", url.PathEscape(u.githubOwner), url.PathEscape(u.githubRepo))
+		}
 	}
 }
 
@@ -237,11 +246,7 @@ func (u *UpdateChecker) fetchLatestFromGitHub() (string, error) {
 	defer resp.Body.Close()
 
 	if u.releaseNameFormat != "" {
-		var releases []struct {
-			TagName    string `json:"tag_name"`
-			Prerelease bool   `json:"prerelease"`
-			Draft      bool   `json:"draft"`
-		}
+		var releases []githubRelease
 		if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
 			return "", err
 		}
@@ -264,9 +269,7 @@ func (u *UpdateChecker) fetchLatestFromGitHub() (string, error) {
 		return "", nil
 	}
 
-	var release struct {
-		TagName string `json:"tag_name"`
-	}
+	var release githubRelease
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
 		return "", err
 	}
