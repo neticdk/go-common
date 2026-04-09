@@ -118,6 +118,49 @@ func TestUpdateChecker_WithMessageFormatter(t *testing.T) {
 	assert.Equal(t, "Hey! v2.0.0 is out (you have v1.0.0)", msg)
 }
 
+func TestUpdateChecker_WithReleaseNameFormat(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`[
+			{"tag_name": "other-v2.0.0", "prerelease": false, "draft": false},
+			{"tag_name": "myapp-v1.3.0", "prerelease": true, "draft": false},
+			{"tag_name": "myapp-v1.2.0", "prerelease": false, "draft": false}
+		]`))
+	}))
+	defer ts.Close()
+
+	tempDir := t.TempDir()
+
+	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithCache(false), WithReleaseNameFormat("myapp-%s"))
+	u.githubURL = ts.URL
+	u.cacheDir = tempDir
+
+	notifyChan := u.CheckForUpdateAsync()
+	msg := <-notifyChan
+
+	assert.Contains(t, msg, "v1.0.0 -> v1.2.0")
+}
+
+func TestUpdateChecker_WithReleaseNameFormatEmpty(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		// It should expect the default single-object release payload
+		_, _ = w.Write([]byte(`{"tag_name": "v1.4.0"}`))
+	}))
+	defer ts.Close()
+
+	tempDir := t.TempDir()
+
+	u := NewUpdateChecker(&ExecutionContext{AppName: "testapp", Version: "v1.0.0"}, "owner", "repo", "", WithCache(false), WithReleaseNameFormat(""))
+	u.githubURL = ts.URL
+	u.cacheDir = tempDir
+
+	notifyChan := u.CheckForUpdateAsync()
+	msg := <-notifyChan
+
+	assert.Contains(t, msg, "v1.0.0 -> v1.4.0")
+}
+
 func TestUpdateChecker_NoUpdateNotifierEnv(t *testing.T) {
 	t.Setenv("NO_UPDATE_NOTIFIER", "1")
 
