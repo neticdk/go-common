@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/neticdk/go-common/pkg/cli/ui"
@@ -37,6 +38,7 @@ type UpdateChecker struct {
 	cacheDuration       time.Duration
 	cacheEnabled        bool
 	disabled            bool
+	releaseNameFormat   string
 	messageFormatter    UpdateMessageFormatter
 	logger              *slog.Logger
 }
@@ -55,6 +57,16 @@ func WithCacheDuration(d time.Duration) UpdateCheckerOption {
 func WithCache(enabled bool) UpdateCheckerOption {
 	return func(u *UpdateChecker) {
 		u.cacheEnabled = enabled
+	}
+}
+
+// WithReleaseNameFormat sets a format string (e.g., "myapp-%s") to find releases by tag.
+// When set, it fetches the list of releases and finds the most recent one matching the format,
+// extracting the version in place of "%s".
+func WithReleaseNameFormat(format string) UpdateCheckerOption {
+	return func(u *UpdateChecker) {
+		u.releaseNameFormat = format
+		u.githubURL = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", url.PathEscape(u.githubOwner), url.PathEscape(u.githubRepo))
 	}
 }
 
@@ -223,6 +235,34 @@ func (u *UpdateChecker) fetchLatestFromGitHub() (string, error) {
 		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 	defer resp.Body.Close()
+
+	if u.releaseNameFormat != "" {
+		var releases []struct {
+			TagName    string `json:"tag_name"`
+			Prerelease bool   `json:"prerelease"`
+			Draft      bool   `json:"draft"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+			return "", err
+		}
+
+		parts := strings.Split(u.releaseNameFormat, "%s")
+		if len(parts) != 2 {
+			return "", fmt.Errorf("invalid release name format: %s", u.releaseNameFormat)
+		}
+		prefix, suffix := parts[0], parts[1]
+
+		for _, r := range releases {
+			if r.Draft || r.Prerelease {
+				continue
+			}
+			if strings.HasPrefix(r.TagName, prefix) && strings.HasSuffix(r.TagName, suffix) {
+				version := strings.TrimSuffix(strings.TrimPrefix(r.TagName, prefix), suffix)
+				return version, nil
+			}
+		}
+		return "", nil
+	}
 
 	var release struct {
 		TagName string `json:"tag_name"`
