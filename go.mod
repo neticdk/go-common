@@ -19,7 +19,7 @@ require (
 	github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/mattn/go-isatty v0.0.21
-	github.com/mattn/go-shellwords v1.0.12
+	github.com/mattn/go-shellwords v1.0.13
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/neticdk/go-stdlib v1.0.1
