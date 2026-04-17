@@ -20,6 +20,14 @@ func NewJSONTraceIDHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler 
 	return h
 }
 
+// NewTextTraceIDHandler creates new [slog.TextHandler] which adds a `TraceID` attribute to all loggings if trace id is present.
+func NewTextTraceIDHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	h := &traceHandler{
+		handler: slog.NewTextHandler(w, opts),
+	}
+	return h
+}
+
 func (h *traceHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return h.handler.Enabled(ctx, level)
 }
