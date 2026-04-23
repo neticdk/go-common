@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	gh "github.com/google/go-github/v84/github"
+	gh "github.com/google/go-github/v85/github"
 	"github.com/neticdk/go-common/pkg/artifact"
 	"github.com/neticdk/go-common/pkg/artifact/archive"
 	"github.com/neticdk/go-common/pkg/github"
