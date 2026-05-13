@@ -14,4 +14,4 @@ jobs:
       contents: write
       packages: write
       pull-requests: write
-    uses: neticdk/shared-github-actions/.github/workflows/go-ci.yaml@6b06079b6d743217648e9829e34db83489a9954c # v0.4.4
+    uses: neticdk/shared-github-actions/.github/workflows/go-ci.yaml@dd6cb4fb8e94da8aa900d82ce377bd64db32f557 # v0.5.0
