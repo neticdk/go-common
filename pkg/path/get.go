@@ -170,7 +170,7 @@ func getSlicePathValueRecursive(data []any, parts []string) (any, error) {
 // It returns true if the data is nil, false otherwise.
 func isNil[T any](data T) bool {
 	v := reflect.ValueOf(data)
-	return (v.Kind() == reflect.Ptr ||
+	return (v.Kind() == reflect.Pointer ||
 		v.Kind() == reflect.Interface ||
 		v.Kind() == reflect.Slice ||
 		v.Kind() == reflect.Map ||

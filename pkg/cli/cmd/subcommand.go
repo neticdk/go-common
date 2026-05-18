@@ -37,14 +37,14 @@ type SubCommandBuilder[T any] struct {
 // contains the ExecutionContext
 func setECCommandField(runnerArg any, c *cobra.Command) {
 	v := reflect.ValueOf(runnerArg)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 	if v.Kind() == reflect.Struct {
 		field := v.FieldByName("EC")
 
 		var ecType *ExecutionContext
-		if field.IsValid() && field.Kind() == reflect.Ptr && !field.IsNil() && field.Type() == reflect.TypeOf(ecType) {
+		if field.IsValid() && field.Kind() == reflect.Pointer && !field.IsNil() && field.Type() == reflect.TypeOf(ecType) {
 			ecField := field.Elem()
 			commandField := ecField.FieldByName("Command")
 			if commandField.IsValid() && commandField.CanSet() && commandField.Type() == reflect.TypeOf((*cobra.Command)(nil)) {
