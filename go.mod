@@ -3,7 +3,7 @@ module github.com/neticdk/go-common
 go 1.26.3
 
 require (
-	atomicgo.dev/keyboard v0.2.9
+	atomicgo.dev/keyboard v0.2.10
 	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/anchore/go-version v1.2.2-0.20210903204242-51efa5b487c4
 	github.com/anchore/grype v0.110.0
@@ -275,7 +275,7 @@ require (
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20250131095131-f4974fa13b8a // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-runewidth v0.0.20 // indirect
+	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mholt/archives v0.1.5 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
