@@ -27,9 +27,11 @@ import (
 	"github.com/anchore/grype/grype/matcher/stock"
 	grypePkg "github.com/anchore/grype/grype/pkg"
 	grypeVulnerability "github.com/anchore/grype/grype/vulnerability"
+	"github.com/anchore/syft/syft/artifact"
 	syftSbom "github.com/anchore/syft/syft/sbom"
 	"github.com/neticdk/go-common/pkg/sbom"
 	"github.com/neticdk/go-common/pkg/types"
+	"github.com/neticdk/go-stdlib/xslices"
 )
 
 const (
@@ -177,9 +179,9 @@ func (s *GrypeScanner) GrypeScanSBOM(ctx context.Context, sbm syftSbom.SBOM) ([]
 	}
 
 	syftPkgs := sbm.Artifacts.Packages.Sorted()
-	grypePkgs := grypePkg.FromPackages(syftPkgs, grypePkg.SynthesisConfig{GenerateMissingCPEs: false})
+	grypePkgs := grypePkg.FromPackages(syftPkgs, []artifact.Relationship{}, grypePkg.SynthesisConfig{GenerateMissingCPEs: false})
 
-	matches, _, err := vulnMatcher.FindMatches(grypePkgs, grypePkg.Context{
+	matches, _, err := vulnMatcher.FindMatches(xslices.Map(grypePkgs, func(p *grypePkg.Package) grypePkg.Package { return *p }), grypePkg.Context{
 		Source: &sbm.Source,
 	})
 	if err != nil {
