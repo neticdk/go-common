@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v90/github"
 	"golang.org/x/mod/semver"
 	"golang.org/x/oauth2"
 )
