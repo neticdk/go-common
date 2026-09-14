@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"helm.sh/helm/v3/pkg/action"
-	helmChart "helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/storage"
-	"helm.sh/helm/v3/pkg/storage/driver"
+	"helm.sh/helm/v4/pkg/action"
+	helmChart "helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/storage"
+	"helm.sh/helm/v4/pkg/storage/driver"
 )
 
 const (
