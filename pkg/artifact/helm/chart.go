@@ -7,7 +7,7 @@ import (
 
 	"github.com/neticdk/go-common/pkg/artifact"
 	"github.com/neticdk/go-common/pkg/helm"
-	"helm.sh/helm/v3/pkg/registry"
+	"helm.sh/helm/v4/pkg/registry"
 )
 
 type ChartOptions struct {
