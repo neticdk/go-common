@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/neticdk/go-common/pkg/log"
@@ -44,7 +45,7 @@ func WithEnvConfig() Option {
 
 // ConfigureTelemetry will configure OpenTelemetry to expose metrics and traces using Prometheus export for metrics and OTEL grpc exporter for traces. The
 // given port is the port to expose metrics, the given serviceName is the OTEL service name attribute associated with all traces. The function will return
-// a shutdown function that can be called when shutting down the process.
+// a shutdown function that can be called when shutting down the process. Setting OTEL_TRACES_EXPORTER=none disables traces and keeps metrics.
 func ConfigureTelemetry(metricsPort int, serviceName string, opts ...Option) (func(context.Context) error, error) {
 	cfg := &config{
 		startServer: true,
@@ -75,6 +76,11 @@ func ConfigureTelemetry(metricsPort int, serviceName string, opts ...Option) (fu
 				logger.ErrorContext(ctx, "metrics listener failed", log.Error(err))
 			}
 		}()
+	}
+
+	// The global tracer provider stays a no-op, so spans are never recorded or exported.
+	if os.Getenv("OTEL_TRACES_EXPORTER") == "none" {
+		return func(context.Context) error { return nil }, nil
 	}
 
 	res, err := resource.New(ctx,
